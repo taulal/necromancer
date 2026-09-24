@@ -1,11 +1,12 @@
 /**
- * Stub effect handlers for NEC-07. Real work lands in later tickets.
- * Progress is throttled (review F1): ≥10pp or ≥3s between reports.
+ * Effect handlers. Progress throttle (review F1) applies to stubs;
+ * exhume uses its own onProgress path (also throttled in NEC-08 fixes).
  */
 import type {EffectHandler} from '@sanity/workflow-engine'
 import {EFFECTS} from '../effects/names'
 import {asDocumentId} from './refId'
 import {createProgressThrottle} from './progressThrottle'
+import {exhumeHandler} from './exhumeHandler'
 
 const stub =
   (label: string): EffectHandler =>
@@ -18,14 +19,14 @@ const stub =
       await new Promise((r) => setTimeout(r, 50))
       await progress(100)
     } catch {
-      /* progress field only exists on the parent; child casts may lack it */
+      /* child casts may lack progress field */
     }
     ctx.log(`[stub] ${label}`, {seance, page})
   }
 
-/** Every effect name the definitions queue — stubs until their ticket lands. */
+/** Real exhume; stubs for everything else until later tickets. */
 export const effectHandlers: Record<string, EffectHandler> = {
-  [EFFECTS.exhume]: stub('necro.exhume'),
+  [EFFECTS.exhume]: exhumeHandler,
   [EFFECTS.autopsy]: stub('necro.autopsy'),
   [EFFECTS.autopsyRerun]: stub('necro.autopsy-rerun'),
   [EFFECTS.interrogate]: stub('necro.interrogate'),
