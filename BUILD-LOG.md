@@ -26,6 +26,7 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Full crawl (`--cap 50`) succeeded: platform `wordpress` @ 0.95, 50 pages / 15k words — then autopsy failed: (1) undeclared effect outputs stuck drain claims; (2) `compileToSchemaJson` left `fields: undefined` on object fields; (3) model put Bones names in `to[]` on arrays. Fixed compile + validate normalize; drop undeclared outputs.
 - **Fast iteration path:** reuse crawl, autopsy on **5 pages** (`/`, `/about/`, `/contact/`, `/shop/`, `/media/`) with **Haiku** (`NECRO_MODEL_FAST=claude-haiku-4-5-20251001`, propose prefers FAST over REASONING). ~37s end-to-end.
 - **Proposal `8pPskmVE0SMaXm7m9hxpmq` v1** on seance `8pPskmVE0SMaXm7m9hsR20`: model `claude-haiku-4-5-20251001`, **13345 in / 5021 out**, **1 repair round**. Types: `siteSettings` (singleton, phone/email/hours/delivery), `page`, `contactBlock`→Bones, `richTextBlock`→Bones, custom `shopBlock`. Haiku under-used hero/gallery vs a senior model — fine for plumbing; bump to Sonnet for the judged golden later.
+- **Sanity array `_key`:** every object in an array needs a unique `_key` (and typed members need `_type`). Autopsy `toHqTypes` + exhume sections/images now stamp them; patched the Haiku Caz proposal in HQ.
 - Workflow instance entombed after the first failed autopsy; proposal was written out-of-band. Next: allow re-run from entombed or `summon --cap 5` fresh after compile fixes land.
 
 ### Batch 3 · dataset quota → shared showcase

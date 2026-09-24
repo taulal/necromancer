@@ -16,19 +16,21 @@ function asSanity(client: unknown): SanityClient {
   return client as SanityClient
 }
 
-function keyOf(prefix: string, i: number): string {
-  return `${prefix}${i.toString(36).padStart(4, '0')}`
+function arrayKey(): string {
+  return crypto.randomUUID().replace(/-/g, '').slice(0, 12)
 }
 
 function toHqTypes(types: SchemaProposal['types']) {
-  return types.map((t, ti) => ({
-    _key: keyOf('t', ti),
+  return types.map((t) => ({
+    _type: 'proposedType' as const,
+    _key: arrayKey(),
     name: t.name,
     title: t.title,
     kind: t.kind,
     bonesMatch: t.bonesMatch,
-    fields: t.fields.map((f, fi) => ({
-      _key: keyOf('f', fi),
+    fields: t.fields.map((f) => ({
+      _type: 'proposedField' as const,
+      _key: arrayKey(),
       name: f.name,
       type: f.type,
       of: f.of,
@@ -39,10 +41,10 @@ function toHqTypes(types: SchemaProposal['types']) {
       evidenceCount: f.evidenceCount,
     })),
     rationale: t.rationale,
-    evidence: t.evidence.map((e, ei) => ({
-      _key: keyOf('e', ei),
-      _type: 'typeEvidence',
-      page: {_type: 'reference', _ref: e.pageId.replace(/^drafts\./, '')},
+    evidence: t.evidence.map((e) => ({
+      _type: 'typeEvidence' as const,
+      _key: arrayKey(),
+      page: {_type: 'reference' as const, _ref: e.pageId.replace(/^drafts\./, '')},
       excerpt: e.excerpt,
     })),
     confidence: t.confidence,
