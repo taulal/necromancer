@@ -3,6 +3,9 @@ export {EFFECTS, type EffectName} from './effects/names'
 export {
   getEngine,
   getWorkflowClient,
+  projectId,
+  dataset,
+  tag,
   runDrain,
   runDrainPass,
   runDrainAndTickAll,
