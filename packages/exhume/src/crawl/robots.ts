@@ -1,8 +1,9 @@
 import robotsParser from 'robots-parser'
 import {fetchText, USER_AGENT} from './http'
 
-export async function loadRobots(origin: string) {
+export async function loadRobots(origin: string, body?: string) {
   const robotsUrl = new URL('/robots.txt', origin).toString()
+  if (body !== undefined) return robotsParser(robotsUrl, body)
   try {
     const res = await fetchText(robotsUrl)
     if (!res.ok) return robotsParser(robotsUrl, '')

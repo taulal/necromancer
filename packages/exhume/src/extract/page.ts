@@ -2,6 +2,8 @@ import {createHash} from 'node:crypto'
 import * as cheerio from 'cheerio'
 import {extractEntities, type DetectedEntities} from './entities'
 import {normaliseUrl} from '../crawl/http'
+import {decodeCfEmailsInHtml, extractDurable} from './durable'
+import {sanitizeStoredHtml} from './sanitizeHtml'
 
 export interface ExhumedSection {
   kind: string
@@ -26,6 +28,8 @@ export interface ExtractedPage {
   sections: ExhumedSection[]
   images: ExhumedImage[]
   links: string[]
+  /** Non-HTML assets discovered (PDFs, images, zips) — not stored as pages (F10). */
+  assetLinks: string[]
   detectedEntities: DetectedEntities
   contentHash: string
   html: string
@@ -46,14 +50,23 @@ export function extractPage(args: {
   status: number
   html: string
   origin: string
+  platform?: string
 }): ExtractedPage {
-  const {url, status, html, origin} = args
-  const $ = cheerio.load(html)
+  const {url, status, origin} = args
+  const {html: decodedHtml, emails: cfEmails} = decodeCfEmailsInHtml(args.html)
+  const durable =
+    args.platform === 'durable' || /cdn\.durable\.co|__NEXT_DATA__/i.test(decodedHtml)
+      ? extractDurable(decodedHtml)
+      : null
+
+  const $ = cheerio.load(decodedHtml)
   $('script, style, noscript, iframe').remove()
 
-  const title = $('title').first().text().trim() || $('h1').first().text().trim() || undefined
+  const title =
+    durable?.title || $('title').first().text().trim() || $('h1').first().text().trim() || undefined
   const meta = {
-    description: $('meta[name="description"]').attr('content')?.trim(),
+    description:
+      durable?.description || $('meta[name="description"]').attr('content')?.trim() || undefined,
     ogImage: $('meta[property="og:image"]').attr('content')?.trim(),
     canonical: $('link[rel="canonical"]').attr('href')?.trim(),
   }
@@ -63,20 +76,22 @@ export function extractPage(args: {
     .get()
     .filter(Boolean)
 
-  const sections: ExhumedSection[] = []
-  $('main section, article, main > div, .content, .entry-content')
-    .slice(0, 40)
-    .each((_, el) => {
-      const node = $(el)
-      const text = node.text().replace(/\s+/g, ' ').trim()
-      if (text.length < 40) return
-      const snip = $.html(el) ?? ''
-      sections.push({
-        kind: guessKind(text, snip),
-        html: snip.slice(0, 4000),
-        text: text.slice(0, 4000),
+  let sections: ExhumedSection[] = durable?.sections?.length ? [...durable.sections] : []
+  if (sections.length === 0) {
+    $('main section, article, main > div, .content, .entry-content')
+      .slice(0, 40)
+      .each((_, el) => {
+        const node = $(el)
+        const text = node.text().replace(/\s+/g, ' ').trim()
+        if (text.length < 40) return
+        const snip = $.html(el) ?? ''
+        sections.push({
+          kind: guessKind(text, snip),
+          html: snip.slice(0, 4000),
+          text: text.slice(0, 4000),
+        })
       })
-    })
+  }
   if (sections.length === 0) {
     const bodyText = $('body').text().replace(/\s+/g, ' ').trim()
     if (bodyText) {
@@ -108,12 +123,18 @@ export function extractPage(args: {
   $('a[href]').each((_, el) => {
     const href = $(el).attr('href')
     if (!href) return
+    // Don't enqueue Cloudflare email-protection paths
+    if (/\/cdn-cgi\/l\/email-protection/i.test(href)) return
     const abs = normaliseUrl(href, url)
     if (abs) links.push(abs)
   })
 
   const textBlob = [title, ...headings, ...sections.map((s) => s.text)].filter(Boolean).join('\n')
   const contentHash = createHash('sha256').update(textBlob).digest('hex').slice(0, 32)
+  const entities = extractEntities(textBlob)
+  if (cfEmails.length) {
+    entities.emails = [...new Set([...entities.emails, ...cfEmails])]
+  }
 
   let path = '/'
   try {
@@ -138,8 +159,9 @@ export function extractPage(args: {
     sections,
     images,
     links: [...new Set(links)],
-    detectedEntities: extractEntities(textBlob),
+    assetLinks: [],
+    detectedEntities: entities,
     contentHash,
-    html,
+    html: sanitizeStoredHtml(args.html),
   }
 }

@@ -5,6 +5,7 @@ import {detectPlatform, type Platform} from '../fingerprints'
 import {extractPage, type ExtractedPage} from '../extract/page'
 import {extractBrand, type BrandExtraction} from '../extract/brand'
 import {detectChrome} from '../extract/chrome'
+import {extractDurable} from '../extract/durable'
 
 export interface CrawlProgress {
   fetched: number
@@ -20,6 +21,8 @@ export interface CrawlResult {
   brand: BrandExtraction
   chromeBlocks: string[]
   pages: ExtractedPage[]
+  /** Non-HTML assets kept as links for later Media Library work (F10). */
+  assetLinks: string[]
   stats: {pages: number; images: number; words: number; links: number}
 }
 
@@ -56,9 +59,12 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
 
   const start = normaliseUrl(options.url, options.url)
   if (!start) throw new Error(`Invalid start URL: ${options.url}`)
-  const origin = new URL(start).origin
 
-  const robots = await loadRobots(origin)
+  // F8: resolve apex → www (or similar) before locking origin / robots / sitemap.
+  const startRes = await fetchPage(start)
+  const finalStart = startRes.finalUrl || start
+  const origin = new URL(finalStart).origin
+
   let robotsTxt = ''
   try {
     const r = await fetchPage(new URL('/robots.txt', origin).toString())
@@ -66,10 +72,12 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
   } catch {
     /* empty */
   }
+  const robots = await loadRobots(origin, robotsTxt)
 
-  const fromSitemap = await collectSitemapUrls(origin, robotsTxt, pageCap)
+  const fromSitemap = await collectSitemapUrls(origin, robotsTxt, pageCap, fetchPage)
   const queue: string[] = []
   const seen = new Set<string>()
+  const assetLinks = new Set<string>()
   const enqueue = (u: string) => {
     const n = normaliseUrl(u, origin)
     if (!n || seen.has(n) || !sameOrigin(n, origin)) return
@@ -79,7 +87,7 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
   }
 
   for (const u of fromSitemap) enqueue(u)
-  enqueue(start)
+  enqueue(finalStart)
   enqueue(new URL('/', origin).toString())
 
   const pages: ExtractedPage[] = []
@@ -87,6 +95,9 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
   let platformConfidence = 0.1
   let platformHits: string[] = []
   let brand: BrandExtraction = {colors: [], fonts: []}
+
+  // Seed first page from the start fetch when it was HTML.
+  const seedHtml = startRes.kind === 'html' || startRes.kind === 'empty' ? startRes : null
 
   while (queue.length && pages.length < pageCap) {
     const batch = queue.splice(0, Math.min(concurrency, pageCap - pages.length))
@@ -96,6 +107,10 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
         totalHint: Math.min(pageCap, seen.size),
         currentUrl: url,
       })
+      // Reuse the start response when the URL matches (avoid double fetch).
+      if (seedHtml && (url === start || url === finalStart) && pages.length === 0) {
+        return {url, res: seedHtml}
+      }
       try {
         const res = await fetchPage(url)
         return {url, res}
@@ -108,6 +123,7 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
             headers: new Headers(),
             body: '',
             finalUrl: url,
+            kind: 'error' as const,
             error: err,
           },
         }
@@ -117,7 +133,13 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
     for (const row of batchResults) {
       if (pages.length >= pageCap) break
       const {url, res} = row
-      if (!res.body && res.status === 0) continue
+
+      if (res.kind === 'asset') {
+        assetLinks.add(res.finalUrl || url)
+        continue
+      }
+      if (res.kind === 'error' || (!res.body && res.status === 0)) continue
+      if (res.kind === 'xml') continue
 
       if (pages.length === 0 || platform === 'unknown' || platform === 'static') {
         const verdict = detectPlatform(res.body, res.headers)
@@ -130,6 +152,15 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
 
       if (pages.length === 0) {
         brand = extractBrand(res.body, url)
+        const durable = extractDurable(res.body)
+        if (durable) {
+          brand = {
+            ...brand,
+            colors: [...new Set([...durable.colors, ...brand.colors])],
+            fonts: [...new Set([...durable.fonts, ...brand.fonts])],
+            name: durable.brandName ?? brand.name,
+          }
+        }
       }
 
       const page = extractPage({
@@ -137,6 +168,7 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
         status: res.status,
         html: res.body,
         origin,
+        platform,
       })
       pages.push(page)
 
@@ -154,7 +186,7 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
 
   const chromeBlocks = detectChrome(pages.map((p) => p.sections.map((s) => s.text).join('\n')))
   const images = new Set(pages.flatMap((p) => p.images.map((i) => i.src)))
-  const links = new Set(pages.flatMap((p) => p.links))
+  const links = new Set([...pages.flatMap((p) => p.links), ...assetLinks])
   const words = pages.reduce(
     (n, p) => n + p.sections.reduce((m, s) => m + s.text.split(/\s+/).filter(Boolean).length, 0),
     0,
@@ -168,6 +200,7 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
     brand,
     chromeBlocks,
     pages,
+    assetLinks: [...assetLinks],
     stats: {pages: pages.length, images: images.size, words, links: links.size},
   }
 }

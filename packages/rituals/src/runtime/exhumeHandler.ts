@@ -5,6 +5,7 @@ import {crawl} from '@necro/exhume'
 import type {EffectHandler} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
 import {asDocumentId} from './refId'
+import {createProgressThrottle} from './progressThrottle'
 
 function publishedAndDraft(id: string): string[] {
   const published = id.replace(/^drafts\./, '')
@@ -31,14 +32,15 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
   }
 
   const pageCap = seance.pageCap ?? 50
-  await ctx.setProgress('exhumeProgress', 1)
+  const progress = createProgressThrottle((field, value) => ctx.setProgress(field, value))
+  await progress(1)
 
   const result = await crawl({
     url: seance.url,
     pageCap,
     onProgress: async ({fetched, totalHint}) => {
       const pct = Math.min(99, Math.round((fetched / Math.max(totalHint, pageCap, 1)) * 100))
-      await ctx.setProgress('exhumeProgress', Math.max(1, pct))
+      await progress(Math.max(1, pct))
     },
   })
 
@@ -63,31 +65,33 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
       headings: page.headings,
       sections: page.sections,
       images: page.images,
-      links: page.links,
+      links: [...page.links, ...page.assetLinks],
       detectedEntities: page.detectedEntities,
       contentHash: page.contentHash,
       html: page.html,
     } as {[key: string]: unknown; _type: string})
   }
 
+  const {name: _brandName, ...brand} = result.brand
   await client
     .patch(seance._id)
     .set({
       platform: result.platform,
       platformConfidence: result.platformConfidence,
-      brand: result.brand,
+      brand,
       stats: result.stats,
-      exhumeProgress: 1,
     })
+    .unset(['exhumeProgress'])
     .commit()
 
-  await ctx.setProgress('exhumeProgress', 100)
+  await progress(100)
 
   return {
     outputs: {
       pages: result.stats.pages,
       platform: result.platform,
       chromeBlocks: result.chromeBlocks.length,
+      assetLinks: result.assetLinks.length,
     },
   }
 }
