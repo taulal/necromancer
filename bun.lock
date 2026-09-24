@@ -103,6 +103,13 @@
     },
     "packages/autopsy": {
       "name": "@necro/autopsy",
+      "dependencies": {
+        "@anthropic-ai/sdk": "^0.128.0",
+        "@necro/bones": "workspace:*",
+        "@necro/exhume": "workspace:*",
+        "@sanity/schema": "^6.16.0",
+        "zod": "^4.5.2",
+      },
     },
     "packages/bones": {
       "name": "@necro/bones",
