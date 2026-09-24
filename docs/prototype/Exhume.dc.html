@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Exhumation</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #0e0d0c;
+            color: #e9e2d3;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+          }
+          a {
+            color: #a6f36b;
+          }
+          a:hover {
+            color: #c8fa9e;
+          }
+          .mono {
+            font-family: 'IBM Plex Mono', ui-monospace, monospace;
+          }
+          .serif {
+            font-family: 'Fraunces', Georgia, serif;
+          }
+          @keyframes flicker {
+            0%,
+            100% {
+              opacity: 1;
+              box-shadow: 0 0 10px #a6f36b;
+            }
+            45% {
+              opacity: 0.82;
+              box-shadow: 0 0 4px #a6f36b;
+            }
+            55% {
+              opacity: 0.95;
+              box-shadow: 0 0 14px #a6f36b;
+            }
+          }
+          .flicker {
+            animation: flicker 2.6s ease-in-out infinite;
+          }
+          @keyframes soil {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 40px 0;
+            }
+          }
+          .soil {
+            background-image: repeating-linear-gradient(115deg, #a6f36b 0 10px, #8fd95a 10px 20px);
+            background-size: 40px 100%;
+            animation: soil 1.4s linear infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .flicker,
+            .soil {
+              animation: none;
+            }
+          }
+          button:focus-visible,
+          a:focus-visible,
+          input:focus-visible {
+            outline: 2px solid #a6f36b;
+            outline-offset: 2px;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1440px;
+          height: 900px;
+          box-sizing: border-box;
+          background: #0e0d0c;
+          color: #e9e2d3;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <header
+          style="
+            height: 64px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #2a2724;
+          "
+        >
+          <a
+            href="Main.dc.html"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              min-height: 44px;
+              color: #a39c8e;
+              text-decoration: none;
+              font-size: 14px;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 18l-6-6 6-6"></path></svg
+            >Graveyard
+          </a>
+          <span style="width: 1px; height: 24px; background: #2a2724"></span>
+          <span
+            class="mono"
+            style="
+              width: 36px;
+              height: 36px;
+              border-radius: 18px;
+              border: 1px solid #4a4540;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: 500;
+            "
+            >DU</span
+          >
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span class="mono" style="font-size: 15px; color: #e9e2d3"
+              >harbourview-plumbing.co.nz</span
+            >
+            <span style="font-size: 12px; color: #8a8378"
+              >Durable · 23 pages · lands in rip-harbourview</span
+            >
+          </div>
+          <div style="flex-grow: 1"></div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span
+              title="Taylor, London 11:40"
+              style="
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+                background: #2a2724;
+                border: 1px solid #a6f36b;
+                font-size: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >T</span
+            >
+            <span
+              title="Jamie, Auckland 22:40"
+              style="
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+                background: #2a2724;
+                border: 1px solid #a6f36b;
+                font-size: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >J</span
+            >
+            <span style="font-size: 12px; color: #8a8378">here now</span>
+          </div>
+          <button
+            style="
+              height: 40px;
+              padding: 0 14px;
+              border: 1px solid #2a2724;
+              border-radius: 8px;
+              background: transparent;
+              color: #a39c8e;
+              font-family: 'IBM Plex Sans', sans-serif;
+              font-size: 13px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M4 6h16M4 12h16M4 18h10"></path></svg
+            >Audit trail
+          </button>
+        </header>
+        <nav
+          aria-label="Resurrection stages"
+          style="
+            height: 64px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #2a2724;
+            background: #121110;
+          "
+        >
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="7">
+            <a
+              href="{{s.href}}"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 44px;
+                padding: 0 4px;
+                text-decoration: none;
+              "
+            >
+              <sc-if value="{{s.isCurrent}}" hint-placeholder-val="{{false}}">
+                <span
+                  class="flicker"
+                  style="width: 10px; height: 10px; border-radius: 5px; background: #a6f36b"
+                ></span>
+                <span style="font-size: 14px; font-weight: 600; color: #e9e2d3">{{s.name}}</span>
+              </sc-if>
+              <sc-if value="{{s.isDone}}" hint-placeholder-val="{{true}}">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#8FD95A"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12l5 5 9-10"></path>
+                </svg>
+                <span style="font-size: 14px; color: #a39c8e">{{s.name}}</span>
+              </sc-if>
+              <sc-if value="{{s.isTodo}}" hint-placeholder-val="{{false}}">
+                <span
+                  style="
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 5px;
+                    border: 1px solid #4a4540;
+                    box-sizing: border-box;
+                  "
+                ></span>
+                <span style="font-size: 14px; color: #8a8378">{{s.name}}</span>
+              </sc-if>
+            </a>
+            <sc-if value="{{s.notLast}}" hint-placeholder-val="{{true}}"
+              ><span style="flex-grow: 1; height: 1px; background: #2a2724"></span
+            ></sc-if>
+          </sc-for>
+        </nav>
+        <main
+          style="
+            flex-grow: 1;
+            min-height: 0;
+            display: flex;
+            gap: 32px;
+            padding: 28px 32px 32px;
+            box-sizing: border-box;
+          "
+        >
+          <section
+            style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 18px"
+          >
+            <div style="display: flex; align-items: flex-end; gap: 16px">
+              <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+                <h1 class="serif" style="margin: 0; font-size: 34px; font-weight: 400">
+                  Exhumation
+                </h1>
+                <p style="margin: 0; font-size: 14px; color: #a39c8e">
+                  Sitemap found, 23 URLs. Robots allow us in. Digging five at a time.
+                </p>
+              </div>
+              <span class="mono" style="font-size: 28px; color: #c8fa9e">{{pct}}%</span>
+            </div>
+            <div
+              role="progressbar"
+              aria-valuenow="{{pct}}"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-label="Exhumation progress"
+              style="height: 10px; border-radius: 5px; background: #1d1b19; overflow: hidden"
+            >
+              <div class="soil" style="height: 10px; border-radius: 5px; width: {{pctWidth}}"></div>
+            </div>
+            <div style="display: flex; gap: 20px; font-size: 13px; color: #a39c8e">
+              <span><span class="mono" style="color: #e9e2d3">{{done}}</span> exhumed</span>
+              <span><span class="mono" style="color: #e9e2d3">{{digging}}</span> digging</span>
+              <span><span class="mono" style="color: #e9e2d3">{{queued}}</span> waiting</span>
+              <span><span class="mono" style="color: #e9e2d3">1</span> left alone (robots)</span>
+              <span style="flex-grow: 1"></span>
+              <button
+                onClick="{{tick}}"
+                style="
+                  height: 32px;
+                  padding: 0 12px;
+                  border: 1px solid #2a2724;
+                  border-radius: 6px;
+                  background: transparent;
+                  color: #a39c8e;
+                  font-family: 'IBM Plex Sans', sans-serif;
+                  font-size: 12px;
+                  cursor: pointer;
+                "
+              >
+                Simulate next page
+              </button>
+            </div>
+            <div
+              style="
+                flex-grow: 1;
+                min-height: 0;
+                border: 1px solid #2a2724;
+                border-radius: 10px;
+                background: #121110;
+                padding: 12px 0;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+              "
+            >
+              <sc-for list="{{tree}}" as="p" hint-placeholder-count="14">
+                <div
+                  style="
+                    height: 34px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 0 18px;
+                  "
+                >
+                  <span style="width: {{p.indent}}; flex-shrink: 0"></span>
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4A4540"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 3v12a3 3 0 0 0 3 3h12"></path>
+                  </svg>
+                  <span class="mono" style="font-size: 13px; color: #e9e2d3; flex-grow: 1"
+                    >{{p.path}}</span
+                  >
+                  <span style="font-size: 12px; color: #8a8378">{{p.meta}}</span>
+                  <sc-if value="{{p.isDone}}" hint-placeholder-val="{{true}}"
+                    ><span style="width: 96px; text-align: right; font-size: 12px; color: #8fd95a"
+                      >exhumed</span
+                    ></sc-if
+                  >
+                  <sc-if value="{{p.isDigging}}" hint-placeholder-val="{{false}}"
+                    ><span
+                      style="
+                        width: 96px;
+                        text-align: right;
+                        font-size: 12px;
+                        color: #c8fa9e;
+                        display: flex;
+                        justify-content: flex-end;
+                        align-items: center;
+                        gap: 6px;
+                      "
+                      ><span
+                        class="flicker"
+                        style="width: 6px; height: 6px; border-radius: 3px; background: #a6f36b"
+                      ></span
+                      >digging</span
+                    ></sc-if
+                  >
+                  <sc-if value="{{p.isQueued}}" hint-placeholder-val="{{false}}"
+                    ><span style="width: 96px; text-align: right; font-size: 12px; color: #8a8378"
+                      >waiting</span
+                    ></sc-if
+                  >
+                  <sc-if value="{{p.isSkipped}}" hint-placeholder-val="{{false}}"
+                    ><span style="width: 96px; text-align: right; font-size: 12px; color: #ff8a4c"
+                      >left alone</span
+                    ></sc-if
+                  >
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <aside
+            style="width: 420px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px"
+          >
+            <div
+              style="
+                border: 1px solid #2a2724;
+                border-radius: 10px;
+                background: #161513;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+              "
+            >
+              <span
+                style="
+                  font-size: 12px;
+                  font-weight: 600;
+                  letter-spacing: 0.08em;
+                  text-transform: uppercase;
+                  color: #8a8378;
+                "
+                >Platform</span
+              >
+              <div style="display: flex; align-items: baseline; gap: 12px">
+                <span class="serif" style="font-size: 28px">Durable</span>
+                <span class="mono" style="font-size: 14px; color: #c8fa9e">97% sure</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px">
+                <span class="mono" style="font-size: 12px; color: #a39c8e"
+                  >cdn.durable.co in 41 image URLs</span
+                >
+                <span class="mono" style="font-size: 12px; color: #a39c8e"
+                  >/_next/image proxies to durable.co</span
+                >
+                <span class="mono" style="font-size: 12px; color: #a39c8e"
+                  >"Built with Durable" in footer</span
+                >
+              </div>
+            </div>
+            <div
+              style="
+                border: 1px solid #2a2724;
+                border-radius: 10px;
+                background: #161513;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+              "
+            >
+              <span
+                style="
+                  font-size: 12px;
+                  font-weight: 600;
+                  letter-spacing: 0.08em;
+                  text-transform: uppercase;
+                  color: #8a8378;
+                "
+                >Its face, recovered</span
+              >
+              <div style="display: flex; gap: 8px">
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: center">
+                  <span
+                    style="width: 56px; height: 40px; border-radius: 6px; background: #0f3d5e"
+                  ></span
+                  ><span class="mono" style="font-size: 10px; color: #8a8378">#0F3D5E</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: center">
+                  <span
+                    style="width: 56px; height: 40px; border-radius: 6px; background: #f2b33d"
+                  ></span
+                  ><span class="mono" style="font-size: 10px; color: #8a8378">#F2B33D</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: center">
+                  <span
+                    style="
+                      width: 56px;
+                      height: 40px;
+                      border-radius: 6px;
+                      background: #f7f5f0;
+                      border: 1px solid #2a2724;
+                      box-sizing: border-box;
+                    "
+                  ></span
+                  ><span class="mono" style="font-size: 10px; color: #8a8378">#F7F5F0</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px; align-items: center">
+                  <span
+                    style="width: 56px; height: 40px; border-radius: 6px; background: #1f2328"
+                  ></span
+                  ><span class="mono" style="font-size: 10px; color: #8a8378">#1F2328</span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 14px">
+                <div
+                  style="
+                    width: 88px;
+                    height: 44px;
+                    border: 1px dashed #4a4540;
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 11px;
+                    color: #8a8378;
+                  "
+                >
+                  [logo]
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px">
+                  <span class="mono" style="font-size: 12px; color: #a39c8e"
+                    >headings: Poppins 600</span
+                  >
+                  <span class="mono" style="font-size: 12px; color: #a39c8e"
+                    >body: Open Sans 400</span
+                  >
+                </div>
+              </div>
+            </div>
+            <div
+              style="
+                border: 1px solid #2a2724;
+                border-radius: 10px;
+                background: #161513;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+              "
+            >
+              <span
+                style="
+                  font-size: 12px;
+                  font-weight: 600;
+                  letter-spacing: 0.08em;
+                  text-transform: uppercase;
+                  color: #8a8378;
+                "
+                >Things it said about itself</span
+              >
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 14px">
+                <span style="flex-grow: 1">Phone numbers</span
+                ><span class="mono" style="color: #ff8a4c">2 different</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 14px">
+                <span style="flex-grow: 1">Email addresses</span
+                ><span class="mono" style="color: #a39c8e">1</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 14px">
+                <span style="flex-grow: 1">Street address</span
+                ><span class="mono" style="color: #a39c8e">1</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 14px">
+                <span style="flex-grow: 1">Prices</span
+                ><span class="mono" style="color: #a39c8e">6, on /services</span>
+              </div>
+            </div>
+            <div
+              style="
+                border: 1px solid #2a2724;
+                border-radius: 10px;
+                background: #161513;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+              "
+            >
+              <span
+                style="
+                  font-size: 12px;
+                  font-weight: 600;
+                  letter-spacing: 0.08em;
+                  text-transform: uppercase;
+                  color: #8a8378;
+                "
+                >Repeated on every page</span
+              >
+              <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #a39c8e">
+                Header and footer appear on 21 of 23 pages. They'll become
+                <span class="mono" style="color: #e9e2d3">siteSettings</span>, not copy.
+              </p>
+            </div>
+          </aside>
+        </main>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+      class Component extends DCLogic {
+        constructor(props) { super(props); this.state = { done: 14 }; }
+        steps() {
+          const names = ['Summoned', 'Exhumed', 'Autopsy', 'Interrogation', 'Reanimated', 'Ritual', 'Risen'];
+          const hrefs = ['Main.dc.html', 'Exhume.dc.html', 'Autopsy.dc.html', 'Interrogate.dc.html', 'Ritual.dc.html', 'Ritual.dc.html', 'Rise.dc.html'];
+          const cur = 1;
+          return names.map((name, i) => ({ name, href: hrefs[i], isCurrent: i === cur, isDone: i < cur, isTodo: i > cur, notLast: i < 6 }));
+        }
+        renderVals() { return Object.assign({ steps: this.steps() }, this.boardVals()); }
+        boardVals() {
+          const paths = [
+            ['/', 0, 'Home · 412 words'], ['/about', 0, 'About · 286 words'], ['/services', 0, 'Services · 6 cards'],
+            ['/services/blocked-drains', 1, '338 words'], ['/services/hot-water', 1, '301 words'], ['/services/gas-fitting', 1, '275 words'],
+            ['/services/bathroom-renovations', 1, '420 words'], ['/services/emergency', 1, '190 words'], ['/services/roofing', 1, '144 words'],
+            ['/testimonials', 0, '4 quotes'], ['/team', 0, '3 people'], ['/contact', 0, 'form, map'], ['/cart', 0, 'robots: disallow'],
+            ['/blog', 0, 'index'], ['/blog/winter-pipes', 1, '612 words'], ['/blog/choosing-a-cylinder', 1, ''],
+            ['/blog/new-van', 1, ''], ['/faq', 0, ''], ['/privacy', 0, ''], ['/terms', 0, '']
+          ];
+          const done = Math.min(this.state.done, 19);
+          const tree = paths.slice(0, 15).map(([path, depth, meta], i) => {
+            const skipped = path === '/cart';
+            const isDone = !skipped && i < done;
+            const isDigging = !skipped && i >= done && i < done + 3;
+            return { path, meta: isDone ? meta : '', indent: (depth * 24) + 'px', isDone, isDigging, isQueued: !skipped && !isDone && !isDigging, isSkipped: skipped };
+          });
+          const total = 22;
+          const pct = Math.round((done / total) * 100);
+          return {
+            tree, pct, pctWidth: pct + '%', done, digging: Math.min(3, total - done), queued: Math.max(0, total - done - 3),
+            tick: () => this.setState({ done: Math.min(this.state.done + 1, 19) })
+          };
+        }
+      }
+    </script>
+  </body>
+</html>

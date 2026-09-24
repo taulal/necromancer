@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ossuary tokens</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #0e0d0c;
+            color: #e9e2d3;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+          }
+          a {
+            color: #a6f36b;
+          }
+          a:hover {
+            color: #c8fa9e;
+          }
+          .mono {
+            font-family: 'IBM Plex Mono', ui-monospace, monospace;
+          }
+          .serif {
+            font-family: 'Fraunces', Georgia, serif;
+          }
+          @keyframes flicker {
+            0%,
+            100% {
+              opacity: 1;
+              box-shadow: 0 0 10px #a6f36b;
+            }
+            45% {
+              opacity: 0.82;
+              box-shadow: 0 0 4px #a6f36b;
+            }
+            55% {
+              opacity: 0.95;
+              box-shadow: 0 0 14px #a6f36b;
+            }
+          }
+          .flicker {
+            animation: flicker 2.6s ease-in-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .flicker {
+              animation: none;
+            }
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1440px;
+          height: 900px;
+          box-sizing: border-box;
+          background: #0e0d0c;
+          color: #e9e2d3;
+          padding: 56px 64px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 48px;
+        "
+      >
+        <section style="display: flex; flex-direction: column; gap: 18px">
+          <h1 class="serif" style="margin: 0; font-size: 40px; font-weight: 400">Ossuary</h1>
+          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #a39c8e">
+            Necromancer's look. Near-black warm ground, bone type, one living green, one ember for
+            trouble. Map these into buildTheme() and CSS vars in apps/app/src/theme.
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span
+                style="
+                  height: 56px;
+                  border-radius: 8px;
+                  background: #0e0d0c;
+                  border: 1px solid #2a2724;
+                "
+              ></span
+              ><span class="mono" style="font-size: 12px">ground #0E0D0C</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span
+                style="
+                  height: 56px;
+                  border-radius: 8px;
+                  background: #161513;
+                  border: 1px solid #2a2724;
+                "
+              ></span
+              ><span class="mono" style="font-size: 12px">surface #161513</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span
+                style="
+                  height: 56px;
+                  border-radius: 8px;
+                  background: #121110;
+                  border: 1px solid #2a2724;
+                "
+              ></span
+              ><span class="mono" style="font-size: 12px">well #121110</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span style="height: 56px; border-radius: 8px; background: #2a2724"></span
+              ><span class="mono" style="font-size: 12px">line #2A2724 / #4A4540</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span style="height: 56px; border-radius: 8px; background: #e9e2d3"></span
+              ><span class="mono" style="font-size: 12px">bone #E9E2D3</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span style="height: 56px; border-radius: 8px; background: #a39c8e"></span
+              ><span class="mono" style="font-size: 12px">dust #A39C8E · faint #8A8378</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span style="height: 56px; border-radius: 8px; background: #a6f36b"></span
+              ><span class="mono" style="font-size: 12px">alive #A6F36B · #C8FA9E · #1E2A16</span>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <span style="height: 56px; border-radius: 8px; background: #ff8a4c"></span
+              ><span class="mono" style="font-size: 12px">ember #FF8A4C · #FFB48A · #22170F</span>
+            </div>
+          </div>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #a39c8e">
+            Contrast on ground: bone 15.1:1, dust 7.1:1, faint 5.2:1. Faint on surface is 4.9:1, so
+            keep it for secondary text only.
+          </p>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 18px">
+          <span
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: #8a8378;
+            "
+            >Type</span
+          >
+          <span class="serif" style="font-size: 40px">Fraunces 400 · titles</span>
+          <span class="serif" style="font-size: 26px">Fraunces 400 · questions</span>
+          <span style="font-size: 15px">IBM Plex Sans 400/500/600 · interface, 13–15px</span>
+          <span
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: #8a8378;
+            "
+            >Plex Sans 600 caps · section labels</span
+          >
+          <span class="mono" style="font-size: 14px"
+            >IBM Plex Mono · URLs, types, fields, counts</span
+          >
+          <span
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: #8a8378;
+              margin-top: 16px;
+            "
+            >Motion</span
+          >
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 14px">
+            <span
+              class="flicker"
+              style="width: 10px; height: 10px; border-radius: 5px; background: #a6f36b"
+            ></span
+            >Candle flicker: current stage, active séance
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 14px">
+            <span
+              style="
+                width: 80px;
+                height: 8px;
+                border-radius: 4px;
+                background-image: repeating-linear-gradient(
+                  115deg,
+                  #a6f36b 0 10px,
+                  #8fd95a 10px 20px
+                );
+              "
+            ></span
+            >Soil: progress while an effect runs
+          </div>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #a39c8e">
+            Both stop under prefers-reduced-motion. Nothing else moves.
+          </p>
+        </section>
+        <section style="display: flex; flex-direction: column; gap: 18px">
+          <span
+            style="
+              font-size: 12px;
+              font-weight: 600;
+              letter-spacing: 0.08em;
+              text-transform: uppercase;
+              color: #8a8378;
+            "
+            >Components</span
+          >
+          <div style="display: flex; gap: 10px; flex-wrap: wrap">
+            <button
+              style="
+                height: 44px;
+                padding: 0 20px;
+                border: 0;
+                border-radius: 8px;
+                background: #a6f36b;
+                color: #0e0d0c;
+                font-family: 'IBM Plex Sans', sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+              "
+            >
+              Primary
+            </button>
+            <button
+              style="
+                height: 44px;
+                padding: 0 16px;
+                border: 1px solid #a6f36b;
+                border-radius: 8px;
+                background: transparent;
+                color: #c8fa9e;
+                font-family: 'IBM Plex Sans', sans-serif;
+                font-size: 14px;
+              "
+            >
+              Cast
+            </button>
+            <button
+              style="
+                height: 44px;
+                padding: 0 16px;
+                border: 1px solid #2a2724;
+                border-radius: 8px;
+                background: transparent;
+                color: #a39c8e;
+                font-family: 'IBM Plex Sans', sans-serif;
+                font-size: 14px;
+              "
+            >
+              Secondary
+            </button>
+            <button
+              style="
+                height: 44px;
+                padding: 0 16px;
+                border: 1px solid #5a3a26;
+                border-radius: 8px;
+                background: #22170f;
+                color: #ffb48a;
+                font-family: 'IBM Plex Sans', sans-serif;
+                font-size: 14px;
+              "
+            >
+              Needs you
+            </button>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap">
+            <span
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                padding: 4px 10px;
+                border-radius: 4px;
+                background: #22170f;
+                color: #ffb48a;
+              "
+              >Contradiction</span
+            >
+            <span
+              style="
+                font-size: 12px;
+                padding: 4px 10px;
+                border-radius: 4px;
+                border: 1px solid #4a4540;
+                color: #d6cfc1;
+              "
+              >found by Knowledge Base</span
+            >
+            <span
+              style="
+                font-size: 12px;
+                padding: 4px 10px;
+                border-radius: 4px;
+                background: #1d1b19;
+                color: #a39c8e;
+              "
+              >document · new</span
+            >
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div
+              style="
+                padding: 12px 14px;
+                border-radius: 8px;
+                border: 1px solid #6fa84a;
+                background: #171614;
+                display: flex;
+                justify-content: space-between;
+              "
+            >
+              <span class="mono" style="font-size: 14px">service</span
+              ><span class="mono" style="font-size: 11px; color: #8a8378">×6</span>
+            </div>
+            <div
+              style="
+                padding: 12px 14px;
+                border-radius: 8px;
+                border: 1px dashed #e9e2d3;
+                background: #171614;
+                display: flex;
+                justify-content: space-between;
+              "
+            >
+              <span class="mono" style="font-size: 14px">siteSettings</span
+              ><span class="mono" style="font-size: 11px; color: #8a8378">1</span>
+            </div>
+            <div
+              style="
+                padding: 8px 12px;
+                border-radius: 8px;
+                border: 1px solid #4a4540;
+                background: #141312;
+                display: flex;
+                justify-content: space-between;
+                width: 140px;
+                box-sizing: border-box;
+              "
+            >
+              <span class="mono" style="font-size: 12px">cardGrid</span
+              ><span class="mono" style="font-size: 11px; color: #8a8378">bone</span>
+            </div>
+          </div>
+          <div
+            style="
+              height: 160px;
+              box-sizing: border-box;
+              border-radius: 120px 120px 10px 10px;
+              border: 1px solid #2a2724;
+              background: #161513;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-direction: column;
+              gap: 6px;
+            "
+          >
+            <span class="mono" style="font-size: 13px">tombstone card</span>
+            <span style="font-size: 12px; color: #8a8378">radius 150 150 10 10 · 300px tall</span>
+          </div>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #a39c8e">
+            Radius 8 on controls, 10 on panels. Touch targets 44px. Section labels are 12px caps,
+            never bold headings.
+          </p>
+        </section>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+      class Component extends DCLogic {
+        renderVals() { return {}; }
+      }
+    </script>
+  </body>
+</html>

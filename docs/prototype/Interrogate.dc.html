@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Interrogation</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #0e0d0c;
+            color: #e9e2d3;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+          }
+          a {
+            color: #a6f36b;
+          }
+          a:hover {
+            color: #c8fa9e;
+          }
+          .mono {
+            font-family: 'IBM Plex Mono', ui-monospace, monospace;
+          }
+          .serif {
+            font-family: 'Fraunces', Georgia, serif;
+          }
+          @keyframes flicker {
+            0%,
+            100% {
+              opacity: 1;
+              box-shadow: 0 0 10px #a6f36b;
+            }
+            45% {
+              opacity: 0.82;
+              box-shadow: 0 0 4px #a6f36b;
+            }
+            55% {
+              opacity: 0.95;
+              box-shadow: 0 0 14px #a6f36b;
+            }
+          }
+          .flicker {
+            animation: flicker 2.6s ease-in-out infinite;
+          }
+          @keyframes soil {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 40px 0;
+            }
+          }
+          .soil {
+            background-image: repeating-linear-gradient(115deg, #a6f36b 0 10px, #8fd95a 10px 20px);
+            background-size: 40px 100%;
+            animation: soil 1.4s linear infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .flicker,
+            .soil {
+              animation: none;
+            }
+          }
+          button:focus-visible,
+          a:focus-visible,
+          input:focus-visible {
+            outline: 2px solid #a6f36b;
+            outline-offset: 2px;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1440px;
+          height: 900px;
+          box-sizing: border-box;
+          background: #0e0d0c;
+          color: #e9e2d3;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <header
+          style="
+            height: 64px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #2a2724;
+          "
+        >
+          <a
+            href="Main.dc.html"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              min-height: 44px;
+              color: #a39c8e;
+              text-decoration: none;
+              font-size: 14px;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 18l-6-6 6-6"></path></svg
+            >Graveyard
+          </a>
+          <span style="width: 1px; height: 24px; background: #2a2724"></span>
+          <span
+            class="mono"
+            style="
+              width: 36px;
+              height: 36px;
+              border-radius: 18px;
+              border: 1px solid #4a4540;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: 500;
+            "
+            >DU</span
+          >
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span class="mono" style="font-size: 15px; color: #e9e2d3"
+              >harbourview-plumbing.co.nz</span
+            >
+            <span style="font-size: 12px; color: #8a8378"
+              >Durable · 23 pages · lands in rip-harbourview</span
+            >
+          </div>
+          <div style="flex-grow: 1"></div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span
+              title="Taylor, London 11:40"
+              style="
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+                background: #2a2724;
+                border: 1px solid #a6f36b;
+                font-size: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >T</span
+            >
+            <span
+              title="Jamie, Auckland 22:40"
+              style="
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+                background: #2a2724;
+                border: 1px solid #a6f36b;
+                font-size: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >J</span
+            >
+            <span style="font-size: 12px; color: #8a8378">here now</span>
+          </div>
+          <button
+            style="
+              height: 40px;
+              padding: 0 14px;
+              border: 1px solid #2a2724;
+              border-radius: 8px;
+              background: transparent;
+              color: #a39c8e;
+              font-family: 'IBM Plex Sans', sans-serif;
+              font-size: 13px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M4 6h16M4 12h16M4 18h10"></path></svg
+            >Audit trail
+          </button>
+        </header>
+        <nav
+          aria-label="Resurrection stages"
+          style="
+            height: 64px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #2a2724;
+            background: #121110;
+          "
+        >
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="7">
+            <a
+              href="{{s.href}}"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 44px;
+                padding: 0 4px;
+                text-decoration: none;
+              "
+            >
+              <sc-if value="{{s.isCurrent}}" hint-placeholder-val="{{false}}">
+                <span
+                  class="flicker"
+                  style="width: 10px; height: 10px; border-radius: 5px; background: #a6f36b"
+                ></span>
+                <span style="font-size: 14px; font-weight: 600; color: #e9e2d3">{{s.name}}</span>
+              </sc-if>
+              <sc-if value="{{s.isDone}}" hint-placeholder-val="{{true}}">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#8FD95A"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12l5 5 9-10"></path>
+                </svg>
+                <span style="font-size: 14px; color: #a39c8e">{{s.name}}</span>
+              </sc-if>
+              <sc-if value="{{s.isTodo}}" hint-placeholder-val="{{false}}">
+                <span
+                  style="
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 5px;
+                    border: 1px solid #4a4540;
+                    box-sizing: border-box;
+                  "
+                ></span>
+                <span style="font-size: 14px; color: #8a8378">{{s.name}}</span>
+              </sc-if>
+            </a>
+            <sc-if value="{{s.notLast}}" hint-placeholder-val="{{true}}"
+              ><span style="flex-grow: 1; height: 1px; background: #2a2724"></span
+            ></sc-if>
+          </sc-for>
+        </nav>
+        <main style="flex-grow: 1; min-height: 0; display: flex; box-sizing: border-box">
+          <nav
+            aria-label="Questions"
+            style="
+              width: 300px;
+              flex-shrink: 0;
+              border-right: 1px solid #2a2724;
+              padding: 24px 16px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            "
+          >
+            <span
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #8a8378;
+                padding: 0 8px 10px;
+              "
+              >{{answeredCount}} of 12 answered · {{requiredLeft}} required left</span
+            >
+            <sc-for list="{{list}}" as="q" hint-placeholder-count="12">
+              <button
+                onClick="{{q.pick}}"
+                style="min-height: 44px; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 0; border-radius: 6px; background: {{q.bg}}; color: #E9E2D3; font-family: 'IBM Plex Sans', sans-serif; text-align: left; cursor: pointer"
+              >
+                <sc-if value="{{q.answered}}" hint-placeholder-val="{{false}}"
+                  ><svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#8FD95A"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-label="answered"
+                  >
+                    <path d="M5 12l5 5 9-10"></path></svg
+                ></sc-if>
+                <sc-if value="{{q.open}}" hint-placeholder-val="{{true}}"
+                  ><span style="width: 14px; display: flex; justify-content: center"
+                    ><span
+                      style="width: 8px; height: 8px; border-radius: 4px; border: 1px solid {{q.ring}}; box-sizing: border-box"
+                    ></span></span
+                ></sc-if>
+                <span style="font-size: 13px; line-height: 1.35; flex-grow: 1; color: {{q.color}}"
+                  >{{q.short}}</span
+                >
+              </button>
+            </sc-for>
+          </nav>
+
+          <section
+            style="
+              flex-grow: 1;
+              min-width: 0;
+              padding: 40px 64px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              gap: 22px;
+            "
+          >
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span
+                style="
+                  font-size: 12px;
+                  font-weight: 600;
+                  letter-spacing: 0.06em;
+                  text-transform: uppercase;
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  background: #22170f;
+                  color: #ffb48a;
+                "
+                >{{q.kind}}</span
+              >
+              <sc-if value="{{q.fromKb}}" hint-placeholder-val="{{true}}"
+                ><span
+                  style="
+                    font-size: 12px;
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    border: 1px solid #4a4540;
+                    color: #d6cfc1;
+                  "
+                  >found by Knowledge Base</span
+                ></sc-if
+              >
+              <sc-if value="{{q.required}}" hint-placeholder-val="{{true}}"
+                ><span style="font-size: 12px; color: #a39c8e">required to continue</span></sc-if
+              >
+              <span style="flex-grow: 1"></span>
+              <span class="mono" style="font-size: 13px; color: #8a8378">{{q.num}} / 12</span>
+            </div>
+            <h1
+              class="serif"
+              style="margin: 0; font-size: 36px; font-weight: 400; line-height: 1.2"
+            >
+              {{q.prompt}}
+            </h1>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <sc-for list="{{q.evidence}}" as="e" hint-placeholder-count="2">
+                <div
+                  style="
+                    display: flex;
+                    gap: 14px;
+                    padding: 14px 16px;
+                    border-radius: 8px;
+                    background: #161513;
+                    border: 1px solid #2a2724;
+                  "
+                >
+                  <span style="width: 2px; flex-shrink: 0; background: #4a4540"></span>
+                  <div style="display: flex; flex-direction: column; gap: 6px">
+                    <a
+                      href="#"
+                      class="mono"
+                      style="font-size: 12px; color: #8fd95a; text-decoration: none"
+                      >{{e.url}} ↗</a
+                    >
+                    <span style="font-size: 15px; line-height: 1.5; color: #d6cfc1"
+                      >“{{e.quote}}”</span
+                    >
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div
+              role="radiogroup"
+              aria-label="Answer"
+              style="display: flex; flex-wrap: wrap; gap: 10px"
+            >
+              <sc-for list="{{q.options}}" as="o" hint-placeholder-count="3">
+                <sc-if value="{{o.chosen}}" hint-placeholder-val="{{false}}">
+                  <button
+                    role="radio"
+                    aria-checked="true"
+                    onClick="{{o.pick}}"
+                    style="
+                      min-height: 44px;
+                      padding: 10px 16px;
+                      border-radius: 8px;
+                      border: 1px solid #a6f36b;
+                      background: #1e2a16;
+                      color: #e9e2d3;
+                      font-family: 'IBM Plex Sans', sans-serif;
+                      font-size: 14px;
+                      cursor: pointer;
+                    "
+                  >
+                    {{o.label}}
+                  </button>
+                </sc-if>
+                <sc-if value="{{o.notChosen}}" hint-placeholder-val="{{true}}">
+                  <button
+                    role="radio"
+                    aria-checked="false"
+                    onClick="{{o.pick}}"
+                    style="
+                      min-height: 44px;
+                      padding: 10px 16px;
+                      border-radius: 8px;
+                      border: 1px solid #4a4540;
+                      background: transparent;
+                      color: #d6cfc1;
+                      font-family: 'IBM Plex Sans', sans-serif;
+                      font-size: 14px;
+                      cursor: pointer;
+                    "
+                  >
+                    {{o.label}}
+                  </button>
+                </sc-if>
+              </sc-for>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <label for="note" style="font-size: 13px; color: #a39c8e"
+                >Anything else it should know?</label
+              >
+              <input
+                id="note"
+                placeholder="Optional note"
+                style="
+                  height: 44px;
+                  box-sizing: border-box;
+                  padding: 0 14px;
+                  background: #121110;
+                  border: 1px solid #2a2724;
+                  border-radius: 8px;
+                  color: #e9e2d3;
+                  font-family: 'IBM Plex Sans', sans-serif;
+                  font-size: 14px;
+                "
+              />
+            </div>
+            <div style="flex-grow: 1"></div>
+            <div style="display: flex; align-items: center; gap: 12px">
+              <sc-if value="{{hasChoice}}" hint-placeholder-val="{{false}}">
+                <span style="font-size: 13px; color: #a39c8e; flex-grow: 1"
+                  >This answer creates: <span style="color: #e9e2d3">{{spawn}}</span></span
+                >
+              </sc-if>
+              <sc-if value="{{noChoice}}" hint-placeholder-val="{{true}}"
+                ><span style="flex-grow: 1"></span
+              ></sc-if>
+              <button
+                onClick="{{next}}"
+                style="
+                  height: 44px;
+                  padding: 0 16px;
+                  border: 1px solid #2a2724;
+                  border-radius: 8px;
+                  background: transparent;
+                  color: #a39c8e;
+                  font-family: 'IBM Plex Sans', sans-serif;
+                  font-size: 14px;
+                  cursor: pointer;
+                "
+              >
+                Skip
+              </button>
+              <button
+                onClick="{{next}}"
+                style="
+                  height: 44px;
+                  padding: 0 20px;
+                  border: 0;
+                  border-radius: 8px;
+                  background: #a6f36b;
+                  color: #0e0d0c;
+                  font-family: 'IBM Plex Sans', sans-serif;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                "
+              >
+                Answer and next
+              </button>
+            </div>
+          </section>
+
+          <aside
+            style="
+              width: 320px;
+              flex-shrink: 0;
+              border-left: 1px solid #2a2724;
+              background: #141312;
+              padding: 24px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              gap: 12px;
+            "
+          >
+            <span
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #8a8378;
+              "
+              >Ritual so far</span
+            >
+            <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #a39c8e">
+              Tasks your answers have created. Auto tasks run themselves after reanimation.
+            </p>
+            <sc-for list="{{tasks}}" as="t" hint-placeholder-count="4">
+              <div
+                style="
+                  padding: 12px;
+                  border-radius: 8px;
+                  border: 1px solid #2a2724;
+                  background: #171614;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                "
+              >
+                <div style="display: flex; align-items: center; gap: 8px">
+                  <span
+                    style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: {{t.modeColor}}"
+                    >{{t.mode}}</span
+                  >
+                  <span style="flex-grow: 1"></span>
+                  <span class="mono" style="font-size: 11px; color: #8a8378">{{t.pages}}</span>
+                </div>
+                <span style="font-size: 14px">{{t.title}}</span>
+              </div>
+            </sc-for>
+            <div style="flex-grow: 1"></div>
+            <a href="Ritual.dc.html" style="font-size: 13px; text-decoration: none"
+              >Skip ahead to the ritual →</a
+            >
+          </aside>
+        </main>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+      class Component extends DCLogic {
+        constructor(props) { super(props); this.state = { index: 0, choice: {}, answered: { 0: false } }; }
+        steps() {
+          const names = ['Summoned', 'Exhumed', 'Autopsy', 'Interrogation', 'Reanimated', 'Ritual', 'Risen'];
+          const hrefs = ['Main.dc.html', 'Exhume.dc.html', 'Autopsy.dc.html', 'Interrogate.dc.html', 'Ritual.dc.html', 'Ritual.dc.html', 'Rise.dc.html'];
+          const cur = 3;
+          return names.map((name, i) => ({ name, href: hrefs[i], isCurrent: i === cur, isDone: i < cur, isTodo: i > cur, notLast: i < 6 }));
+        }
+        renderVals() { return Object.assign({ steps: this.steps() }, this.boardVals()); }
+        boardVals() {
+          const Q = [
+            { short: 'Which phone number is right?', kind: 'Contradiction', fromKb: true, required: true, prompt: 'Home and Services say 09 555 0142. Contact says 09 555 0198. Which one should the new site use?',
+              evidence: [['/  ·  header', 'Call us now on 09 555 0142'], ['/contact', 'Phone: 09 555 0198 (Mon–Fri 7am–5pm)']],
+              options: ['09 555 0142', '09 555 0198', 'Both: office and after-hours', 'Neither, I’ll give you the new one'],
+              spawn: 'Fix phone on 4 pages (auto) · Set siteSettings.phone (auto)' },
+            { short: 'Are these testimonials real?', kind: 'Authenticity', fromKb: false, required: true, prompt: 'Two of the four testimonials match Durable’s template text word for word. Keep them?',
+              evidence: [['/testimonials', 'Fantastic service, would highly recommend to anyone!  – John D.'], ['/testimonials', 'Professional, on time and great value.  – Sarah K.']],
+              options: ['Remove both', 'They’re real, keep them', 'I’ll check with the client'],
+              spawn: 'Verify testimonial with client ×2 (human)' },
+            { short: 'Keep the blog?', kind: 'Keep or kill', fromKb: false, required: false, prompt: 'The blog has three posts, last one 2019. Two are under 40 words. What happens to them?',
+              evidence: [['/blog/new-van', 'We got a new van! Come say hi.'], ['/blog/choosing-a-cylinder', 'Coming soon.']],
+              options: ['Keep the long one, drop the rest', 'Keep all three', 'Drop the blog, redirect to /services'],
+              spawn: 'Drop 2 posts + 301 to /blog (auto)' }
+          ];
+          const extra = ['Is /roofing a service you still offer?', 'No meta descriptions on 19 pages', 'Map /faq to the faq block?', 'Missing alt text on 31 images', 'Opening hours differ on /contact', 'Is “since 1998” still true?', 'Merge /emergency into hot water?', 'Privacy page is Durable boilerplate'];
+          const i = this.state.index;
+          const q = Q[i % 3];
+          const chosen = this.state.choice[i];
+          const answeredIdx = Object.keys(this.state.answered).filter((k) => this.state.answered[k]).map(Number);
+          const list = [...Q.map((x) => x.short), ...extra].map((short, k) => {
+            const done = answeredIdx.includes(k);
+            const current = k === i;
+            return { short, answered: done, open: !done, ring: k < 5 ? '#FF8A4C' : '#4A4540', color: current ? '#E9E2D3' : done ? '#8A8378' : '#D6CFC1', bg: current ? '#1D1B19' : 'transparent', pick: () => this.setState({ index: k }) };
+          });
+          const taskPool = [
+            { mode: 'auto', title: 'Fix phone number', pages: '4 pages', modeColor: '#A6F36B' },
+            { mode: 'human', title: 'Verify testimonials with client', pages: '/testimonials', modeColor: '#FFB48A' },
+            { mode: 'auto', title: 'Drop 2 thin posts, 301 to /blog', pages: '2 pages', modeColor: '#A6F36B' }
+          ];
+          const tasks = [{ mode: 'auto', title: 'Write meta descriptions', pages: '19 pages', modeColor: '#A6F36B' }, ...taskPool.filter((_, k) => answeredIdx.includes(k))];
+          return {
+            q: { ...q, num: i + 1, evidence: q.evidence.map(([url, quote]) => ({ url, quote })),
+              options: q.options.map((label, k) => ({ label, chosen: chosen === k, notChosen: chosen !== k, pick: () => this.setState({ choice: { ...this.state.choice, [i]: k } }) })) },
+            list, tasks,
+            answeredCount: answeredIdx.length, requiredLeft: Math.max(0, 5 - answeredIdx.filter((k) => k < 5).length),
+            hasChoice: chosen !== undefined, noChoice: chosen === undefined, spawn: q.spawn,
+            next: () => this.setState({ answered: { ...this.state.answered, [i]: chosen !== undefined }, index: (i + 1) % 3 })
+          };
+        }
+      }
+    </script>
+  </body>
+</html>

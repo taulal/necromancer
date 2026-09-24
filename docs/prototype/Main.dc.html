@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Graveyard</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #0e0d0c;
+            color: #e9e2d3;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+          }
+          a {
+            color: #a6f36b;
+          }
+          a:hover {
+            color: #c8fa9e;
+          }
+          .mono {
+            font-family: 'IBM Plex Mono', ui-monospace, monospace;
+          }
+          .serif {
+            font-family: 'Fraunces', Georgia, serif;
+          }
+          @keyframes flicker {
+            0%,
+            100% {
+              opacity: 1;
+              box-shadow: 0 0 10px #a6f36b;
+            }
+            45% {
+              opacity: 0.82;
+              box-shadow: 0 0 4px #a6f36b;
+            }
+            55% {
+              opacity: 0.95;
+              box-shadow: 0 0 14px #a6f36b;
+            }
+          }
+          .flicker {
+            animation: flicker 2.6s ease-in-out infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .flicker {
+              animation: none;
+            }
+          }
+          button:focus-visible,
+          a:focus-visible,
+          input:focus-visible {
+            outline: 2px solid #a6f36b;
+            outline-offset: 2px;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1440px;
+          height: 900px;
+          box-sizing: border-box;
+          background: #0e0d0c;
+          color: #e9e2d3;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <header
+          style="
+            height: 72px;
+            box-sizing: border-box;
+            padding: 0 48px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid #2a2724;
+          "
+        >
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 32 32"
+            fill="none"
+            stroke="#A6F36B"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="16" cy="13" r="8"></circle>
+            <path d="M16 21v8M11 25h10M13 12h.01M19 12h.01M13.5 16.5c1.5 1 3.5 1 5 0"></path>
+          </svg>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span class="serif" style="font-size: 22px; font-weight: 600; letter-spacing: 0.01em"
+              >Necromancer</span
+            >
+            <span class="mono" style="font-size: 11px; color: #8a8378"
+              >Flight org · v9dl2xdi · hq</span
+            >
+          </div>
+          <div style="flex-grow: 1"></div>
+          <label for="search" style="position: absolute; left: -9999px">Search séances</label>
+          <input
+            id="search"
+            placeholder="Search domains…"
+            style="
+              width: 280px;
+              height: 44px;
+              box-sizing: border-box;
+              padding: 0 14px;
+              background: #161513;
+              border: 1px solid #2a2724;
+              border-radius: 8px;
+              color: #e9e2d3;
+              font-family: 'IBM Plex Mono', monospace;
+              font-size: 13px;
+            "
+          />
+          <button
+            onClick="{{openSummon}}"
+            style="
+              height: 44px;
+              padding: 0 20px;
+              border: 0;
+              border-radius: 8px;
+              background: #a6f36b;
+              color: #0e0d0c;
+              font-family: 'IBM Plex Sans', sans-serif;
+              font-size: 15px;
+              font-weight: 600;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14"></path></svg
+            >Summon
+          </button>
+        </header>
+
+        <section style="padding: 32px 48px 20px; display: flex; align-items: flex-end; gap: 24px">
+          <div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1">
+            <h1 class="serif" style="margin: 0; font-size: 40px; font-weight: 400">
+              The Graveyard
+            </h1>
+            <p style="margin: 0; font-size: 15px; color: #a39c8e">
+              7 séances across the org. 1 haunted. Everything here was alive once.
+            </p>
+          </div>
+          <div role="group" aria-label="Filter séances" style="display: flex; gap: 8px">
+            <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+              <sc-if value="{{f.active}}" hint-placeholder-val="{{false}}">
+                <button
+                  onClick="{{f.pick}}"
+                  aria-pressed="true"
+                  style="
+                    height: 36px;
+                    min-width: 44px;
+                    padding: 0 14px;
+                    border-radius: 18px;
+                    border: 1px solid #a6f36b;
+                    background: #1e2a16;
+                    color: #c8fa9e;
+                    font-family: 'IBM Plex Sans', sans-serif;
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                  "
+                >
+                  {{f.label}} <span class="mono" style="color: #a6f36b">{{f.count}}</span>
+                </button>
+              </sc-if>
+              <sc-if value="{{f.inactive}}" hint-placeholder-val="{{true}}">
+                <button
+                  onClick="{{f.pick}}"
+                  aria-pressed="false"
+                  style="
+                    height: 36px;
+                    min-width: 44px;
+                    padding: 0 14px;
+                    border-radius: 18px;
+                    border: 1px solid #2a2724;
+                    background: transparent;
+                    color: #a39c8e;
+                    font-family: 'IBM Plex Sans', sans-serif;
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                  "
+                >
+                  {{f.label}} <span class="mono" style="color: #8a8378">{{f.count}}</span>
+                </button>
+              </sc-if>
+            </sc-for>
+          </div>
+        </section>
+
+        <section
+          style="
+            padding: 8px 48px 32px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 24px;
+          "
+        >
+          <sc-for list="{{visible}}" as="s" hint-placeholder-count="7">
+            <a
+              href="{{s.href}}"
+              style="
+                height: 300px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 28px 24px 18px;
+                border-radius: 150px 150px 10px 10px;
+                border: 1px solid #2a2724;
+                background: #161513;
+                color: #e9e2d3;
+                text-decoration: none;
+                position: relative;
+              "
+            >
+              <div style="display: flex; justify-content: center">
+                <span
+                  class="mono"
+                  style="
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 24px;
+                    border: 1px solid #4a4540;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: #e9e2d3;
+                  "
+                  >{{s.sigil}}</span
+                >
+              </div>
+              <div
+                style="
+                  display: flex;
+                  flex-direction: column;
+                  gap: 4px;
+                  align-items: center;
+                  text-align: center;
+                "
+              >
+                <span class="mono" style="font-size: 14px; color: #e9e2d3">{{s.domain}}</span>
+                <span style="font-size: 12px; color: #8a8378"
+                  >{{s.platform}} · died c. {{s.died}}</span
+                >
+              </div>
+              <div style="height: 1px; background: #2a2724"></div>
+              <div style="display: flex; align-items: center; gap: 8px">
+                <sc-if value="{{s.isHaunted}}" hint-placeholder-val="{{false}}">
+                  <span
+                    style="width: 8px; height: 8px; border-radius: 4px; background: #ff8a4c"
+                  ></span>
+                  <span style="font-size: 13px; font-weight: 600; color: #ff8a4c">{{s.stage}}</span>
+                </sc-if>
+                <sc-if value="{{s.isAlive}}" hint-placeholder-val="{{true}}">
+                  <span
+                    class="flicker"
+                    style="width: 8px; height: 8px; border-radius: 4px; background: #a6f36b"
+                  ></span>
+                  <span style="font-size: 13px; font-weight: 600; color: #c8fa9e">{{s.stage}}</span>
+                </sc-if>
+                <sc-if value="{{s.isRisen}}" hint-placeholder-val="{{false}}">
+                  <span
+                    style="width: 8px; height: 8px; border-radius: 4px; background: #e9e2d3"
+                  ></span>
+                  <span style="font-size: 13px; font-weight: 600; color: #e9e2d3">{{s.stage}}</span>
+                </sc-if>
+                <sc-if value="{{s.isDead}}" hint-placeholder-val="{{false}}">
+                  <span
+                    style="
+                      width: 8px;
+                      height: 8px;
+                      border-radius: 4px;
+                      border: 1px solid #8a8378;
+                      box-sizing: border-box;
+                    "
+                  ></span>
+                  <span style="font-size: 13px; font-weight: 600; color: #8a8378">{{s.stage}}</span>
+                </sc-if>
+                <span style="flex-grow: 1"></span>
+                <span class="mono" style="font-size: 12px; color: #8a8378">{{s.step}}/7</span>
+              </div>
+              <div style="display: flex; gap: 4px" aria-hidden="true">
+                <sc-for list="{{s.pips}}" as="p" hint-placeholder-count="7">
+                  <sc-if value="{{p.on}}" hint-placeholder-val="{{true}}"
+                    ><span
+                      style="flex-grow: 1; height: 3px; border-radius: 2px; background: #a6f36b"
+                    ></span
+                  ></sc-if>
+                  <sc-if value="{{p.off}}" hint-placeholder-val="{{false}}"
+                    ><span
+                      style="flex-grow: 1; height: 3px; border-radius: 2px; background: #2a2724"
+                    ></span
+                  ></sc-if>
+                </sc-for>
+              </div>
+              <p
+                style="margin: 0; font-size: 13px; line-height: 1.45; color: #a39c8e; flex-grow: 1"
+              >
+                {{s.note}}
+              </p>
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span class="mono" style="font-size: 12px; color: #8a8378">{{s.pages}} pages</span>
+                <span style="flex-grow: 1"></span>
+                <sc-for list="{{s.present}}" as="who" hint-placeholder-count="1">
+                  <span
+                    title="{{who.title}}"
+                    style="
+                      width: 26px;
+                      height: 26px;
+                      border-radius: 13px;
+                      background: #2a2724;
+                      border: 1px solid #a6f36b;
+                      color: #e9e2d3;
+                      font-size: 11px;
+                      font-weight: 600;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                    >{{who.initial}}</span
+                  >
+                </sc-for>
+              </div>
+            </a>
+          </sc-for>
+          <button
+            onClick="{{openSummon}}"
+            style="
+              height: 300px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 12px;
+              border-radius: 150px 150px 10px 10px;
+              border: 1px dashed #4a4540;
+              background: transparent;
+              color: #a39c8e;
+              font-family: 'IBM Plex Sans', sans-serif;
+              cursor: pointer;
+            "
+          >
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            <span class="serif" style="font-size: 20px; color: #e9e2d3">An empty plot</span>
+            <span style="font-size: 13px">Summon another site</span>
+          </button>
+        </section>
+
+        <sc-if value="{{summonOpen}}" hint-placeholder-val="{{false}}">
+          <div
+            style="
+              position: absolute;
+              inset: 0;
+              background: rgba(8, 7, 6, 0.72);
+              display: flex;
+              justify-content: flex-end;
+            "
+          >
+            <div
+              role="dialog"
+              aria-label="Summon a site"
+              style="
+                width: 480px;
+                height: 900px;
+                box-sizing: border-box;
+                background: #161513;
+                border-left: 1px solid #2a2724;
+                padding: 40px;
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+              "
+            >
+              <div style="display: flex; align-items: center">
+                <h2
+                  class="serif"
+                  style="margin: 0; font-size: 30px; font-weight: 400; flex-grow: 1"
+                >
+                  Summon
+                </h2>
+                <button
+                  onClick="{{closeSummon}}"
+                  aria-label="Close"
+                  style="
+                    width: 44px;
+                    height: 44px;
+                    border: 1px solid #2a2724;
+                    border-radius: 8px;
+                    background: transparent;
+                    color: #a39c8e;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  "
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M6 6l12 12M18 6L6 18"></path>
+                  </svg>
+                </button>
+              </div>
+              <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #a39c8e">
+                Give it the address of a site that's dying. Nothing is published until you Rise.
+              </p>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <label for="url" style="font-size: 13px; font-weight: 500">Site URL</label>
+                <input
+                  id="url"
+                  value="https://harbourview-plumbing.co.nz"
+                  style="
+                    height: 48px;
+                    box-sizing: border-box;
+                    padding: 0 14px;
+                    background: #0e0d0c;
+                    border: 1px solid #4a4540;
+                    border-radius: 8px;
+                    color: #e9e2d3;
+                    font-family: 'IBM Plex Mono', monospace;
+                    font-size: 14px;
+                  "
+                />
+              </div>
+              <div style="display: flex; gap: 16px">
+                <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1">
+                  <label for="cap" style="font-size: 13px; font-weight: 500">Page cap</label>
+                  <input
+                    id="cap"
+                    value="50"
+                    style="
+                      height: 44px;
+                      box-sizing: border-box;
+                      padding: 0 14px;
+                      background: #0e0d0c;
+                      border: 1px solid #2a2724;
+                      border-radius: 8px;
+                      color: #e9e2d3;
+                      font-family: 'IBM Plex Mono', monospace;
+                      font-size: 14px;
+                    "
+                  />
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; flex-grow: 1">
+                  <label for="ds" style="font-size: 13px; font-weight: 500">Target dataset</label>
+                  <input
+                    id="ds"
+                    value="rip-harbourview"
+                    style="
+                      height: 44px;
+                      box-sizing: border-box;
+                      padding: 0 14px;
+                      background: #0e0d0c;
+                      border: 1px solid #2a2724;
+                      border-radius: 8px;
+                      color: #e9e2d3;
+                      font-family: 'IBM Plex Mono', monospace;
+                      font-size: 14px;
+                    "
+                  />
+                </div>
+              </div>
+              <fieldset
+                style="
+                  border: 0;
+                  margin: 0;
+                  padding: 0;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 8px;
+                "
+              >
+                <legend style="font-size: 13px; font-weight: 500; padding: 0; margin-bottom: 8px">
+                  Land it in
+                </legend>
+                <label
+                  style="
+                    display: flex;
+                    gap: 12px;
+                    align-items: flex-start;
+                    padding: 14px;
+                    border: 1px solid #a6f36b;
+                    border-radius: 8px;
+                    background: #1a2114;
+                    cursor: pointer;
+                  "
+                >
+                  <input
+                    type="radio"
+                    name="target"
+                    checked
+                    style="margin-top: 3px; accent-color: #a6f36b"
+                  />
+                  <span style="display: flex; flex-direction: column; gap: 2px"
+                    ><span style="font-size: 14px; font-weight: 500">A new dataset</span
+                    ><span style="font-size: 12px; color: #a39c8e"
+                      >In v9dl2xdi. Fast, good for trying things.</span
+                    ></span
+                  >
+                </label>
+                <label
+                  style="
+                    display: flex;
+                    gap: 12px;
+                    align-items: flex-start;
+                    padding: 14px;
+                    border: 1px solid #2a2724;
+                    border-radius: 8px;
+                    cursor: pointer;
+                  "
+                >
+                  <input
+                    type="radio"
+                    name="target"
+                    style="margin-top: 3px; accent-color: #a6f36b"
+                  />
+                  <span style="display: flex; flex-direction: column; gap: 2px"
+                    ><span style="font-size: 14px; font-weight: 500">A new project</span
+                    ><span style="font-size: 12px; color: #a39c8e"
+                      >One project per site, the way a real build ships.</span
+                    ></span
+                  >
+                </label>
+              </fieldset>
+              <label
+                style="
+                  display: flex;
+                  gap: 12px;
+                  align-items: center;
+                  font-size: 14px;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="checkbox"
+                  style="width: 18px; height: 18px; accent-color: #a6f36b"
+                />Make the resurrected dataset public
+              </label>
+              <div style="flex-grow: 1"></div>
+              <a
+                href="Exhume.dc.html"
+                style="
+                  height: 52px;
+                  border-radius: 8px;
+                  background: #a6f36b;
+                  color: #0e0d0c;
+                  font-size: 16px;
+                  font-weight: 600;
+                  text-decoration: none;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 10px;
+                "
+                >Begin exhumation</a
+              >
+              <p
+                class="mono"
+                style="margin: 0; font-size: 11px; color: #8a8378; text-align: center"
+              >
+                NecromancerBot honours robots.txt
+              </p>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+      class Component extends DCLogic {
+        constructor(props) { super(props); this.state = { filter: 'all', summonOpen: false }; }
+        renderVals() {
+          const seances = [
+            { domain: 'harbourview-plumbing.co.nz', platform: 'Durable', sigil: 'DU', died: 2021, stage: 'Interrogation', kind: 'alive', step: 4, pages: 23, note: '3 of 12 questions answered. Two phone numbers disagree.', present: [{ initial: 'T', title: 'Taylor, London' }], href: 'Interrogate.dc.html' },
+            { domain: 'kauri-coast-motors.co.nz', platform: 'WordPress', sigil: 'WP', died: 2019, stage: 'Ritual', kind: 'alive', step: 6, pages: 31, note: '14 of 31 tasks done. 6 pages blessed.', present: [{ initial: 'J', title: 'Jamie, Auckland' }], href: 'Ritual.dc.html' },
+            { domain: 'thelittlebakery.nz', platform: 'Wix', sigil: 'WX', died: 2020, stage: 'Exhuming', kind: 'alive', step: 2, pages: 17, note: 'Crawling. 11 of 17 pages exhumed.', present: [], href: 'Exhume.dc.html' },
+            { domain: 'marlow-joinery.co.uk', platform: 'Squarespace', sigil: 'SQ', died: 2022, stage: 'Autopsy', kind: 'alive', step: 3, pages: 12, note: 'Anatomy v2 proposed. 7 types, 2 new.', present: [{ initial: 'T', title: 'Taylor, London' }, { initial: 'J', title: 'Jamie, Auckland' }], href: 'Autopsy.dc.html' },
+            { domain: 'oldmill-lodge.co.nz', platform: 'WordPress', sigil: 'WP', died: 2018, stage: 'Haunted', kind: 'haunted', step: 4, pages: 44, note: 'Interrogation has waited 3 days. 5 required questions open.', present: [], href: 'Interrogate.dc.html' },
+            { domain: 'southside-physio.co.uk', platform: 'Static / PHP', sigil: 'ST', died: 2016, stage: 'Risen', kind: 'risen', step: 7, pages: 9, note: 'Risen 21 Sep. 9 of 9 URLs redirected.', present: [], href: 'Rise.dc.html' },
+            { domain: 'bellbird-events.nz', platform: 'Durable', sigil: 'DU', died: 2023, stage: 'Entombed', kind: 'dead', step: 2, pages: 0, note: 'robots.txt disallows crawling. Left in peace.', present: [], href: 'Exhume.dc.html' }
+          ];
+          const match = { all: () => true, alive: (s) => s.kind === 'alive', haunted: (s) => s.kind === 'haunted', risen: (s) => s.kind === 'risen', dead: (s) => s.kind === 'dead' };
+          const defs = [['all', 'All'], ['alive', 'Rising'], ['haunted', 'Haunted'], ['risen', 'Risen'], ['dead', 'Entombed']];
+          const filters = defs.map(([id, label]) => ({ id, label, count: seances.filter(match[id]).length, active: this.state.filter === id, inactive: this.state.filter !== id, pick: () => this.setState({ filter: id }) }));
+          const visible = seances.filter(match[this.state.filter]).map((s) => ({
+            ...s,
+            isAlive: s.kind === 'alive', isHaunted: s.kind === 'haunted', isRisen: s.kind === 'risen', isDead: s.kind === 'dead',
+            pips: [1, 2, 3, 4, 5, 6, 7].map((n) => ({ on: n <= s.step, off: n > s.step }))
+          }));
+          return {
+            filters, visible,
+            summonOpen: this.state.summonOpen,
+            openSummon: () => this.setState({ summonOpen: true }),
+            closeSummon: () => this.setState({ summonOpen: false })
+          };
+        }
+      }
+    </script>
+  </body>
+</html>

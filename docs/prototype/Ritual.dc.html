@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ritual</title>
+    <script src="./support.js"></script>
+  </head>
+  <body>
+    <x-dc>
+      <helmet>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&amp;family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap"
+          rel="stylesheet"
+        />
+        <style>
+          body {
+            margin: 0;
+            background: #0e0d0c;
+            color: #e9e2d3;
+            font-family: 'IBM Plex Sans', system-ui, sans-serif;
+          }
+          a {
+            color: #a6f36b;
+          }
+          a:hover {
+            color: #c8fa9e;
+          }
+          .mono {
+            font-family: 'IBM Plex Mono', ui-monospace, monospace;
+          }
+          .serif {
+            font-family: 'Fraunces', Georgia, serif;
+          }
+          @keyframes flicker {
+            0%,
+            100% {
+              opacity: 1;
+              box-shadow: 0 0 10px #a6f36b;
+            }
+            45% {
+              opacity: 0.82;
+              box-shadow: 0 0 4px #a6f36b;
+            }
+            55% {
+              opacity: 0.95;
+              box-shadow: 0 0 14px #a6f36b;
+            }
+          }
+          .flicker {
+            animation: flicker 2.6s ease-in-out infinite;
+          }
+          @keyframes soil {
+            0% {
+              background-position: 0 0;
+            }
+            100% {
+              background-position: 40px 0;
+            }
+          }
+          .soil {
+            background-image: repeating-linear-gradient(115deg, #a6f36b 0 10px, #8fd95a 10px 20px);
+            background-size: 40px 100%;
+            animation: soil 1.4s linear infinite;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .flicker,
+            .soil {
+              animation: none;
+            }
+          }
+          button:focus-visible,
+          a:focus-visible,
+          input:focus-visible {
+            outline: 2px solid #a6f36b;
+            outline-offset: 2px;
+          }
+        </style>
+      </helmet>
+      <div
+        style="
+          width: 1440px;
+          height: 900px;
+          box-sizing: border-box;
+          background: #0e0d0c;
+          color: #e9e2d3;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <header
+          style="
+            height: 64px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid #2a2724;
+          "
+        >
+          <a
+            href="Main.dc.html"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              min-height: 44px;
+              color: #a39c8e;
+              text-decoration: none;
+              font-size: 14px;
+            "
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 18l-6-6 6-6"></path></svg
+            >Graveyard
+          </a>
+          <span style="width: 1px; height: 24px; background: #2a2724"></span>
+          <span
+            class="mono"
+            style="
+              width: 36px;
+              height: 36px;
+              border-radius: 18px;
+              border: 1px solid #4a4540;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 12px;
+              font-weight: 500;
+            "
+            >DU</span
+          >
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span class="mono" style="font-size: 15px; color: #e9e2d3"
+              >harbourview-plumbing.co.nz</span
+            >
+            <span style="font-size: 12px; color: #8a8378"
+              >Durable · 23 pages · lands in rip-harbourview</span
+            >
+          </div>
+          <div style="flex-grow: 1"></div>
+          <div style="display: flex; align-items: center; gap: 8px">
+            <span
+              title="Taylor, London 11:40"
+              style="
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+                background: #2a2724;
+                border: 1px solid #a6f36b;
+                font-size: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >T</span
+            >
+            <span
+              title="Jamie, Auckland 22:40"
+              style="
+                width: 30px;
+                height: 30px;
+                border-radius: 15px;
+                background: #2a2724;
+                border: 1px solid #a6f36b;
+                font-size: 12px;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >J</span
+            >
+            <span style="font-size: 12px; color: #8a8378">here now</span>
+          </div>
+          <button
+            style="
+              height: 40px;
+              padding: 0 14px;
+              border: 1px solid #2a2724;
+              border-radius: 8px;
+              background: transparent;
+              color: #a39c8e;
+              font-family: 'IBM Plex Sans', sans-serif;
+              font-size: 13px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              aria-hidden="true"
+            >
+              <path d="M4 6h16M4 12h16M4 18h10"></path></svg
+            >Audit trail
+          </button>
+        </header>
+        <nav
+          aria-label="Resurrection stages"
+          style="
+            height: 64px;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #2a2724;
+            background: #121110;
+          "
+        >
+          <sc-for list="{{steps}}" as="s" hint-placeholder-count="7">
+            <a
+              href="{{s.href}}"
+              style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 44px;
+                padding: 0 4px;
+                text-decoration: none;
+              "
+            >
+              <sc-if value="{{s.isCurrent}}" hint-placeholder-val="{{false}}">
+                <span
+                  class="flicker"
+                  style="width: 10px; height: 10px; border-radius: 5px; background: #a6f36b"
+                ></span>
+                <span style="font-size: 14px; font-weight: 600; color: #e9e2d3">{{s.name}}</span>
+              </sc-if>
+              <sc-if value="{{s.isDone}}" hint-placeholder-val="{{true}}">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#8FD95A"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M5 12l5 5 9-10"></path>
+                </svg>
+                <span style="font-size: 14px; color: #a39c8e">{{s.name}}</span>
+              </sc-if>
+              <sc-if value="{{s.isTodo}}" hint-placeholder-val="{{false}}">
+                <span
+                  style="
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 5px;
+                    border: 1px solid #4a4540;
+                    box-sizing: border-box;
+                  "
+                ></span>
+                <span style="font-size: 14px; color: #8a8378">{{s.name}}</span>
+              </sc-if>
+            </a>
+            <sc-if value="{{s.notLast}}" hint-placeholder-val="{{true}}"
+              ><span style="flex-grow: 1; height: 1px; background: #2a2724"></span
+            ></sc-if>
+          </sc-for>
+        </nav>
+        <main style="flex-grow: 1; min-height: 0; display: flex; box-sizing: border-box">
+          <section
+            style="
+              flex-grow: 1;
+              min-width: 0;
+              padding: 24px 32px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+            "
+          >
+            <div style="display: flex; align-items: flex-end; gap: 16px">
+              <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1">
+                <h1 class="serif" style="margin: 0; font-size: 34px; font-weight: 400">
+                  The ritual
+                </h1>
+                <p style="margin: 0; font-size: 14px; color: #a39c8e">
+                  Content is in the release, not live. One small workflow per page: cast the
+                  automatic tasks, then bless the page.
+                </p>
+              </div>
+              <button
+                onClick="{{castAll}}"
+                style="
+                  height: 44px;
+                  padding: 0 18px;
+                  border: 0;
+                  border-radius: 8px;
+                  background: #a6f36b;
+                  color: #0e0d0c;
+                  font-family: 'IBM Plex Sans', sans-serif;
+                  font-size: 14px;
+                  font-weight: 600;
+                  cursor: pointer;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                "
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"></path></svg
+                >Cast all auto ({{autoLeft}})
+              </button>
+            </div>
+            <div style="display: flex; gap: 12px">
+              <div
+                style="
+                  flex-grow: 1;
+                  padding: 14px 16px;
+                  border-radius: 8px;
+                  background: #161513;
+                  border: 1px solid #2a2724;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                "
+              >
+                <span class="mono" style="font-size: 22px">{{total}}</span
+                ><span style="font-size: 12px; color: #8a8378">tasks</span>
+              </div>
+              <div
+                style="
+                  flex-grow: 1;
+                  padding: 14px 16px;
+                  border-radius: 8px;
+                  background: #161513;
+                  border: 1px solid #2a2724;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                "
+              >
+                <span class="mono" style="font-size: 22px; color: #c8fa9e">{{doneCount}}</span
+                ><span style="font-size: 12px; color: #8a8378">done</span>
+              </div>
+              <div
+                style="
+                  flex-grow: 1;
+                  padding: 14px 16px;
+                  border-radius: 8px;
+                  background: #161513;
+                  border: 1px solid #2a2724;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                "
+              >
+                <span class="mono" style="font-size: 22px">{{autoLeft}}</span
+                ><span style="font-size: 12px; color: #8a8378">auto, waiting</span>
+              </div>
+              <div
+                style="
+                  flex-grow: 1;
+                  padding: 14px 16px;
+                  border-radius: 8px;
+                  background: #161513;
+                  border: 1px solid #2a2724;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                "
+              >
+                <span class="mono" style="font-size: 22px; color: #ffb48a">{{humanLeft}}</span
+                ><span style="font-size: 12px; color: #8a8378">need you</span>
+              </div>
+              <div
+                style="
+                  flex-grow: 1;
+                  padding: 14px 16px;
+                  border-radius: 8px;
+                  background: #161513;
+                  border: 1px solid #2a2724;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 2px;
+                "
+              >
+                <span class="mono" style="font-size: 22px">{{blessed}}/23</span
+                ><span style="font-size: 12px; color: #8a8378">pages blessed</span>
+              </div>
+            </div>
+            <div
+              style="
+                flex-grow: 1;
+                min-height: 0;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+              "
+            >
+              <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+                <div style="border: 1px solid #2a2724; border-radius: 10px; background: #121110">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+                      padding: 10px 16px;
+                      border-bottom: 1px solid #1d1b19;
+                    "
+                  >
+                    <span class="mono" style="font-size: 14px; flex-grow: 1">{{g.path}}</span>
+                    <span style="font-size: 12px; color: #8a8378">casting</span
+                    ><span style="width: 16px; height: 1px; background: #4a4540"></span>
+                    <span style="font-size: 12px; color: #8a8378">reviewing</span
+                    ><span style="width: 16px; height: 1px; background: #4a4540"></span>
+                    <span style="font-size: 12px; font-weight: 600; color: {{g.stageColor}}"
+                      >{{g.stage}}</span
+                    >
+                  </div>
+                  <sc-for list="{{g.tasks}}" as="t" hint-placeholder-count="2">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                        min-height: 52px;
+                        padding: 6px 16px;
+                        border-bottom: 1px solid #1a1816;
+                      "
+                    >
+                      <span
+                        style="width: 52px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: {{t.modeColor}}"
+                        >{{t.mode}}</span
+                      >
+                      <div
+                        style="
+                          display: flex;
+                          flex-direction: column;
+                          gap: 2px;
+                          flex-grow: 1;
+                          min-width: 0;
+                        "
+                      >
+                        <span style="font-size: 14px">{{t.title}}</span>
+                        <span style="font-size: 12px; color: #8a8378">{{t.why}}</span>
+                      </div>
+                      <span
+                        class="mono"
+                        style="font-size: 11px; color: #8a8378; width: 150px; text-align: right"
+                        >{{t.agent}}</span
+                      >
+                      <div style="width: 120px; display: flex; justify-content: flex-end">
+                        <sc-if value="{{t.canCast}}" hint-placeholder-val="{{true}}">
+                          <button
+                            onClick="{{t.cast}}"
+                            style="
+                              height: 36px;
+                              padding: 0 14px;
+                              border: 1px solid #a6f36b;
+                              border-radius: 6px;
+                              background: transparent;
+                              color: #c8fa9e;
+                              font-family: 'IBM Plex Sans', sans-serif;
+                              font-size: 13px;
+                              font-weight: 500;
+                              cursor: pointer;
+                            "
+                          >
+                            Cast
+                          </button>
+                        </sc-if>
+                        <sc-if value="{{t.isCasting}}" hint-placeholder-val="{{false}}">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              gap: 8px;
+                              font-size: 12px;
+                              color: #c8fa9e;
+                            "
+                            ><span
+                              class="soil"
+                              style="width: 60px; height: 6px; border-radius: 3px"
+                            ></span
+                            >casting</span
+                          >
+                        </sc-if>
+                        <sc-if value="{{t.isDone}}" hint-placeholder-val="{{false}}">
+                          <span
+                            style="
+                              display: flex;
+                              align-items: center;
+                              gap: 6px;
+                              font-size: 12px;
+                              color: #8fd95a;
+                            "
+                            ><svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M5 12l5 5 9-10"></path></svg
+                            >done</span
+                          >
+                        </sc-if>
+                        <sc-if value="{{t.isHuman}}" hint-placeholder-val="{{false}}">
+                          <button
+                            onClick="{{t.open}}"
+                            style="
+                              height: 36px;
+                              padding: 0 14px;
+                              border: 1px solid #5a3a26;
+                              border-radius: 6px;
+                              background: #22170f;
+                              color: #ffb48a;
+                              font-family: 'IBM Plex Sans', sans-serif;
+                              font-size: 13px;
+                              font-weight: 500;
+                              cursor: pointer;
+                            "
+                          >
+                            Step through
+                          </button>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <aside
+            style="
+              width: 420px;
+              flex-shrink: 0;
+              border-left: 1px solid #2a2724;
+              background: #141312;
+              padding: 24px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              gap: 16px;
+            "
+          >
+            <span
+              style="
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #8a8378;
+              "
+              >Needs you · {{humanLeft}} left</span
+            >
+            <sc-if value="{{hasHuman}}" hint-placeholder-val="{{true}}">
+              <h2
+                class="serif"
+                style="margin: 0; font-size: 26px; font-weight: 400; line-height: 1.25"
+              >
+                Verify: is Sarah K. a real customer?
+              </h2>
+              <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #a39c8e">
+                You said you'd check with the client. The quote is still in the release, marked
+                unverified.
+              </p>
+              <div
+                style="
+                  padding: 14px 16px;
+                  border-radius: 8px;
+                  background: #1a1816;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+                "
+              >
+                <span class="mono" style="font-size: 11px; color: #8fd95a"
+                  >testimonial · rip-harbourview</span
+                >
+                <span style="font-size: 15px; line-height: 1.5; color: #d6cfc1"
+                  >“Professional, on time and great value.”</span
+                >
+                <span style="font-size: 13px; color: #8a8378">Sarah K. · suburb unknown</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <button
+                  onClick="{{resolve}}"
+                  style="
+                    min-height: 44px;
+                    border: 1px solid #a6f36b;
+                    border-radius: 8px;
+                    background: #1e2a16;
+                    color: #e9e2d3;
+                    font-family: 'IBM Plex Sans', sans-serif;
+                    font-size: 14px;
+                    cursor: pointer;
+                  "
+                >
+                  Client confirmed, keep it
+                </button>
+                <button
+                  onClick="{{resolve}}"
+                  style="
+                    min-height: 44px;
+                    border: 1px solid #4a4540;
+                    border-radius: 8px;
+                    background: transparent;
+                    color: #d6cfc1;
+                    font-family: 'IBM Plex Sans', sans-serif;
+                    font-size: 14px;
+                    cursor: pointer;
+                  "
+                >
+                  Remove from the release
+                </button>
+                <button
+                  style="
+                    min-height: 44px;
+                    border: 1px solid #2a2724;
+                    border-radius: 8px;
+                    background: transparent;
+                    color: #a39c8e;
+                    font-family: 'IBM Plex Sans', sans-serif;
+                    font-size: 14px;
+                    cursor: pointer;
+                  "
+                >
+                  Open in Studio
+                </button>
+              </div>
+            </sc-if>
+            <sc-if value="{{noHuman}}" hint-placeholder-val="{{false}}">
+              <p class="serif" style="margin: 0; font-size: 22px; color: #c8fa9e">
+                Nothing needs you. The dead are patient.
+              </p>
+            </sc-if>
+            <div style="flex-grow: 1"></div>
+            <a
+              href="Rise.dc.html"
+              style="
+                height: 48px;
+                border-radius: 8px;
+                border: 1px solid #a6f36b;
+                color: #c8fa9e;
+                font-size: 14px;
+                font-weight: 600;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              "
+              >Preview the rising →</a
+            >
+          </aside>
+        </main>
+      </div>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+      class Component extends DCLogic {
+        constructor(props) { super(props); this.state = { status: { a1: 'done', a2: 'todo', a3: 'todo', a4: 'todo', h1: 'todo', a5: 'todo', h2: 'done' } }; }
+        steps() {
+          const names = ['Summoned', 'Exhumed', 'Autopsy', 'Interrogation', 'Reanimated', 'Ritual', 'Risen'];
+          const hrefs = ['Main.dc.html', 'Exhume.dc.html', 'Autopsy.dc.html', 'Interrogate.dc.html', 'Ritual.dc.html', 'Ritual.dc.html', 'Rise.dc.html'];
+          const cur = 5;
+          return names.map((name, i) => ({ name, href: hrefs[i], isCurrent: i === cur, isDone: i < cur, isTodo: i > cur, notLast: i < 6 }));
+        }
+        renderVals() { return Object.assign({ steps: this.steps() }, this.boardVals()); }
+        boardVals() {
+          const G = [
+            { path: '/', tasks: [
+              ['a1', 'auto', 'Fix phone number in header copy', 'Your answer: 09 555 0142', 'patch · body[0].text'],
+              ['a2', 'auto', 'Write meta description', 'None on the old page', 'generate · seo.description'] ] },
+            { path: '/testimonials', tasks: [
+              ['h1', 'human', 'Verify testimonial: Sarah K.', 'Matches template text', 'you'],
+              ['h2', 'human', 'Verify testimonial: John D.', 'Removed by you', 'you'] ] },
+            { path: '/services/hot-water', tasks: [
+              ['a3', 'auto', 'Rewrite placeholder intro', 'Durable default paragraph detected', 'transform · body'],
+              ['a4', 'auto', 'Alt text for 3 images', 'All empty', 'generate · heroImage.alt'],
+              ['a5', 'auto', 'Normalise headings', 'Two h1s on the page', 'patch · body'] ] }
+          ];
+          const st = this.state.status;
+          const setOne = (id) => {
+            this.setState({ status: { ...this.state.status, [id]: 'casting' } });
+            setTimeout(() => this.setState({ status: { ...this.state.status, [id]: 'done' } }), 1600);
+          };
+          const groups = G.map((g) => {
+            const tasks = g.tasks.map(([id, mode, title, why, agent]) => {
+              const s = st[id];
+              const human = mode === 'human';
+              return { title, why, agent, mode, modeColor: human ? '#FFB48A' : '#A6F36B',
+                canCast: !human && s === 'todo', isCasting: s === 'casting', isDone: s === 'done', isHuman: human && s === 'todo',
+                cast: () => setOne(id), open: () => {} };
+            });
+            const allDone = g.tasks.every(([id]) => st[id] === 'done');
+            const anyCasting = g.tasks.some(([id]) => st[id] === 'casting');
+            return { path: g.path, tasks, stage: allDone ? 'blessed' : anyCasting ? 'casting' : 'reviewing', stageColor: allDone ? '#8FD95A' : '#E9E2D3' };
+          });
+          const all = G.flatMap((g) => g.tasks);
+          const autoIds = all.filter((t) => t[1] === 'auto').map((t) => t[0]);
+          const autoLeft = autoIds.filter((id) => st[id] === 'todo').length;
+          const humanLeft = all.filter((t) => t[1] === 'human' && st[t[0]] !== 'done').length;
+          const blessedHere = groups.filter((g) => g.stage === 'blessed').length;
+          return {
+            groups, total: 31, doneCount: 12 + all.filter((t) => st[t[0]] === 'done').length, autoLeft, humanLeft: humanLeft + 3, blessed: 6 + blessedHere,
+            hasHuman: st.h1 !== 'done', noHuman: st.h1 === 'done',
+            resolve: () => this.setState({ status: { ...this.state.status, h1: 'done' } }),
+            castAll: () => autoIds.filter((id) => st[id] === 'todo').forEach((id, k) => setTimeout(() => setOne(id), k * 300))
+          };
+        }
+      }
+    </script>
+  </body>
+</html>
