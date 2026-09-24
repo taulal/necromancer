@@ -36,7 +36,7 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
     {published, draft: `drafts.${published}`},
   )
 
-  const instanceId = await c.fetch(
+  const instanceId = (await c.fetch(
     `*[
       _type == "sanity.workflow.instance" &&
       tag == $tag &&
@@ -45,11 +45,11 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
       count(fields[name == "subject" && (
         value.id == $published ||
         value.id == $draft ||
-        value.id match "*" + $published
+        string(value.id) match "*" + $published
       )]) > 0
     ][0]._id`,
-    {tag: TAG, published, draft: `drafts.${published}`},
-  )
+    {tag: TAG, published, draft: `drafts.${published}`} as Record<string, string>,
+  )) as string | null
 
   if (typeof instanceId !== 'string' || !instanceId) {
     console.log(`[question-gate] no active resurrection for ${published}; count=${count}`)
