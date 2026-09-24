@@ -1,7 +1,7 @@
 /**
- * Sanity Functions for Necromancer.
- * The Function is the trigger; the Vessel drain route is the muscle (BRIEF.md §4).
- * Deploy with Taylor's go: `bunx sanity blueprints deploy` (not run from this PR).
+ * Sanity Functions for Necromancer (review F1).
+ * Document kick: only when there is unclaimed pending work.
+ * Schedule: tick-all + sweep (Vessel interprets mode=schedule).
  */
 import {defineBlueprint, defineDocumentFunction, defineScheduledFunction} from '@sanity/blueprints'
 
@@ -17,7 +17,10 @@ export default defineBlueprint({
       memory: 1,
       event: {
         on: ['create', 'update'],
-        filter: '_type == "sanity.workflow.instance" && tag == "necromancer"',
+        // Unclaimed pending effects only (0.35: claim absence = available).
+        // Prefer delta when the Functions runtime supports it.
+        filter:
+          '_type == "sanity.workflow.instance" && tag == "necromancer" && count(pendingEffects[!defined(claim)]) > 0 && delta::changedAny(pendingEffects)',
         resource: {type: 'dataset', id: `${PROJECT_ID}.${HQ}`},
       },
       env: {
@@ -25,7 +28,6 @@ export default defineBlueprint({
         DRAIN_SECRET: process.env.DRAIN_SECRET ?? '',
       },
     }),
-    // Experimental in blueprints — still the BRIEF §4 safety net when the App is closed.
     defineScheduledFunction({
       name: 'drain-kicker-schedule',
       displayName: 'Necromancer drain schedule',
@@ -35,6 +37,7 @@ export default defineBlueprint({
       env: {
         VESSEL_URL: process.env.VESSEL_URL ?? '',
         DRAIN_SECRET: process.env.DRAIN_SECRET ?? '',
+        DRAIN_MODE: 'schedule',
       },
     }),
   ],

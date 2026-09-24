@@ -14,7 +14,12 @@ export function getEngine(): Engine {
     client: getWorkflowClient(),
     workflowResource: {type: 'dataset', id: `${projectId}.${dataset}`},
     tag,
-    effects: {handlers: effectHandlers, missingHandler: 'fail'},
+    effects: {
+      handlers: effectHandlers,
+      missingHandler: 'fail',
+      // ~12 min — above Netlify background (15 min) longest effect budget with headroom for sweep.
+      leaseMs: 12 * 60 * 1000,
+    },
     executionContext: {kind: 'server', id: 'vessel-drain'},
   })
   return cached

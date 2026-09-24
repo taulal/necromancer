@@ -1,9 +1,15 @@
 /**
- * One drain + tick pass over workflow instances (BRIEF.md §4).
- * Called by Vessel `/api/ritual/drain` and by local CLI watchers later.
+ * One drain + tick pass over workflow instances (BRIEF.md §4, review F1/F2/F3).
+ *
+ * Modes:
+ * - `pending` (default / App kick): drain only instances with unclaimed pending effects
+ * - `schedule`: sweep stale claims, drain pending, then tick ALL tagged instances (SLA)
  */
+import {sweepStaleClaims} from '@sanity/workflow-engine'
 import {getWorkflowClient, tag} from './client'
 import {getEngine} from './engine'
+
+export type DrainMode = 'pending' | 'schedule'
 
 export interface DrainPassResult {
   instanceId: string
@@ -11,13 +17,14 @@ export interface DrainPassResult {
   drained: number
   lost: number
   tickChanged: boolean
+  swept?: number
   error?: string
 }
 
-async function pendingInstanceIds(): Promise<string[]> {
-  // Inline the tag — typed client fetch + $params fights TypeGen overloads here.
+/** Instances with at least one unclaimed pending effect (0.35: claim absence = available). */
+export async function pendingInstanceIds(): Promise<string[]> {
   return getWorkflowClient().fetch<string[]>(
-    `*[_type == "sanity.workflow.instance" && tag == ${JSON.stringify(tag)} && count(pendingEffects) > 0]._id`,
+    `*[_type == "sanity.workflow.instance" && tag == ${JSON.stringify(tag)} && count(pendingEffects[!defined(claim)]) > 0]._id`,
   )
 }
 
@@ -27,8 +34,12 @@ async function taggedInstanceIds(): Promise<string[]> {
   )
 }
 
-async function drainOne(instanceId: string): Promise<DrainPassResult> {
+async function drainOne(
+  instanceId: string,
+  opts: {tick: boolean; sweep: boolean},
+): Promise<DrainPassResult> {
   const engine = getEngine()
+  const client = getWorkflowClient()
   const result: DrainPassResult = {
     instanceId,
     stage: '?',
@@ -37,19 +48,35 @@ async function drainOne(instanceId: string): Promise<DrainPassResult> {
     tickChanged: false,
   }
 
+  if (opts.sweep) {
+    try {
+      const swept = await sweepStaleClaims({
+        client,
+        tag,
+        instanceId,
+        executionContext: {kind: 'server', id: 'vessel-drain'},
+      })
+      result.swept = swept.released.length
+    } catch (err) {
+      result.error = `sweep:${(err as Error).message}`
+    }
+  }
+
   try {
     const drained = await engine.drainEffects({instanceId})
     result.drained = drained.drained.length
     result.lost = drained.lost.length
   } catch (err) {
-    result.error = (err as Error).message
+    result.error = [result.error, (err as Error).message].filter(Boolean).join(' ')
   }
 
-  try {
-    const ticked = await engine.tick({instanceId})
-    result.tickChanged = ticked.changed
-  } catch (err) {
-    result.error = [result.error, `tick:${(err as Error).message}`].filter(Boolean).join(' ')
+  if (opts.tick) {
+    try {
+      const ticked = await engine.tick({instanceId})
+      result.tickChanged = ticked.changed
+    } catch (err) {
+      result.error = [result.error, `tick:${(err as Error).message}`].filter(Boolean).join(' ')
+    }
   }
 
   try {
@@ -61,18 +88,33 @@ async function drainOne(instanceId: string): Promise<DrainPassResult> {
   return result
 }
 
+/**
+ * Drain pending work only (no tick-all). Used by document kicks and App kicks.
+ */
 export async function runDrainPass(instanceIds?: string[]): Promise<DrainPassResult[]> {
   const ids = instanceIds?.length ? instanceIds : await pendingInstanceIds()
   const results: DrainPassResult[] = []
   for (const id of ids) {
-    results.push(await drainOne(id))
+    results.push(await drainOne(id, {tick: false, sweep: false}))
   }
   return results
 }
 
-/** Drain pending work and tick every instance so SLA triggers can fire. */
+/**
+ * Schedule pass: sweep + drain pending + tick every tagged instance (SLA / $now).
+ */
 export async function runDrainAndTickAll(): Promise<DrainPassResult[]> {
-  return runDrainPass(await taggedInstanceIds())
+  const all = await taggedInstanceIds()
+  const results: DrainPassResult[] = []
+
+  for (const id of all) {
+    results.push(await drainOne(id, {tick: true, sweep: true}))
+  }
+  return results
+}
+
+export async function runDrain(mode: DrainMode): Promise<DrainPassResult[]> {
+  return mode === 'schedule' ? runDrainAndTickAll() : runDrainPass()
 }
 
 export function summariseDrain(results: DrainPassResult[]) {

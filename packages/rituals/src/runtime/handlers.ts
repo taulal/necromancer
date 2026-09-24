@@ -1,22 +1,22 @@
 /**
- * Stub effect handlers for NEC-07. Real work lands in later tickets;
- * stubs mark done and report progress so UI bars can light up early.
- *
- * Handler signature on 0.35: `(params, ctx)` — progress is 0–100.
+ * Stub effect handlers for NEC-07. Real work lands in later tickets.
+ * Progress is throttled (review F1): ≥10pp or ≥3s between reports.
  */
 import type {EffectHandler} from '@sanity/workflow-engine'
 import {EFFECTS} from '../effects/names'
 import {asDocumentId} from './refId'
+import {createProgressThrottle} from './progressThrottle'
 
 const stub =
   (label: string): EffectHandler =>
   async (params, ctx) => {
     const seance = params.seance != null ? asDocumentId(params.seance) : undefined
     const page = params.page != null ? asDocumentId(params.page) : undefined
+    const progress = createProgressThrottle((field, value) => ctx.setProgress(field, value))
     try {
-      await ctx.setProgress('exhumeProgress', 15)
+      await progress(15)
       await new Promise((r) => setTimeout(r, 50))
-      await ctx.setProgress('exhumeProgress', 100)
+      await progress(100)
     } catch {
       /* progress field only exists on the parent; child casts may lack it */
     }
