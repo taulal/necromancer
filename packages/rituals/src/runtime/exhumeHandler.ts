@@ -75,8 +75,16 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
       title: page.title,
       meta: page.meta,
       headings: page.headings,
-      sections: page.sections,
-      images: page.images,
+      sections: (page.sections ?? []).map((s) => ({
+        _type: 'exhumedSection',
+        _key: crypto.randomUUID().replace(/-/g, '').slice(0, 12),
+        ...s,
+      })),
+      images: (page.images ?? []).map((img) => ({
+        _type: 'exhumedImage',
+        _key: crypto.randomUUID().replace(/-/g, '').slice(0, 12),
+        ...img,
+      })),
       links: [...page.links, ...page.assetLinks],
       detectedEntities: page.detectedEntities,
       contentHash: page.contentHash,
