@@ -1,11 +1,14 @@
 import {Suspense, useEffect, type ReactNode} from 'react'
 import {HashRouter, Navigate, Route, Routes, useLocation} from 'react-router'
 import {Flex, Spinner} from '@sanity/ui'
+import {isAppRoutePath} from './lib/appRoutes'
 import {Graveyard} from './screens/Graveyard'
 import {SeanceLayout} from './screens/SeanceLayout'
 import {Exhumation} from './screens/Exhumation'
 import {Autopsy} from './screens/Autopsy'
 import {PlaceholderStage} from './screens/PlaceholderStage'
+
+export {isAppRoutePath} from './lib/appRoutes'
 
 function Loading() {
   return (
@@ -13,14 +16,6 @@ function Loading() {
       <Spinner muted />
     </Flex>
   )
-}
-
-const SEANCE_PATH = /^\/seance\/[^/]+(?:\/(?:exhumation|autopsy|interrogation|ritual|rise)?)?\/?$/
-
-/** Keep only Graveyard / séance stage hashes; wipe Dashboard host junk. */
-export function isAppRoutePath(pathname: string): boolean {
-  const path = pathname.split('?')[0] || '/'
-  return path === '/' || SEANCE_PATH.test(path)
 }
 
 function stripNonRouteHash(): void {

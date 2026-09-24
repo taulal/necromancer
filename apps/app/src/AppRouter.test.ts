@@ -1,5 +1,5 @@
 import {describe, expect, test} from 'vitest'
-import {isAppRoutePath} from './AppRouter'
+import {isAppRoutePath} from './lib/appRoutes'
 
 describe('isAppRoutePath', () => {
   test('allows graveyard and séance stages', () => {

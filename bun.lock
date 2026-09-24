@@ -49,7 +49,14 @@
       "name": "@necro/studio",
       "dependencies": {
         "@necro/hq-schema": "workspace:*",
+        "@sanity/sdk": "^3.5.0",
         "@sanity/vision": "^6.16.0",
+        "@sanity/workflow-components": "0.35.0",
+        "@sanity/workflow-diagram": "0.35.0",
+        "@sanity/workflow-engine": "0.35.0",
+        "@sanity/workflow-react": "0.35.0",
+        "@sanity/workflow-studio": "0.35.0",
+        "@sanity/workflow-studio-plugin": "0.35.0",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
         "sanity": "^6.16.0",
@@ -1006,6 +1013,10 @@
     "@sanity/workflow-react": ["@sanity/workflow-react@0.35.0", "", { "dependencies": { "@sanity/telemetry": "^1.1.0", "@sanity/types": "^5.28.0" }, "peerDependencies": { "@sanity/workflow-engine": "0.35.0", "react": "^19.2.7" } }, "sha512-1vrIkGU2IESUnIezmbYwEn9A0VRhmwerbswqDTlcz1qZ/q0i9bUsIVuAQ7SkipzVLNQfSjX2B+SuPbqtUfudxQ=="],
 
     "@sanity/workflow-sdk": ["@sanity/workflow-sdk@0.35.0", "", { "dependencies": { "@sanity/telemetry": "^1.1.0", "dataloader": "^2.2.3" }, "peerDependencies": { "@sanity/sdk": "^3.1.0", "@sanity/sdk-react": "^3.1.0", "@sanity/workflow-components": "0.35.0", "@sanity/workflow-engine": "0.35.0", "@sanity/workflow-react": "0.35.0", "react": "^19.2.7" }, "optionalPeers": ["@sanity/sdk-react"] }, "sha512-JogqqyRjcP583mdhXvs0i++tikdBPlfhp+Mg3uDTUl0WE64J9L6H94UjZtpF63lwolABVNf3EPXatDpkyQ8uoQ=="],
+
+    "@sanity/workflow-studio": ["@sanity/workflow-studio@0.35.0", "", { "peerDependencies": { "@sanity/sdk": "^3.1.0", "@sanity/workflow-engine": "0.35.0", "@sanity/workflow-react": "0.35.0", "@sanity/workflow-sdk": "0.35.0", "react": "^19.2.7", "sanity": "^6" } }, "sha512-cLIa/vKln3+4TXUrlrUUd03tWIl+bIz1fi7n/6NlD0QKBOnaxnr0kAaOg4dV1OJcSRmFSEMa0RdKH/PJnhsAjw=="],
+
+    "@sanity/workflow-studio-plugin": ["@sanity/workflow-studio-plugin@0.35.0", "", { "dependencies": { "@sanity/client": "^8.6.2", "@sanity/icons": "^4.1.0", "@sanity/telemetry": "^1.1.0", "@sanity/types": "^6.15.0", "@sanity/ui": "^4.2.1", "@sanity/util": "^6.15.0", "@tanstack/react-virtual": "^3.14.6", "date-fns": "^4.4.0", "motion": "^12.43.0", "pluralize-esm": "^9.0.5", "rxjs": "^7.8.2" }, "peerDependencies": { "@sanity/sdk": "^3.1.0", "@sanity/workflow-components": "0.35.0", "@sanity/workflow-diagram": "0.35.0", "@sanity/workflow-engine": "0.35.0", "@sanity/workflow-react": "0.35.0", "@sanity/workflow-studio": "0.35.0", "react": "^19.2.7", "react-dom": "^19.2.7", "sanity": "^6.15.0", "styled-components": "^6.4.2" } }, "sha512-KNQBql/uDeqdtw2npMYno0PZKaiaNtqljruSz4BQd7CABIpeOTTt/F2twk/e1FgJP1rirkfa0J2veAtVy96L2w=="],
 
     "@sec-ant/readable-stream": ["@sec-ant/readable-stream@0.4.1", "", {}, "sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg=="],
 
@@ -2387,6 +2398,12 @@
 
     "@sanity/workflow-react/@sanity/types": ["@sanity/types@5.31.2", "", { "dependencies": { "@sanity/client": "^7.22.1", "@sanity/media-library-types": "^1.4.0" }, "peerDependencies": { "@types/react": "^19.2" } }, "sha512-UM8GfNgsrFaGt3TQzG5tKFyXvNMEQD+e8AJq44DiL7t/UYJaMScofCSWzFGg+4c7A3A2lhooC8zO9gJi8Vj7aw=="],
 
+    "@sanity/workflow-studio-plugin/@sanity/icons": ["@sanity/icons@4.1.0", "", { "peerDependencies": { "react": "^19" } }, "sha512-UssuBHPNXSdm4jK2bb7SKdK9VdbodWHqB5KUMuioYSe+xZw4+IUkEnVjT71mKP3bHOKIgCRheiFHN7WsWgiDDQ=="],
+
+    "@sanity/workflow-studio-plugin/@sanity/ui": ["@sanity/ui@4.2.3", "", { "dependencies": { "@floating-ui/react-dom": "^2.1.9", "@sanity/color": "^3.0.8", "@sanity/icons": "^5.2.2", "@vanilla-extract/dynamic": "^2.1.5", "clsx": "^2.1.1", "csstype": "^3.2.3", "motion": "^13.4.0", "react-is": "^19.3.0", "react-refractor": "^4.0.0", "use-effect-event": "^2.0.4" }, "peerDependencies": { "react": "^19.2", "react-dom": "^19.2", "styled-components": "^6.1" } }, "sha512-pxIshNSZGE40/YvRpsHmU1B5hSRLDpLfKgvrGkUltKgcb/lgzoksCM6rcbwTPNT/o1A5OQChYlHYklLOsGv5vA=="],
+
+    "@sanity/workflow-studio-plugin/motion": ["motion@12.43.0", "", { "dependencies": { "framer-motion": "^12.43.0", "tslib": "^2.4.0" }, "peerDependencies": { "@emotion/is-prop-valid": "*", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@emotion/is-prop-valid", "react", "react-dom"] }, "sha512-BQgQbSa9Hn3/mtbib0MK53y6JSANa+YKUKlaYnWzAVDH424RYQ5LVpV3pNiWH00BA2z4ojsSdMzqT7g2FQwjuQ=="],
+
     "@vercel/frameworks/js-yaml": ["js-yaml@3.13.1", "", { "dependencies": { "argparse": "^1.0.7", "esprima": "^4.0.0" }, "bin": { "js-yaml": "bin/js-yaml.js" } }, "sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw=="],
 
     "@vercel/frameworks/smol-toml": ["smol-toml@1.5.2", "", {}, "sha512-QlaZEqcAH3/RtNyet1IPIYPsEWAaYyXXv1Krsi+1L/QHppjX4Ifm8MQsBISz9vE8cHicIq3clogsheili5vhaQ=="],
@@ -2565,6 +2582,12 @@
 
     "@sanity/workflow-react/@sanity/types/@sanity/client": ["@sanity/client@7.27.0", "", { "dependencies": { "@sanity/eventsource": "^5.0.4", "get-it": "^8.8.3", "nanoid": "^3.3.17", "rxjs": "^7.8.2" } }, "sha512-qPVfGFo0bjUmRRtrx8mk1a2UnPPM93CFQr97bNacm2J3nShdhJlR6goNA/pQ7eRQO9uEG8moyUNrINYVGXgpPA=="],
 
+    "@sanity/workflow-studio-plugin/@sanity/ui/@sanity/icons": ["@sanity/icons@5.2.2", "", { "peerDependencies": { "react": "^18 || ^19" } }, "sha512-v+5dMjYJ6pC4x8IS/4O/GvQBet5GqsXsqJxBiiS6WHZt21EgntpW+q5hxU3dO4q/njiyR8O1JsdLAs3NranoXA=="],
+
+    "@sanity/workflow-studio-plugin/@sanity/ui/motion": ["motion@13.4.2", "", { "dependencies": { "framer-motion": "^13.4.2", "tslib": "^2.4.0" }, "peerDependencies": { "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["react", "react-dom"] }, "sha512-PlwVlwO7Ibhv2gZMX9ZqE7eGfSmbeU9Yf+mqkvJFdDSyTK7inlKRCry7IpofrcIU8JY7++83614eG7TJ7ORC2w=="],
+
+    "@sanity/workflow-studio-plugin/motion/framer-motion": ["framer-motion@12.43.0", "", { "dependencies": { "motion-dom": "^12.43.0", "motion-utils": "^12.39.0", "tslib": "^2.4.0" }, "peerDependencies": { "@emotion/is-prop-valid": "*", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@emotion/is-prop-valid", "react", "react-dom"] }, "sha512-1eaL3RvR/kAlbG7UYcpMptEyzPoENO0c6w7ZnB3/hh2vSAz/6uGAFn6fdoqTBguNstf3MsFhJHsD/0DHiclG+g=="],
+
     "@vercel/frameworks/js-yaml/argparse": ["argparse@1.0.10", "", { "dependencies": { "sprintf-js": "~1.0.2" } }, "sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg=="],
 
     "@vitejs/plugin-react/vite/postcss": ["postcss@8.5.28", "", { "dependencies": { "nanoid": "^3.3.18", "picocolors": "^1.1.1", "source-map-js": "^1.2.1" } }, "sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A=="],
@@ -2690,6 +2713,10 @@
     "@sanity/workflow-react/@sanity/types/@sanity/client/get-it": ["get-it@8.8.3", "", { "dependencies": { "decompress-response": "^7.0.0", "is-retry-allowed": "^2.2.0", "through2": "^4.0.2", "tunnel-agent": "^0.6.0" } }, "sha512-IfkbWqOGO2kd2Ccgiz/NIzk3bcwjtVqBm3RNa3j/veHg2q7c1DgS3EXrCrvIWH0jbNTbhkdblnxBP7Dm8CiH+A=="],
 
     "@sanity/workflow-react/@sanity/types/@sanity/client/nanoid": ["nanoid@3.3.19", "", { "bin": { "nanoid": "bin/nanoid.cjs" } }, "sha512-Y2tUNy4ouw6tq5oDSKeQYGOyhkUBhNOcGV/02KC+6kd9eDGqdZd++mjMiIDilrBYvjEnCYvVtsuHCuP+okSfug=="],
+
+    "@sanity/workflow-studio-plugin/motion/framer-motion/motion-dom": ["motion-dom@12.43.0", "", { "dependencies": { "motion-utils": "^12.39.0" } }, "sha512-azKON4d9S65PEoFUiQTMTgPheEmzf2QngdRc50AKfJp9Q9mmcBVw22c8eMq9k8kxOFHdL7+WZY7N/5F/lwiDag=="],
+
+    "@sanity/workflow-studio-plugin/motion/framer-motion/motion-utils": ["motion-utils@12.39.0", "", {}, "sha512-8nadJAJjTtqRkmRF36FoJTrywK9nnFmnPwnSMyxaOCU7GDjN9RTMJIxx9De8ErM+vpPhMccr/6fo5WciyQLnMQ=="],
 
     "@vitejs/plugin-react/vite/postcss/nanoid": ["nanoid@3.3.19", "", { "bin": { "nanoid": "bin/nanoid.cjs" } }, "sha512-Y2tUNy4ouw6tq5oDSKeQYGOyhkUBhNOcGV/02KC+6kd9eDGqdZd++mjMiIDilrBYvjEnCYvVtsuHCuP+okSfug=="],
 

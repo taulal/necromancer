@@ -6,16 +6,11 @@ import {Box, Button, Flex, Heading, Spinner, Stack, Text} from '@sanity/ui'
 import {PendingWorkKicker} from '../lib/useDrainKicker'
 import {useNecroEngine} from '../lib/useNecroEngine'
 import {seanceGdrUri} from '../lib/seanceGdr'
+import {AuditTrail} from './seance/AuditTrail'
+import {ResurrectionDiagram} from './seance/ResurrectionDiagram'
+import {STAGE_SCREENS, visitedScreenPaths} from './seance/stageRoutes'
 
-const STAGES = [
-  {path: 'exhumation', label: 'Exhume'},
-  {path: 'autopsy', label: 'Autopsy'},
-  {path: 'interrogation', label: 'Interrogate'},
-  {path: 'ritual', label: 'Ritual'},
-  {path: 'rise', label: 'Rise'},
-] as const
-
-function SeanceHeader({seanceId}: {seanceId: string}) {
+function SeanceTitle({seanceId}: {seanceId: string}) {
   const {data} = useDocumentProjection<{
     url?: string
     slug?: {current?: string}
@@ -35,36 +30,118 @@ function SeanceHeader({seanceId}: {seanceId: string}) {
   }
 
   return (
+    <Stack space={2}>
+      <Text size={1}>
+        <Link to="/" style={{color: 'var(--necro-dust)', textDecoration: 'none'}}>
+          ← Graveyard
+        </Link>
+      </Text>
+      <Heading size={3} className="necro-serif" style={{fontWeight: 400}}>
+        {host}
+      </Heading>
+      <Text size={1} className="necro-mono" muted>
+        {data?.url || '—'} · {data?.platform || 'unknown'} · {data?.status || '—'}
+      </Text>
+    </Stack>
+  )
+}
+
+function SeanceWorkflowChrome({seanceId}: {seanceId: string}) {
+  const engine = useNecroEngine()
+  const list = useDocumentWorkflows({engine, document: seanceGdrUri(seanceId)})
+  const instanceId = list.instances?.[0]?._id
+  if (!instanceId) {
+    return (
+      <Stack space={4}>
+        <Text size={1} muted>
+          No resurrection instance yet.
+        </Text>
+        <StageTabs visited={new Set()} />
+        <Outlet />
+      </Stack>
+    )
+  }
+  return <SeanceWorkflowSession instanceId={instanceId} />
+}
+
+function SeanceWorkflowSession({instanceId}: {instanceId: string}) {
+  const engine = useNecroEngine()
+  const session = useWorkflowSession({engine, instanceId})
+  const [auditOpen, setAuditOpen] = useState(true)
+  const evaluation = session.evaluation
+  const instance = evaluation?.instance
+  const definition = evaluation?.definition
+  const currentStage = instance?.currentStage
+  const history = instance?.history ?? []
+  const visited = visitedScreenPaths(history)
+
+  return (
     <Stack space={4}>
-      <Flex align="baseline" justify="space-between" gap={4} wrap="wrap">
-        <Stack space={2}>
-          <Text size={1}>
-            <Link to="/" style={{color: 'var(--necro-dust)', textDecoration: 'none'}}>
-              ← Graveyard
-            </Link>
-          </Text>
-          <Heading size={3} className="necro-serif" style={{fontWeight: 400}}>
-            {host}
-          </Heading>
-          <Text size={1} className="necro-mono" muted>
-            {data?.url || '—'} · {data?.platform || 'unknown'} · {data?.status || '—'}
-          </Text>
+      <Flex align="flex-start" justify="space-between" gap={4} wrap="wrap">
+        <Box flex={1} style={{minWidth: 280}}>
+          {definition ? (
+            <ResurrectionDiagram
+              instanceId={instanceId}
+              definition={definition}
+              currentStage={currentStage}
+              history={history}
+            />
+          ) : (
+            <Text size={1} muted>
+              {session.ready ? 'Definition unavailable.' : 'Loading ritual diagram…'}
+            </Text>
+          )}
+        </Box>
+        <Stack space={2} style={{alignItems: 'flex-end'}}>
+          <EntombedRetryControls session={session} />
+          <Button
+            mode="ghost"
+            text={auditOpen ? 'Hide audit trail' : 'Audit trail'}
+            onClick={() => setAuditOpen((v) => !v)}
+          />
         </Stack>
-        <Suspense fallback={null}>
-          <EntombedRetry seanceId={seanceId} />
-        </Suspense>
       </Flex>
 
-      <Flex as="nav" gap={1} wrap="wrap" style={{borderBottom: '1px solid var(--necro-line)'}}>
-        {STAGES.map((s) => (
+      <StageTabs visited={visited} currentStage={currentStage} />
+
+      <Flex gap={4} align="flex-start" wrap="wrap">
+        <Box flex={1} style={{minWidth: 0}}>
+          <Outlet />
+        </Box>
+        {auditOpen ? (
+          <Box style={{flex: '0 0 280px'}}>
+            <AuditTrail history={history} />
+          </Box>
+        ) : null}
+      </Flex>
+    </Stack>
+  )
+}
+
+function StageTabs({visited, currentStage}: {visited: Set<string>; currentStage?: string}) {
+  return (
+    <Flex as="nav" gap={1} wrap="wrap" style={{borderBottom: '1px solid var(--necro-line)'}}>
+      {STAGE_SCREENS.map((s) => {
+        const stageLit =
+          visited.has(s.path) ||
+          (currentStage !== undefined && (s.stages as readonly string[]).includes(currentStage))
+        return (
           <NavLink
             key={s.path}
             to={s.path}
             style={({isActive}) => ({
               padding: '10px 14px',
               textDecoration: 'none',
-              color: isActive ? 'var(--necro-alive)' : 'var(--necro-dust)',
-              borderBottom: isActive ? '2px solid var(--necro-alive)' : '2px solid transparent',
+              color: isActive
+                ? 'var(--necro-alive)'
+                : stageLit
+                  ? 'var(--necro-bone)'
+                  : 'var(--necro-dust)',
+              borderBottom: isActive
+                ? '2px solid var(--necro-alive)'
+                : stageLit
+                  ? '2px solid var(--necro-line-strong)'
+                  : '2px solid transparent',
               fontSize: 13,
               fontWeight: 500,
               letterSpacing: '0.04em',
@@ -73,25 +150,15 @@ function SeanceHeader({seanceId}: {seanceId: string}) {
           >
             {s.label}
           </NavLink>
-        ))}
-      </Flex>
-    </Stack>
+        )
+      })}
+    </Flex>
   )
 }
 
-function EntombedRetry({seanceId}: {seanceId: string}) {
-  const engine = useNecroEngine()
-  const list = useDocumentWorkflows({engine, document: seanceGdrUri(seanceId)})
-  const instanceId = list.instances?.[0]?._id
-  if (!instanceId) return null
-  return <EntombedRetrySession instanceId={instanceId} />
-}
-
-function EntombedRetrySession({instanceId}: {instanceId: string}) {
-  const engine = useNecroEngine()
-  const session = useWorkflowSession({engine, instanceId})
+function EntombedRetryControls({session}: {session: ReturnType<typeof useWorkflowSession>}) {
   const [pending, setPending] = useState(false)
-  const stage = (session.evaluation?.instance as {currentStage?: string} | undefined)?.currentStage
+  const stage = session.evaluation?.instance.currentStage
   const from = session.evaluation?.instance.fields?.find(
     (f) => f.name === 'entombedFromStage',
   )?.value
@@ -129,18 +196,26 @@ export function SeanceLayout() {
       <Suspense fallback={null}>
         <PendingWorkKicker />
       </Suspense>
-      <Suspense
-        fallback={
-          <Flex justify="center" padding={6}>
-            <Spinner muted />
-          </Flex>
-        }
-      >
-        <SeanceHeader seanceId={seanceId} />
-      </Suspense>
-      <Box paddingTop={4}>
-        <Outlet />
-      </Box>
+      <Stack space={4}>
+        <Suspense
+          fallback={
+            <Flex justify="center" padding={4}>
+              <Spinner muted />
+            </Flex>
+          }
+        >
+          <SeanceTitle seanceId={seanceId} />
+        </Suspense>
+        <Suspense
+          fallback={
+            <Flex justify="center" padding={6}>
+              <Spinner muted />
+            </Flex>
+          }
+        >
+          <SeanceWorkflowChrome seanceId={seanceId} />
+        </Suspense>
+      </Stack>
     </Box>
   )
 }

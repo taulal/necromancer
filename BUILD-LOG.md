@@ -71,3 +71,9 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Summon / séance default `visibility: 'private'`; showcase dataset flipped to **private** (`sanity datasets visibility set showcase private`) until Taylor picks the public demo site.
 - App router back on **HashRouter** with `path="*"` → `<Navigate to="/" />` and non-route hash scrubbing (Dashboard host junk was the empty-plot cause).
 - Autopsy propose defaults to `NECRO_MODEL_REASONING` (Sonnet); Haiku only with `bun run summon … --fast` / `NECRO_AUTOPSY_FAST=1`.
+
+### Workflow surfaces (séance diagram + Studio plugin)
+
+- **Séance header:** `@sanity/workflow-diagram` on the resurrection instance (`useDocumentWorkflows` → `useWorkflowSession`). Current stage highlighted / visited path from `instance.history`; Ossuary `--ws-*` overrides (alive accent on bone/surface). Text stage tabs stay for navigation (`WorkflowDiagram` 0.35 has no `onStageClick`). Tabs light visited screens from history.
+- **Audit trail panel:** side panel lists `instance.history` newest-first (who/what + when). Person / agent / system share one label style — no kind badges.
+- **HQ Studio:** `@sanity/workflow-studio-plugin@0.35.0` (peers `sanity ^6.15`; we are on `^6.16`). Tag `necromancer`. Mappings: `seance` → `resurrection` (`autoStart: false` — App/summon starts it), `exhumedPage` → `page-ritual` for inspection. `workflowDefaultDocumentNode` adds the Workflows doc tab (inspector audit trail). Live instance list is the navbar **Workflows** tool — Taylor captures real screenshots into `docs/submission` (no mocks).
