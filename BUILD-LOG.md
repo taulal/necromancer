@@ -69,6 +69,16 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 
 - `bun run build:vessel` failed: Turbopack couldn't bundle Studio into the drain server route because `packages/bones` and `packages/hq-schema` imported `defineType`/`defineField` from `sanity` (pulls `swr`'s react-server build, which has no default export). Fixed by importing from `@sanity/types` instead. AGENTS.md rule 11; CI already had `build:vessel`, plus a grep that bans `from 'sanity'` in Vessel/Functions packages.
 
+### Netlify Vessel live
+
+- Site: [https://the-necromancer.netlify.app/](https://the-necromancer.netlify.app/) (“Vessel is empty. Raise something.”). Unblocks NEC-07c checklist: set `VESSEL_URL` / `SANITY_APP_VESSEL_URL` to that origin, confirm CORS on `v9dl2xdi`, then Taylor **go** for `bunx sanity blueprints deploy` (needs `VESSEL_URL` + `DRAIN_SECRET` in the blueprint env).
+
+### NEC-07c · blueprints deployed
+
+- Stack `necromancer-functions` `<ST-9h3tm9qg2z>` org-scoped on `or6mff29v` (scheduled Functions require org scope; `SANITY_PROJECT_ID` in the shell makes `blueprints doctor` 404 the org stack — unset it for plan/deploy).
+- Document Functions need `project: v9dl2xdi`. Growth plan caps cron at **hourly** (`0 * * * *`), not every minute — document kick still covers live pending work.
+- Deployed: `question-gate`, `drain-kicker`, `drain-kicker-schedule` (2026-09-24). Next: confirm drain-background 401 without secret, then unattended exhume.
+
 ### Loose ends (post-UI2)
 
 - Entombed **Retry** action returns to `entombedFromStage` (set by each `*-failed` action); séance header shows Retry via `session.fireAction`.

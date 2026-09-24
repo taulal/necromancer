@@ -1,9 +1,13 @@
 /**
- * Sanity Functions for Necromancer (review F1 + NEC-06b).
+ * Sanity Functions for Necromancer (review F1 + NEC-06b / NEC-07c).
  * Document kick: only when there is unclaimed pending work.
  * Schedule: tick-all + sweep (Vessel interprets mode=schedule).
  * question-gate: recompute openRequiredQuestions on question changes.
- * Blueprint deploy: NO-GO until Vessel is on Netlify.
+ *
+ * Stack is org-scoped (scheduled Functions require it). Document Functions
+ * therefore need an explicit `project`. Growth plan caps cron at hourly —
+ * was `every 1 minute` in the brief; Vessel schedule mode still does a full
+ * tick when kicked.
  */
 import {defineBlueprint, defineDocumentFunction, defineScheduledFunction} from '@sanity/blueprints'
 
@@ -15,6 +19,7 @@ export default defineBlueprint({
     defineDocumentFunction({
       name: 'question-gate',
       displayName: 'Necromancer question gate',
+      project: PROJECT_ID,
       timeout: 30,
       memory: 1,
       event: {
@@ -37,6 +42,7 @@ export default defineBlueprint({
     defineDocumentFunction({
       name: 'drain-kicker',
       displayName: 'Necromancer drain kicker',
+      project: PROJECT_ID,
       timeout: 30,
       memory: 1,
       event: {
@@ -57,7 +63,8 @@ export default defineBlueprint({
       displayName: 'Necromancer drain schedule',
       timeout: 30,
       memory: 1,
-      event: {expression: 'every 1 minute'},
+      // Growth plan: hourly max (not every minute). Document kick still covers live work.
+      event: {expression: '0 * * * *'},
       env: {
         VESSEL_URL: process.env.VESSEL_URL ?? '',
         DRAIN_SECRET: process.env.DRAIN_SECRET ?? '',
