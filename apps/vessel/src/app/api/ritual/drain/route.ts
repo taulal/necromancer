@@ -9,6 +9,7 @@
  * available; locally runs after the response is queued.
  */
 import {
+  isDrainLockHeld,
   releaseDrainLock,
   runDrain,
   summariseDrain,
@@ -56,6 +57,7 @@ async function runLocked(mode: DrainMode, holder: string) {
 function backgroundUrl(): string | null {
   const site = process.env.URL ?? process.env.DEPLOY_PRIME_URL ?? process.env.VESSEL_URL
   if (!site || !process.env.NETLIFY) return null
+  // Default Functions v2 URL: drain-background.mts has no custom `config.path` (B2).
   return `${site.replace(/\/$/, '')}/.netlify/functions/drain-background`
 }
 
@@ -66,18 +68,33 @@ export async function POST(req: Request) {
   const mode = await readMode(req.clone(), kind)
   const holder = kind === 'kick' ? 'app-kick' : mode === 'schedule' ? 'schedule' : 'secret-kick'
 
+  // Cheap read first: if a drain holds the lock, don't spend a background invocation.
+  if (await isDrainLockHeld()) {
+    return Response.json({skipped: 'busy'}, {status: 202})
+  }
+
   const bg = backgroundUrl()
   if (bg) {
-    // Netlify Background Function — 15 min; HTTP returns immediately.
-    const secret = process.env.DRAIN_SECRET
-    void fetch(bg, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(secret ? {authorization: `Bearer ${secret}`} : {}),
-      },
-      body: JSON.stringify({mode, holder}),
-    }).catch((err) => console.error('[drain] background invoke failed', err))
+    // Netlify Background Function (15 min). It answers 202 at once, so awaiting is
+    // cheap, and it guarantees the request leaves before this function is frozen (B1).
+    try {
+      const res = await fetch(bg, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${process.env.DRAIN_SECRET ?? ''}`,
+        },
+        body: JSON.stringify({mode, holder}),
+        signal: AbortSignal.timeout(10_000),
+      })
+      if (!res.ok) {
+        console.error('[drain] background invoke returned', res.status)
+        return Response.json({error: `background ${res.status}`}, {status: 502})
+      }
+    } catch (err) {
+      console.error('[drain] background invoke failed', err)
+      return Response.json({error: 'background invoke failed'}, {status: 502})
+    }
     return Response.json({accepted: true, mode, via: 'background'}, {status: 202})
   }
 

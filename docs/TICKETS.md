@@ -84,7 +84,7 @@ AC: bench green; PR notes Blueprint still NO-GO (combine with NEC-07 filter befo
 - `apps/vessel/src/app/api/ritual/drain/route.ts`: auth via `DRAIN_SECRET`, claim + run effects, return a summary.
 - Effect handler registry with stub handlers that just mark done (real ones land in later tickets). Use `ctx.setProgress` in stubs so progress bars can be shown early.
 - `functions/drain-kicker` + `sanity.blueprint.ts`: document Function on workflow-instance changes in `hq` + 1-minute schedule. Check the current `@sanity/blueprints` / `@sanity/functions` API before writing. The existing file is a placeholder.
-- App-side kicker hook (poll every 5s while a séance screen is open). The Function is the safety net.
+- App-side kicker hook (poll every 20s, only while queued work exists and the tab is visible). The Function is the safety net.
 
 AC: start a `resurrection` instance by hand, and with the App closed a queued stub effect is claimed within 60s via the Function.
 

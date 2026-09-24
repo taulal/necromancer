@@ -2,6 +2,7 @@ import {Suspense} from 'react'
 import {Link, NavLink, Outlet, useParams} from 'react-router'
 import {useDocumentProjection} from '@sanity/sdk-react'
 import {Box, Flex, Heading, Spinner, Stack, Text} from '@sanity/ui'
+import {PendingWorkKicker} from '../lib/useDrainKicker'
 
 const STAGES = [
   {path: 'exhumation', label: 'Exhume'},
@@ -83,6 +84,10 @@ export function SeanceLayout() {
 
   return (
     <Box style={{minHeight: '100vh', background: 'var(--necro-ground)'}} padding={5}>
+      {/* Pokes the drain only while a séance screen is open and work is queued. */}
+      <Suspense fallback={null}>
+        <PendingWorkKicker />
+      </Suspense>
       <Suspense
         fallback={
           <Flex justify="center" padding={6}>

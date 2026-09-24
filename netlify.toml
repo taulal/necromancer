@@ -5,6 +5,7 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["@necro/rituals", "@sanity/client", "@sanity/workflow-engine"]
+  # @necro/* are source-only TS workspace packages: esbuild must bundle them (B3).
+  external_node_modules = ["@sanity/client", "@sanity/workflow-engine"]
 
 # Background functions: *-background get a 15-minute limit.

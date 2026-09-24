@@ -2,7 +2,7 @@
  * Netlify Background Function — up to 15 minutes (review F2).
  * Invoked by `/api/ritual/drain` after auth; does the lock + drain work.
  */
-import type {Config, Context} from '@netlify/functions'
+import type {Context} from '@netlify/functions'
 import {
   releaseDrainLock,
   runDrain,
@@ -45,6 +45,6 @@ export default async (req: Request, _context: Context) => {
   }
 }
 
-export const config: Config = {
-  path: '/drain-background',
-}
+// No `config.path` on purpose (B2): the Vessel route calls the default
+// /.netlify/functions/drain-background URL, and the `-background` filename suffix is
+// what makes this a 15-minute background function.

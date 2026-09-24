@@ -10,6 +10,7 @@ export {
   summariseDrain,
   tryAcquireDrainLock,
   releaseDrainLock,
+  isDrainLockHeld,
   createProgressThrottle,
   effectHandlers,
   asDocumentId,
