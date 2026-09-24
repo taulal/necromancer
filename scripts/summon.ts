@@ -9,7 +9,15 @@
  * Project mode is stretch (kept in code; not the default).
  */
 import {slugFromUrl} from '@necro/hq-schema'
-import {getEngine, getWorkflowClient, projectId, runDrain, tag} from '@necro/rituals'
+import {
+  getEngine,
+  getWorkflowClient,
+  projectId,
+  dataset,
+  runDrainAndTickAll,
+  tag,
+} from '@necro/rituals'
+import {refDataset} from '@sanity/workflow-engine'
 
 const SHOWCASE = 'showcase'
 
@@ -112,7 +120,12 @@ async function main() {
       {
         type: 'subject',
         name: 'subject',
-        value: {id: seance._id, type: 'seance'},
+        value: refDataset({
+          projectId,
+          dataset,
+          documentId: seance._id,
+          type: 'seance',
+        }),
       },
     ],
   })
@@ -131,16 +144,33 @@ async function main() {
     return
   }
 
-  const deadline = Date.now() + 15 * 60 * 1000
+  const deadline = Date.now() + 25 * 60 * 1000
   let stage = (await engine.getInstance({instanceId})).currentStage
   while (Date.now() < deadline) {
-    const summary = await runDrain('pending')
+    const summary = await runDrainAndTickAll()
     stage = (await engine.getInstance({instanceId})).currentStage
-    console.log(
-      `[summon] drain instances=${summary.length} stage=${stage} drained=${summary.reduce((n, r) => n + r.drained, 0)}`,
+    const drained = summary.reduce((n, r) => n + r.drained, 0)
+    const swept = summary.reduce((n, r) => n + (r.swept || 0), 0)
+    const err = summary
+      .map((r) => r.error)
+      .filter(Boolean)
+      .join(' | ')
+    const proposals = await client.fetch<number>(
+      `count(*[_type == "schemaProposal" && seance._ref == $id])`,
+      {id: seance._id},
     )
-    if (stage === 'autopsy' || stage === 'entombed' || stage === 'risen') break
-    if (summary.every((r) => r.drained === 0 && !r.error)) {
+    console.log(
+      `[summon] drain instances=${summary.length} stage=${stage} drained=${drained} swept=${swept} proposals=${proposals}` +
+        (err ? ` err=${err}` : ''),
+    )
+    if (stage === 'entombed' || stage === 'risen') break
+    // Autopsy stage means exhume done; keep draining until schemaProposal exists (or we leave autopsy).
+    if (stage === 'autopsy' && proposals > 0) break
+    if (stage === 'interrogation') break
+    if (err && stage === 'exhuming' && drained === 0) {
+      console.log(`[summon] drain note: ${err}`)
+    }
+    if (drained === 0 && swept === 0) {
       await new Promise((r) => setTimeout(r, 1500))
     }
   }
@@ -164,9 +194,19 @@ async function main() {
   )
   console.log(`  pages:     ${pages}`)
   console.log(`  stats:     ${JSON.stringify(seanceNow?.stats ?? {})}`)
-  console.log(`  status:    ${seanceNow?.status ?? '?'}`)
-  if (stage !== 'autopsy') {
-    console.error(`[summon] expected autopsy, got ${stage}`)
+  const proposals = await client.fetch<number>(
+    `count(*[_type == "schemaProposal" && seance._ref == $id])`,
+    {id: seance._id},
+  )
+  console.log(`  proposals: ${proposals}`)
+  if (stage === 'entombed' || (stage === 'autopsy' && proposals < 1 && pages < 1)) {
+    console.error(
+      `[summon] expected autopsy with pages+proposal, got stage=${stage} pages=${pages} proposals=${proposals}`,
+    )
+    process.exit(2)
+  }
+  if (stage === 'autopsy' && proposals < 1) {
+    console.error(`[summon] reached autopsy but no schemaProposal yet`)
     process.exit(2)
   }
 }

@@ -6,6 +6,7 @@ import type {EffectHandler} from '@sanity/workflow-engine'
 import {EFFECTS} from '../effects/names'
 import {asDocumentId} from './refId'
 import {createProgressThrottle} from './progressThrottle'
+import {autopsyHandler} from './autopsyHandler'
 import {exhumeHandler} from './exhumeHandler'
 import {reanimateHandler} from './reanimateHandler'
 
@@ -25,11 +26,11 @@ const stub =
     ctx.log(`[stub] ${label}`, {seance, page})
   }
 
-/** Real exhume + showcase-gated reanimate; stubs for the rest until later tickets. */
+/** Real exhume, autopsy, and showcase-gated reanimate; stubs for the rest. */
 export const effectHandlers: Record<string, EffectHandler> = {
   [EFFECTS.exhume]: exhumeHandler,
-  [EFFECTS.autopsy]: stub('necro.autopsy'),
-  [EFFECTS.autopsyRerun]: stub('necro.autopsy-rerun'),
+  [EFFECTS.autopsy]: autopsyHandler,
+  [EFFECTS.autopsyRerun]: autopsyHandler,
   [EFFECTS.interrogate]: stub('necro.interrogate'),
   [EFFECTS.reanimate]: reanimateHandler,
   [EFFECTS.planRitual]: stub('necro.plan-ritual'),

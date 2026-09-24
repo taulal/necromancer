@@ -9,5 +9,11 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@necro/bones": "workspace:*",
+    "@necro/exhume": "workspace:*",
+    "@sanity/schema": "^6.16.0",
+    "zod": "^4.5.2"
+  }
 }

@@ -13,21 +13,42 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
   - The official `app-sanity-ui` template's loading `<Flex width="100vw">` fails typecheck against current Sanity UI. Fixed with `style`.
   - Next 16 deprecates `middleware.ts` in favour of `proxy.ts`.
 
+### Batch 3 kickoff
+
+- Landed Claude's missing B1–B5/B7 via `push-batch2b.sh` → `origin/main` includes question-gate B7 (must re-deploy blueprints in NEC-07c).
+- `docs/batch-3.md` + `bun run summon` CLI (#11). Bones catalogue (#10). Autopsy engine (#12). Showcase target (#13).
+- **NEC-07c:** waiting on Netlify site URL + env. Cursor checklist once `VESSEL_URL` exists: `/.netlify/functions/drain-background` → 401 without secret; workspace packages resolve; unattended exhume claim within 60s with App closed; then `bunx sanity blueprints deploy`.
+- **NEC-09:** Autopsy pipeline `condense` → `propose_anatomy` → `validate` (+ one repair) → `schemaProposal` v(n+1). HQ usage fields need `schema:deploy:hq` (Taylor go).
+
+### NEC-09 live golden (Caz's Kitchen, not PNJ)
+
+- **PNJ blocked:** `https://pnjbuild.co.nz/robots.txt` now has `Disallow: /` — NecromancerBot correctly crawls 0 pages. Switched test site to [cazskitchen.co.uk](https://cazskitchen.co.uk/) (WordPress / WooCommerce).
+- Full crawl (`--cap 50`) succeeded: platform `wordpress` @ 0.95, 50 pages / 15k words — then autopsy failed: (1) undeclared effect outputs stuck drain claims; (2) `compileToSchemaJson` left `fields: undefined` on object fields; (3) model put Bones names in `to[]` on arrays. Fixed compile + validate normalize; drop undeclared outputs.
+- **Fast iteration path:** reuse crawl, autopsy on **5 pages** (`/`, `/about/`, `/contact/`, `/shop/`, `/media/`) with **Haiku** (`NECRO_MODEL_FAST=claude-haiku-4-5-20251001`, propose prefers FAST over REASONING). ~37s end-to-end.
+- **Proposal `8pPskmVE0SMaXm7m9hxpmq` v1** on seance `8pPskmVE0SMaXm7m9hsR20`: model `claude-haiku-4-5-20251001`, **13345 in / 5021 out**, **1 repair round**. Types: `siteSettings` (singleton, phone/email/hours/delivery), `page`, `contactBlock`→Bones, `richTextBlock`→Bones, custom `shopBlock`. Haiku under-used hero/gallery vs a senior model — fine for plumbing; bump to Sonnet for the judged golden later.
+- **Sanity array `_key`:** every object in an array needs a unique `_key` (and typed members need `_type`) — Content Lake rejects / Studio breaks without them across _all_ writes, not just proposals. Shared `withArrayKeys` / `arrayKey` in `@necro/hq-schema`; exhume + autopsy handlers use it at the write boundary. Primitive arrays (string/url) stay unkeyed.
+- Workflow instance entombed after the first failed autopsy; proposal was written out-of-band. Next: allow re-run from entombed or `summon --cap 5` fresh after compile fixes land.
+
 ### Batch 3 · dataset quota → shared showcase
 
 - Project `v9dl2xdi` plan limit: **`maxDatasets: 2`** (`hq` + `showcase`). Creating `rip-*` → `402 Quota exceeded`. Raising the quota (or NEC-10p project-per-site) deferred.
 - **Decision (skip NEC-10p for now):** every séance defaults to `targetMode: 'dataset'`, `targetDataset: 'showcase'`, `visibility: 'public'`. Project mode stays in the schema/code (`--mode project` on summon) but is **not** the default.
 - **One site at a time:** `showcase` holds a single resurrection. `necro.reanimate` refuses if showcase already has another séance's content unless `replaceTarget` is set (`bun run summon <url> --replace`; App confirm later). Replace wipes showcase **documents + deployed schemas** first — never touches `hq`.
 - Spike cleanup (24 Sep): deleted `_.schemas.spike` from showcase; archived+deleted release `r3xHWiOV`. Left `_.schemas.nec10s-spike` on `hq` alone (do not touch hq).
-- **Token gotcha:** `.env` had inline comments glued to token values (`sk…# project robot…`). `bun --env-file` still lost to a stale shell-exported `SANITY_HQ_WRITE_TOKEN`. After stripping comments, the project robot `necromancer-worker` auth works (200).
-- Spikes NEC-10s / NEC-12s: both **GO** (schema-store PUT; Agent Actions on `versions.<releaseId>.<docId>`). Full write-ups live on PR #12 / nec-09 branch until that merges.
+- **Token gotcha:** `.env` had inline comments glued to token values (`sk…# project robot…`). Stale shell-exported `SANITY_HQ_WRITE_TOKEN` overrode `bun --env-file`. After stripping comments, project robot `necromancer-worker` auth works (200). Live summon unblocked.
+
+### NEC-10s spike — schema deploy without Studio
+
+**Verdict: GO** — worker `PUT https://api.sanity.io/v2025-03-01/projects/{id}/datasets/{ds}/schemas` with `ManifestSchemaType[]` + project write token. No Studio build. MCP deploy_schema NO-GO (wrong grants). Blocked for `rip-*` only by dataset quota.
+
+### NEC-12s spike — Agent Actions × Content Releases
+
+**Verdict: GO** — cast `transform` / `generate` on `versions.<releaseId>.<docId>` (`apiVersion: 'vX'`). Draft→release fallback also works. ~1.5–2.1s per action.
 
 ### NEC-UI1 · Summon drawer + Exhumation
 
-- Based on `nec-showcase-target` (PR #13 still open) so Summon defaults to shared `showcase` + `replaceTarget`.
-- App-side summon uses `refDataset({projectId, dataset: hq, documentId, type: 'seance'})` as the resurrection subject (GDR `dataset:v9dl2xdi:hq:<id>`), then `fireAction(begin-exhumation)` — same as CLI but with the Dashboard session, no tokens.
+- Summon defaults to shared `showcase` + `replaceTarget`. App-side summon uses `refDataset({projectId, dataset: hq, documentId, type: 'seance'})` as the resurrection subject (GDR `dataset:v9dl2xdi:hq:<id>`), then `fireAction(begin-exhumation)` — same as CLI but with the Dashboard session, no tokens.
 - Surprise: crawl already returned `platformHits` / `chromeBlocks` but exhume never wrote them on the séance. Handler now patches them so the Exhumation rail can show evidence + chrome without a schema deploy (Content Lake accepts undeclared fields; Studio won't list them until HQ schema catches up).
 - Progress bar prefers the workflow `exhumeProgress` field via `useDocumentWorkflows` → `useWorkflowSession`; falls back to seance field / pages÷cap while the instance is still resolving.
 - Screenshot side-by-side with prototype deferred — Dashboard iframe not captured in this agent session.
 - **Exhume drain gotcha:** returning undeclared effect `outputs` (pages/platform/…) makes `drainEffects` reject completion while the crawl already wrote pages — claim sits until lease expiry. Handlers must return void or only declared outputs.
-- **Sanity array `_key`:** every object array member written to Sanity needs a unique `_key` (typed members also `_type`) — not just proposals. Shared `withArrayKeys` / `arrayKey` in `@necro/hq-schema`; exhume uses it for sections/images. Primitive string/url arrays stay unkeyed.

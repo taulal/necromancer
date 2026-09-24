@@ -171,6 +171,10 @@ export type SchemaProposal = {
       _key: string
     } & ProposedType
   >
+  model?: string
+  inputTokens?: number
+  outputTokens?: number
+  repairRounds?: number
   acceptedAt?: string
 }
 
