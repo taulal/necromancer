@@ -96,6 +96,7 @@
     "packages/hq-schema": {
       "name": "@necro/hq-schema",
       "dependencies": {
+        "@sanity/icons": "^5.2.2",
         "sanity": "^6.16.0",
       },
     },
