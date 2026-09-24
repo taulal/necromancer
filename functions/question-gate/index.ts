@@ -24,7 +24,9 @@ function client() {
     apiVersion: ENGINE_API_VERSION,
     token,
     useCdn: false,
-    perspective: 'raw',
+    // B7: 'drafts' overlays a draft on its published doc and counts each question once.
+    // Answers from the App land in drafts, so 'published' would never see them.
+    perspective: 'drafts',
   })
 }
 
@@ -32,8 +34,8 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
   const c = client()
   const published = seanceId.replace(/^drafts\./, '')
   const count = await c.fetch<number>(
-    `count(*[_type == "question" && seance._ref in [$published, $draft] && required == true && !defined(answer)])`,
-    {published, draft: `drafts.${published}`},
+    `count(*[_type == "question" && seance._ref == $published && required == true && !defined(answer)])`,
+    {published},
   )
 
   const instanceId = (await c.fetch(
@@ -75,14 +77,19 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
   return count
 }
 
+type QuestionEvent = {
+  data?: QuestionDoc & {after?: QuestionDoc; before?: QuestionDoc}
+}
+
 export const handler = documentEventHandler(async ({event}) => {
-  const after = (event as {data?: {after?: QuestionDoc; before?: QuestionDoc}}).data?.after
-  const before = (event as {data?: {after?: QuestionDoc; before?: QuestionDoc}}).data?.before
-  const seanceId = after?.seance?._ref ?? before?.seance?._ref
+  // The blueprint projects {seance, required} (coalescing before()/after() so deletes
+  // carry them); fall back to raw before/after shapes if the projection is absent.
+  const data = (event as QuestionEvent).data
+  const seanceId = data?.seance?._ref ?? data?.after?.seance?._ref ?? data?.before?.seance?._ref
   if (!seanceId) {
     console.warn('[question-gate] question event without seance ref — skip')
     return
   }
-  if (after?.required === false && before?.required === false) return
+  // Always recount: a required → optional flip must lower the count too.
   await syncOpenRequiredQuestions(seanceId)
 })

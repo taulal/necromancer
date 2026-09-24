@@ -18,8 +18,13 @@ export default defineBlueprint({
       timeout: 30,
       memory: 1,
       event: {
-        on: ['create', 'update'],
+        // delete too (B7): removing an open required question must lower the count.
+        on: ['create', 'update', 'delete'],
         filter: '_type == "question"',
+        // The App SDK writes answers to drafts, so draft edits must trigger the recount.
+        includeDrafts: true,
+        projection:
+          '{"seance": coalesce(after().seance, before().seance), "required": coalesce(after().required, before().required)}',
         resource: {type: 'dataset', id: `${PROJECT_ID}.${HQ}`},
       },
       env: {
