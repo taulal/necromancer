@@ -19,14 +19,22 @@ import {
   type DrainRunOutcome,
 } from '@necro/rituals'
 
+/** Always read Netlify/runtime env — never bake an empty secret at build. */
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
 type AuthKind = 'secret' | 'kick'
+
+function env(name: string): string {
+  return (process.env[name] ?? '').trim()
+}
 
 function authorise(req: Request): AuthKind | null {
   const header = req.headers.get('authorization') ?? ''
-  const token = header.startsWith('Bearer ') ? header.slice(7) : ''
+  const token = header.startsWith('Bearer ') ? header.slice(7).trim() : ''
   if (!token) return null
-  const secret = process.env.DRAIN_SECRET?.trim()
-  const kick = process.env.DRAIN_KICK?.trim()
+  const secret = env('DRAIN_SECRET')
+  const kick = env('DRAIN_KICK')
   if (secret && token === secret) return 'secret'
   if (kick && token === kick) return 'kick'
   return null
@@ -62,8 +70,8 @@ async function runLocked(mode: DrainMode, holder: string) {
 }
 
 function backgroundUrl(): string | null {
-  const site = process.env.URL ?? process.env.DEPLOY_PRIME_URL ?? process.env.VESSEL_URL
-  if (!site || !process.env.NETLIFY) return null
+  const site = env('URL') || env('DEPLOY_PRIME_URL') || env('VESSEL_URL')
+  if (!site || !env('NETLIFY')) return null
   // Default Functions v2 URL: drain-background.mts has no custom `config.path` (B2).
   return `${site.replace(/\/$/, '')}/.netlify/functions/drain-background`
 }
@@ -89,7 +97,7 @@ export async function POST(req: Request) {
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          authorization: `Bearer ${process.env.DRAIN_SECRET ?? ''}`,
+          authorization: `Bearer ${env('DRAIN_SECRET')}`,
         },
         body: JSON.stringify({mode, holder}),
         signal: AbortSignal.timeout(10_000),
