@@ -30,5 +30,6 @@ export function Placeholder({screen}: {screen: Screen}) {
 export {Graveyard} from './Graveyard'
 export {SeanceLayout} from './SeanceLayout'
 export {Exhumation} from './Exhumation'
+export {Autopsy} from './Autopsy'
 export {SummonDrawer} from './SummonDrawer'
 export {PlaceholderStage} from './PlaceholderStage'
