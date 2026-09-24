@@ -30,3 +30,4 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Progress bar prefers the workflow `exhumeProgress` field via `useDocumentWorkflows` → `useWorkflowSession`; falls back to seance field / pages÷cap while the instance is still resolving.
 - Screenshot side-by-side with prototype deferred — Dashboard iframe not captured in this agent session.
 - **Exhume drain gotcha:** returning undeclared effect `outputs` (pages/platform/…) makes `drainEffects` reject completion while the crawl already wrote pages — claim sits until lease expiry. Handlers must return void or only declared outputs.
+- **Sanity array `_key`:** every object array member written to Sanity needs a unique `_key` (typed members also `_type`) — not just proposals. Shared `withArrayKeys` / `arrayKey` in `@necro/hq-schema`; exhume uses it for sections/images. Primitive string/url arrays stay unkeyed.

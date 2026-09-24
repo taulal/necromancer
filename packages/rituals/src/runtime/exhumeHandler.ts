@@ -2,6 +2,7 @@
  * necro.exhume — crawl the dead site and write exhumedPage docs + seance stats.
  */
 import {crawl, OffSiteRedirectError} from '@necro/exhume'
+import {withArrayKeys} from '@necro/hq-schema'
 import type {EffectHandler} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
 import {asDocumentId} from './refId'
@@ -75,16 +76,8 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
       title: page.title,
       meta: page.meta,
       headings: page.headings,
-      sections: (page.sections ?? []).map((s) => ({
-        _type: 'exhumedSection',
-        _key: crypto.randomUUID().replace(/-/g, '').slice(0, 12),
-        ...s,
-      })),
-      images: (page.images ?? []).map((img) => ({
-        _type: 'exhumedImage',
-        _key: crypto.randomUUID().replace(/-/g, '').slice(0, 12),
-        ...img,
-      })),
+      sections: withArrayKeys(page.sections ?? [], 'exhumedSection'),
+      images: withArrayKeys(page.images ?? [], 'exhumedImage'),
       links: [...page.links, ...page.assetLinks],
       detectedEntities: page.detectedEntities,
       contentHash: page.contentHash,
