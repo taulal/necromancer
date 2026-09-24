@@ -2,6 +2,7 @@
  * necro.autopsy / necro.autopsy-rerun — condense → propose → validate → write schemaProposal.
  */
 import {runAutopsy, type SchemaProposal} from '@necro/autopsy'
+import {withArrayKeys} from '@necro/hq-schema'
 import type {EffectHandler} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
 import {asDocumentId} from './refId'
@@ -16,41 +17,40 @@ function asSanity(client: unknown): SanityClient {
   return client as SanityClient
 }
 
-function arrayKey(): string {
-  return crypto.randomUUID().replace(/-/g, '').slice(0, 12)
-}
-
 function toHqTypes(types: SchemaProposal['types']) {
-  return types.map((t) => ({
-    _type: 'proposedType' as const,
-    _key: arrayKey(),
-    name: t.name,
-    title: t.title,
-    kind: t.kind,
-    bonesMatch: t.bonesMatch,
-    fields: t.fields.map((f) => ({
-      _type: 'proposedField' as const,
-      _key: arrayKey(),
-      name: f.name,
-      type: f.type,
-      of: f.of,
-      to: f.to,
-      required: f.required ?? false,
-      validation: f.validation,
-      description: f.description,
-      evidenceCount: f.evidenceCount,
+  return withArrayKeys(
+    types.map((t) => ({
+      name: t.name,
+      title: t.title,
+      kind: t.kind,
+      bonesMatch: t.bonesMatch,
+      fields: withArrayKeys(
+        t.fields.map((f) => ({
+          name: f.name,
+          type: f.type,
+          of: f.of,
+          to: f.to,
+          required: f.required ?? false,
+          validation: f.validation,
+          description: f.description,
+          evidenceCount: f.evidenceCount,
+        })),
+        'proposedField',
+      ),
+      rationale: t.rationale,
+      evidence: withArrayKeys(
+        t.evidence.map((e) => ({
+          page: {_type: 'reference' as const, _ref: e.pageId.replace(/^drafts\./, '')},
+          excerpt: e.excerpt,
+        })),
+        'typeEvidence',
+      ),
+      confidence: t.confidence,
+      decision: t.decision,
+      mergeInto: t.mergeInto,
     })),
-    rationale: t.rationale,
-    evidence: t.evidence.map((e) => ({
-      _type: 'typeEvidence' as const,
-      _key: arrayKey(),
-      page: {_type: 'reference' as const, _ref: e.pageId.replace(/^drafts\./, '')},
-      excerpt: e.excerpt,
-    })),
-    confidence: t.confidence,
-    decision: t.decision,
-    mergeInto: t.mergeInto,
-  }))
+    'proposedType',
+  )
 }
 
 export const autopsyHandler: EffectHandler = async (params, ctx) => {

@@ -53,6 +53,7 @@ Before every PR: `bun run typecheck && bun run test` are green, and the relevant
 6. **The engine is 0.x.** Before using a construct from the sandbox (written for 0.28), check `node_modules/@sanity/workflow-engine/CHANGELOG.md`. If behaviour differs from the brief, write it in the PR.
 7. **Every AI claim carries evidence** (page ref + quote). Use structured output / tool use, never free-text parsing.
 8. **Effects bind document ids, never hydrated asset objects.** See the gotchas in BRIEF §5.3.
+   8a. **Every object in a Sanity array needs a unique `_key`** (typed members also need `_type`). Stamp with `withArrayKeys` / `arrayKey` from `@necro/hq-schema` at every create/patch write boundary. Primitive arrays (string, number, url) do not need keys.
 9. **Crawler etiquette:** same-origin only, honour robots.txt, page cap, 10s timeout, UA `NecromancerBot`.
 10. **If the brief is wrong, stop and say so** in the PR with the fallback from BRIEF §11. Don't silently invent around it.
 
