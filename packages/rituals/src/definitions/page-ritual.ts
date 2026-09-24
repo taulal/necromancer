@@ -22,7 +22,8 @@ export const pageRitual = defineWorkflow({
   lifecycle: 'child',
   initialStage: 'casting',
   roleAliases: {
-    reviewer: ['administrator', 'editor'],
+    // Alias keys must be real Sanity project roles (deploy rejects invented names like "reviewer").
+    editor: ['administrator', 'editor'],
   },
   fields: [
     defineField({
@@ -110,7 +111,7 @@ export const pageRitual = defineWorkflow({
             defineAction({
               name: 'approve',
               title: 'Bless',
-              roles: ['reviewer'],
+              roles: ['editor'],
               status: 'done',
               ops: [
                 {
@@ -128,7 +129,7 @@ export const pageRitual = defineWorkflow({
             defineAction({
               name: 'recast',
               title: 'Recast',
-              roles: ['reviewer'],
+              roles: ['editor'],
               status: 'done',
               ops: [
                 {
