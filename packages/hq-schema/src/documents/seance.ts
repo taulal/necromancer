@@ -68,7 +68,7 @@ export const seance = defineType({
       title: 'Target mode',
       type: 'string',
       description:
-        'MVP uses a new dataset in the sandbox project. Stretch: create a whole new project per site.',
+        'Default: shared public `showcase` dataset (one resurrected site at a time). Stretch: create a whole new project per site (`targetProjectId`).',
       options: {
         list: [
           {title: 'Dataset (MVP)', value: 'dataset'},
@@ -83,7 +83,9 @@ export const seance = defineType({
       name: 'targetDataset',
       title: 'Target dataset',
       type: 'string',
-      description: 'Dataset id for the resurrected content (e.g. rip-example or showcase).',
+      description:
+        'Dataset id for the resurrected content. Default is `showcase` (quota: project maxDatasets=2).',
+      initialValue: 'showcase',
       validation: (rule) =>
         rule.custom((value, context) => {
           const mode = (context.document as {targetMode?: string} | undefined)?.targetMode
@@ -95,8 +97,16 @@ export const seance = defineType({
       name: 'targetProjectId',
       title: 'Target project id',
       type: 'string',
-      description: 'Only used in stretch project mode.',
+      description: 'Only used in stretch project mode (filled when reanimate creates the project).',
       hidden: ({document}) => document?.targetMode !== 'project',
+    }),
+    defineField({
+      name: 'replaceTarget',
+      title: 'Replace target',
+      type: 'boolean',
+      description:
+        'When targeting showcase: if true, reanimate wipes existing showcase documents and schemas before writing. Without this, reanimate refuses when showcase already holds another séance.',
+      initialValue: false,
     }),
     defineField({
       name: 'visibility',
@@ -110,7 +120,7 @@ export const seance = defineType({
         ],
         layout: 'radio',
       },
-      initialValue: 'private',
+      initialValue: 'public',
       validation: (rule) => rule.required(),
     }),
     defineField({

@@ -230,6 +230,7 @@ export type Seance = {
   targetMode?: 'dataset' | 'project'
   targetDataset?: string
   targetProjectId?: string
+  replaceTarget?: boolean
   visibility?: 'private' | 'public'
   pageCap?: number
   brand?: {

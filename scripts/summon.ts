@@ -2,13 +2,21 @@
 /**
  * NEC-08L — create a séance, start resurrection, begin exhumation, drain until autopsy.
  *
- *   bun run summon https://pnjbuild.co.nz [--cap 50] [--no-drain]
+ *   bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project]
+ *
+ * Default target: dataset `showcase` (public). One resurrected site at a time —
+ * pass --replace to wipe showcase on reanimate if it already holds another séance.
+ * Project mode is stretch (kept in code; not the default).
  */
 import {slugFromUrl} from '@necro/hq-schema'
 import {getEngine, getWorkflowClient, projectId, runDrain, tag} from '@necro/rituals'
 
+const SHOWCASE = 'showcase'
+
 function usage(): never {
-  console.error('Usage: bun run summon <url> [--cap 50] [--no-drain]')
+  console.error(
+    'Usage: bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project]',
+  )
   process.exit(1)
 }
 
@@ -17,6 +25,8 @@ function parseArgs(argv: string[]) {
   let url: string | undefined
   let cap = 50
   let drain = true
+  let replace = false
+  let mode: 'dataset' | 'project' = 'dataset'
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!
     if (a === '--cap') {
@@ -24,6 +34,12 @@ function parseArgs(argv: string[]) {
       if (!Number.isFinite(cap) || cap < 1) usage()
     } else if (a === '--no-drain') {
       drain = false
+    } else if (a === '--replace') {
+      replace = true
+    } else if (a === '--mode') {
+      const m = args[++i]
+      if (m !== 'dataset' && m !== 'project') usage()
+      mode = m
     } else if (a.startsWith('-')) {
       usage()
     } else if (!url) {
@@ -40,24 +56,33 @@ function parseArgs(argv: string[]) {
     console.error(`Invalid URL: ${url}`)
     process.exit(1)
   }
-  return {url, cap, drain}
+  return {url, cap, drain, replace, mode}
 }
 
 async function main() {
-  const {url, cap, drain} = parseArgs(process.argv)
+  const {url, cap, drain, replace, mode} = parseArgs(process.argv)
   const slug = slugFromUrl(url)
   if (!slug) {
     console.error('Could not derive slug from URL')
     process.exit(1)
   }
-  const targetDataset = `rip-${slug}`
+
+  const targetDataset = mode === 'dataset' ? SHOWCASE : undefined
+  const visibility = mode === 'dataset' ? 'public' : 'private'
   const client = getWorkflowClient()
   const engine = getEngine()
 
   console.log(`[summon] ${url}`)
   console.log(
-    `[summon] slug=${slug} dataset=${targetDataset} cap=${cap} project=${projectId} tag=${tag}`,
+    `[summon] slug=${slug} mode=${mode}` +
+      (targetDataset ? ` dataset=${targetDataset}` : '') +
+      ` replace=${replace} cap=${cap} project=${projectId} tag=${tag}`,
   )
+  if (mode === 'project') {
+    console.log(
+      '[summon] project mode is stretch — targetProjectId filled at reanimate (not default)',
+    )
+  }
 
   const existing = await client.fetch<{_id: string} | null>(
     `*[_type == "seance" && slug.current == $slug][0]{_id}`,
@@ -73,9 +98,10 @@ async function main() {
     url,
     slug: {current: slug, _type: 'slug'},
     pageCap: cap,
-    targetMode: 'dataset',
-    targetDataset,
-    visibility: 'private',
+    targetMode: mode,
+    ...(targetDataset ? {targetDataset} : {}),
+    visibility,
+    replaceTarget: replace,
     status: 'alive',
   })
   console.log(`[summon] created seance ${seance._id}`)
