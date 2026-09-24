@@ -1,0 +1,10 @@
+[build]
+  command = "bun run build:vessel"
+  publish = "apps/vessel/.next"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["@necro/rituals", "@sanity/client", "@sanity/workflow-engine"]
+
+# Background functions: *-background get a 15-minute limit.

@@ -1,11 +1,22 @@
 /**
- * Pokes the Vessel drain route. Keep this tiny: no AI, no crawling, no long work here.
- * TODO(NEC-07): wrap with the @sanity/functions handler signature.
+ * Pokes the Vessel drain route. Keep this tiny: no AI, no crawling, no long work.
  */
-export async function kick(): Promise<number> {
-  const res = await fetch(`${process.env.VESSEL_URL}/api/ritual/drain`, {
+import {documentEventHandler} from '@sanity/functions'
+
+async function kickVessel(): Promise<void> {
+  const base = process.env.VESSEL_URL?.replace(/\/$/, '')
+  const secret = process.env.DRAIN_SECRET
+  if (!base || !secret) {
+    console.warn('[drain-kicker] VESSEL_URL or DRAIN_SECRET missing — skip')
+    return
+  }
+  const res = await fetch(`${base}/api/ritual/drain`, {
     method: 'POST',
-    headers: {authorization: `Bearer ${process.env.DRAIN_SECRET}`},
+    headers: {authorization: `Bearer ${secret}`},
   })
-  return res.status
+  console.log(`[drain-kicker] drain → ${res.status}`)
 }
+
+export const handler = documentEventHandler(async () => {
+  await kickVessel()
+})

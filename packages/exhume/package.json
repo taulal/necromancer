@@ -10,6 +10,8 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "cheerio": "^1.2.0"
+    "cheerio": "^1.2.0",
+    "fast-xml-parser": "^5.11.1",
+    "robots-parser": "^3.0.1"
   }
 }
