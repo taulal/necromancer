@@ -4,6 +4,7 @@ export interface BrandExtraction {
   colors: string[]
   fonts: string[]
   logo?: string
+  name?: string
 }
 
 const HEX_RE = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/g
