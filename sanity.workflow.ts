@@ -14,8 +14,8 @@ export default defineWorkflowConfig({
     {
       name: 'necromancer',
       tag: 'necromancer',
-      // TODO(NEC-06): confirm the reader-model floor required by engine 0.35 (was 4 on 0.28).
-      expectedMinReaderModel: 4,
+      // Required subject/doc.ref fields need reader model 10 on engine 0.33+ (was 4 on 0.28).
+      expectedMinReaderModel: 10,
       workflowResource: {type: 'dataset', id: `${PROJECT_ID}.${DATASET}`},
       definitions,
     },
