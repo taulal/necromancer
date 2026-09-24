@@ -108,6 +108,7 @@
       "name": "@necro/bones",
       "dependencies": {
         "react": "^19.2.0",
+        "sanity": "^6.16.0",
       },
     },
     "packages/exhume": {
