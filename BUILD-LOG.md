@@ -77,7 +77,17 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 
 - Stack `necromancer-functions` `<ST-9h3tm9qg2z>` org-scoped on `or6mff29v` (scheduled Functions require org scope; `SANITY_PROJECT_ID` in the shell makes `blueprints doctor` 404 the org stack — unset it for plan/deploy).
 - Document Functions need `project: v9dl2xdi`. Growth plan caps cron at **hourly** (`0 * * * *`), not every minute — document kick still covers live pending work.
-- Deployed: `question-gate`, `drain-kicker`, `drain-kicker-schedule` (2026-09-24). Next: confirm drain-background 401 without secret, then unattended exhume.
+- Deployed: `question-gate`, `drain-kicker`, `drain-kicker-schedule` (2026-09-24).
+
+### Drain loop (exhume→autopsy cascade)
+
+- Kicks while the lock is held were skipped; effects queued mid-drain waited for the next kick (hourly). Fix: `runDrain` re-queries `pendingInstanceIds()` and loops until empty or ~12 min budget; on budget expiry, release lock then self-invoke background drain. Unit test: mid-drain queued effect drained in the same run (`runDrain.test.ts`).
+
+### NEC-07c unattended test (blocked on Netlify secret)
+
+- Summoned `https://targetcleaningsupplies.co.nz` (`--cap 5 --fast --replace --no-drain`): seance `NUTbHt8Bunvcm3fS8gPQw0`, instance `necromancer.wf-instance.356b93135c5c` @ `exhuming` with 1 unclaimed pending effect.
+- Poll (~40s+): stage stayed `exhuming`, unclaimed=1 — Function did not clear work.
+- Manual `POST https://the-necromancer.netlify.app/api/ritual/drain` with local `DRAIN_SECRET` → **401**. Netlify site env `DRAIN_SECRET` does not match local/.blueprint bake (or is unset). Sync Netlify production env to the same `DRAIN_SECRET` (and `VESSEL_URL`), then re-kick / re-summon and log timings.
 
 ### Loose ends (post-UI2)
 
