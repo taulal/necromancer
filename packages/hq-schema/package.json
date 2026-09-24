@@ -10,6 +10,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@sanity/icons": "^5.2.2",
     "sanity": "^6.16.0"
   }
 }

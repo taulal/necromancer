@@ -96,6 +96,7 @@
     "packages/hq-schema": {
       "name": "@necro/hq-schema",
       "dependencies": {
+        "@sanity/icons": "^5.2.2",
         "sanity": "^6.16.0",
       },
     },
@@ -107,6 +108,9 @@
         "@necro/exhume": "workspace:*",
         "@sanity/client": "^8.7.0",
         "@sanity/workflow-engine": "0.35.0",
+      },
+      "devDependencies": {
+        "@sanity/workflow-engine-test": "0.35.0",
       },
     },
   },
