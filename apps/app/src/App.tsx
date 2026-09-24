@@ -1,5 +1,6 @@
 import {SanityApp} from '@sanity/sdk-react'
 import {Flex, Spinner} from '@sanity/ui'
+import {WorkflowTelemetryProvider} from '@sanity/workflow-sdk'
 import {AppRouter} from './AppRouter'
 import {sanityConfigs} from './lib/config'
 import {NecroUI} from './theme/NecroUI'
@@ -23,7 +24,9 @@ export default function App() {
   return (
     <NecroUI>
       <SanityApp config={sanityConfigs} fallback={<Loading />}>
-        <AppRouter />
+        <WorkflowTelemetryProvider>
+          <AppRouter />
+        </WorkflowTelemetryProvider>
       </SanityApp>
     </NecroUI>
   )

@@ -3,6 +3,7 @@ import {HashRouter, Navigate, Route, Routes} from 'react-router'
 import {Box, Flex, Spinner, Text} from '@sanity/ui'
 import {Graveyard} from './screens/Graveyard'
 import {SeanceLayout} from './screens/SeanceLayout'
+import {Exhumation} from './screens/Exhumation'
 import {PlaceholderStage} from './screens/PlaceholderStage'
 
 function Loading() {
@@ -33,7 +34,7 @@ export function AppRouter() {
           <Route path="/" element={<Graveyard />} />
           <Route path="/seance/:seanceId" element={<SeanceLayout />}>
             <Route index element={<Navigate to="exhumation" replace />} />
-            <Route path="exhumation" element={<PlaceholderStage stage="exhumation" />} />
+            <Route path="exhumation" element={<Exhumation />} />
             <Route path="autopsy" element={<PlaceholderStage stage="autopsy" />} />
             <Route path="interrogation" element={<PlaceholderStage stage="interrogation" />} />
             <Route path="ritual" element={<PlaceholderStage stage="ritual" />} />

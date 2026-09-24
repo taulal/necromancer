@@ -1,7 +1,8 @@
-import {Suspense} from 'react'
+import {Suspense, useState} from 'react'
 import {Link} from 'react-router'
 import {useDocuments, useDocumentProjection, type DocumentHandle} from '@sanity/sdk-react'
 import {Badge, Box, Button, Card, Flex, Grid, Heading, Spinner, Stack, Text} from '@sanity/ui'
+import {SummonDrawer} from './SummonDrawer'
 
 type SeanceCard = {
   url?: string
@@ -121,6 +122,8 @@ function SeanceGrid() {
 
 /** Home — BRIEF.md §8.1 / docs/prototype/Main.dc.html */
 export function Graveyard() {
+  const [summonOpen, setSummonOpen] = useState(false)
+
   return (
     <Box
       style={{
@@ -163,9 +166,13 @@ export function Graveyard() {
           text="Summon"
           tone="primary"
           mode="default"
-          style={{background: 'var(--necro-alive)', color: 'var(--necro-ground)'}}
-          disabled
-          title="Summon drawer lands with the séance create flow"
+          onClick={() => setSummonOpen(true)}
+          style={{
+            background: 'var(--necro-alive)',
+            color: 'var(--necro-ground)',
+            minHeight: 44,
+            minWidth: 44,
+          }}
         />
       </Flex>
 
@@ -180,6 +187,8 @@ export function Graveyard() {
           <SeanceGrid />
         </Suspense>
       </Box>
+
+      <SummonDrawer open={summonOpen} onClose={() => setSummonOpen(false)} />
     </Box>
   )
 }

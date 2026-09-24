@@ -21,3 +21,11 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Spike cleanup (24 Sep): deleted `_.schemas.spike` from showcase; archived+deleted release `r3xHWiOV`. Left `_.schemas.nec10s-spike` on `hq` alone (do not touch hq).
 - **Token gotcha:** `.env` had inline comments glued to token values (`sk…# project robot…`). `bun --env-file` still lost to a stale shell-exported `SANITY_HQ_WRITE_TOKEN`. After stripping comments, the project robot `necromancer-worker` auth works (200).
 - Spikes NEC-10s / NEC-12s: both **GO** (schema-store PUT; Agent Actions on `versions.<releaseId>.<docId>`). Full write-ups live on PR #12 / nec-09 branch until that merges.
+
+### NEC-UI1 · Summon drawer + Exhumation
+
+- Based on `nec-showcase-target` (PR #13 still open) so Summon defaults to shared `showcase` + `replaceTarget`.
+- App-side summon uses `refDataset({projectId, dataset: hq, documentId, type: 'seance'})` as the resurrection subject (GDR `dataset:v9dl2xdi:hq:<id>`), then `fireAction(begin-exhumation)` — same as CLI but with the Dashboard session, no tokens.
+- Surprise: crawl already returned `platformHits` / `chromeBlocks` but exhume never wrote them on the séance. Handler now patches them so the Exhumation rail can show evidence + chrome without a schema deploy (Content Lake accepts undeclared fields; Studio won't list them until HQ schema catches up).
+- Progress bar prefers the workflow `exhumeProgress` field via `useDocumentWorkflows` → `useWorkflowSession`; falls back to seance field / pages÷cap while the instance is still resolving.
+- Screenshot side-by-side with prototype deferred — Dashboard iframe not captured in this agent session.

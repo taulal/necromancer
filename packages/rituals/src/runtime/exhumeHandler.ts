@@ -90,6 +90,9 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
     .set({
       platform: result.platform,
       platformConfidence: result.platformConfidence,
+      // Persisted for the Exhumation screen (NEC-UI1); not yet on HQ schema — Content Lake accepts them.
+      platformHits: result.platformHits,
+      chromeBlocks: result.chromeBlocks,
       brand,
       stats: result.stats,
     })

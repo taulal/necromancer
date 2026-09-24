@@ -58,6 +58,20 @@ const GlobalStyle = createGlobalStyle`
     animation: necro-flicker 2.6s ease-in-out infinite;
   }
 
+  @keyframes necro-soil {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 0; }
+  }
+  .necro-soil {
+    background-image: repeating-linear-gradient(
+      115deg,
+      var(--necro-alive) 0 10px,
+      #8fd95a 10px 20px
+    );
+    background-size: 40px 100%;
+    animation: necro-soil 1.4s linear infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation: none !important;
