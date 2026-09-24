@@ -42,7 +42,7 @@ AC: CI green on the first PR. Screenshot of the app inside the Dashboard.
 ## 🟨 NEC-04 App shell, routing + theme (C, after NEC-02 lands)
 
 Router for the 7 screens (§8). Theme tokens from the prototype mapped into `apps/app/src/theme/NecroUI.tsx` (`buildTheme` overrides + CSS vars). Graveyard lists `seance` docs with `useDocuments`. First Dashboard deploy (Taylor approves).
-AC: deployed app visible to Flight org members in the Dashboard; Graveyard shows seed séances live.
+AC: deployed app visible to org members in the Dashboard; Graveyard shows seed séances live.
 
 ## ⬜ NEC-05 HQ content model (C)
 

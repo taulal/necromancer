@@ -93,7 +93,7 @@ Bones renderers (plain, styled by CSS vars from `siteSettings.brand`) + the sche
 
 ### NEC-16 Rise
 
-`necro.rise` publishes the release and sets `seance.status = 'risen'`. Showcase run: pick the site Taylor has consent for (or a Flight-owned one), set `showcase` visibility public, deploy the Vessel publicly, and record the URLs for the submission.
+`necro.rise` publishes the release and sets `seance.status = 'risen'`. Showcase run: pick the site Taylor has consent for, set `showcase` visibility public, deploy the Vessel publicly, and record the URLs for the submission.
 
 ---
 

@@ -12,10 +12,10 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "dev:app": "bun run --filter @necro/app dev",
+    "dev:app": "bun --env-file=.env run --filter @necro/app dev",
     "dev:vessel": "bun run --filter @necro/vessel dev",
     "dev:studio": "bun run --filter @necro/studio dev",
-    "build:app": "bun run --filter @necro/app build",
+    "build:app": "bun --env-file=.env run --filter @necro/app build",
     "build:vessel": "bun run --filter @necro/vessel build",
     "typecheck": "bun run --filter '*' typecheck",
     "test": "vitest run",

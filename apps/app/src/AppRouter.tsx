@@ -1,6 +1,6 @@
 import {Suspense} from 'react'
-import {HashRouter, Navigate, Route, Routes} from 'react-router'
-import {Box, Flex, Spinner, Text} from '@sanity/ui'
+import {MemoryRouter, Navigate, Route, Routes} from 'react-router'
+import {Flex, Spinner} from '@sanity/ui'
 import {Graveyard} from './screens/Graveyard'
 import {SeanceLayout} from './screens/SeanceLayout'
 import {Exhumation} from './screens/Exhumation'
@@ -14,21 +14,14 @@ function Loading() {
   )
 }
 
-function NotFound() {
-  return (
-    <Box padding={5}>
-      <Text muted>This plot is empty.</Text>
-    </Box>
-  )
-}
-
 /**
- * Hash routes so the Dashboard iframe deep-links stay on the app origin.
- * Screens: Graveyard + 5 séance stages (Exhumation…Rise). Séance shell wraps stages.
+ * MemoryRouter: the App runs inside the Dashboard shell; the host URL/hash is not ours.
+ * HashRouter was matching the catch-all ("This plot is empty") on preview/dev open.
+ * In-app Links / navigate() still work; a full iframe remount resets to the Graveyard.
  */
 export function AppRouter() {
   return (
-    <HashRouter>
+    <MemoryRouter>
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<Graveyard />} />
@@ -40,9 +33,9 @@ export function AppRouter() {
             <Route path="ritual" element={<PlaceholderStage stage="ritual" />} />
             <Route path="rise" element={<PlaceholderStage stage="rise" />} />
           </Route>
-          <Route path="*" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
-    </HashRouter>
+    </MemoryRouter>
   )
 }

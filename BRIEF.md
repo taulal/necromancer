@@ -15,11 +15,11 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 
 ## 2. Roles & ways of working
 
-| Who                 | Role                     | Owns                                                                                                                                                                                            |
-| ------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Taylor**          | Product owner / approver | Decisions, real-site selection + consent, Sanity org admin actions (tokens, beta access, dataset delete), final demo + submission                                                               |
-| **Claude (Cowork)** | Designer + PM            | This brief, clickable HTML prototype, ticket breakdown + acceptance criteria, reviewing each Cursor PR against the brief, build log, DEV write-up draft                                         |
-| **Cursor agent**    | Developer                | All code in the `necromancer` repo, bench tests, deploys. Works ticket-by-ticket (§12). Starts from `flight-cursor-starter` conventions (rules, skills) but **no `@flight-digital/*` packages** |
+| Who                 | Role                     | Owns                                                                                                                                                                                   |
+| ------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Taylor**          | Product owner / approver | Decisions, real-site selection + consent, Sanity org admin actions (tokens, beta access, dataset delete), final demo + submission                                                      |
+| **Claude (Cowork)** | Designer + PM            | This brief, clickable HTML prototype, ticket breakdown + acceptance criteria, reviewing each Cursor PR against the brief, build log, DEV write-up draft                                |
+| **Cursor agent**    | Developer                | All code in the `necromancer` repo, bench tests, deploys. Works ticket-by-ticket (§12). Starts from Cursor starter conventions (rules, skills) but **no `@flight-digital/*` packages** |
 
 **Loop:** Claude writes ticket → Cursor builds on a branch → Cursor posts summary + screenshots → Claude reviews against acceptance criteria → Taylor merges. Cursor keeps its chat transcripts (they're an optional-but-encouraged submission artefact). Claude maintains `BUILD-LOG.md` daily — the honest writeup is judged more heavily than polish ("a rough app with an honest writeup beats a polished one with three sentences").
 
@@ -29,7 +29,7 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 
 ### MVP (must ship by 3 Oct)
 
-1. App SDK app deployed to the Flight org Dashboard with: Graveyard, Séance view (all stages), Autopsy board, Interrogation, Ritual list, workflow diagram.
+1. App SDK app deployed to the Sanity org Dashboard with: Graveyard, Séance view (all stages), Autopsy board, Interrogation, Ritual list, workflow diagram.
 2. Workflow definitions (engine 0.35) for the resurrection + per-page child ritual, with bench tests.
 3. Exhumation of server-rendered sites (WordPress, Durable, static/PHP) up to 50 pages.
 4. AI schema inference → editable proposal → compiled + deployed to a target dataset.
@@ -58,7 +58,7 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 ## 4. Architecture
 
 ```
-┌──────────────────────────── Sanity org (oEouFCZpW) ────────────────────────────┐
+┌──────────────────────────── Sanity org (or6mff29v) ────────────────────────────┐
 │                                                                                │
 │  Dashboard ── Necromancer App (App SDK, React+Vite, Sanity UI)                 │
 │                 │  reads/writes HQ + every target dataset (user's own session) │
@@ -108,9 +108,9 @@ Port from `sanity-sandbox` (copy, don't import): `src/workflows/{client,engine,d
 
 ### Sanity project reset (Taylor-approved step, ticket NEC-01)
 
-- Base project: **`v9dl2xdi`** (confirmed from `.env.development`). ⚠️ `flight.json` in the sandbox points at `dyewmg78` — that's the **Flight website**. Never touch it.
+- Base project: **`v9dl2xdi`** (confirmed from `.env.development`). ⚠️ Never touch project `dyewmg78` — it is unrelated and out of scope.
 - Delete dataset `v9dl2xdi/production` (irreversible — Taylor runs or explicitly approves the command). `showcase` ✅ created by Taylor 24 Sep (check it's set **public**). Create `hq` (private). `rip-*` datasets are created by the app.
-- The sandbox repo itself stays as-is on disk (it's the Flight site codebase — not published).
+- The sandbox repo used for early Workflows experiments stays as-is on disk (not published; not part of this entry).
 
 ## 5. The ritual — workflow design
 
@@ -269,7 +269,7 @@ Design direction: **dark, occult, precise.** Near-black base, bone-white type, o
 | KB beta not accessible / not API-drivable        | Med-High               | Claude contradiction pass (MVP); document honestly                                                                                    |
 | Crawl too slow / blocked                         | Med                    | Sitemap-first, cap 50, cache HTML in `exhumedPage` so reruns don't refetch                                                            |
 | Judges can't log into our org to use the App     | High                   | Public `showcase` dataset + public Vessel URL + GIFs/video + Cursor transcripts in the post                                           |
-| Real client content in public                    | Low (if we follow §10) | `showcase` uses a consenting or Flight-owned site only                                                                                |
+| Real client content in public                    | Low (if we follow §10) | `showcase` uses a consenting site only                                                                                                |
 | Scope creep vs 10 days                           | High                   | §3 cut line; Claude calls it daily in the build log                                                                                   |
 
 ## 12. Plan & tickets
@@ -288,8 +288,8 @@ Each ticket: branch `nec-XX-short-name`, PR with summary, screenshots, and "devi
 
 - **NEC-01 Project reset** — delete `v9dl2xdi/production` (Taylor approves), create `hq` (private) + `showcase` (public). AC: `sanity dataset list` shows only `hq`, `showcase`; `dyewmg78` untouched.
 - **NEC-02 Prototype** (Claude) — clickable HTML of Graveyard, Séance/Autopsy, Interrogation, Ritual. AC: Taylor sign-off.
-- **NEC-03 Repo scaffold** — monorepo per §4, `AGENTS.md` from flight-cursor-starter rules minus Flight IP, CI typecheck + vitest. AC: `bun test` green, App runs in Dashboard locally.
-- **NEC-04 App SDK shell + theme** — Sanity UI theme per §8, routing for 7 screens, deploy to org Dashboard (`sanity deploy`, app.id saved). AC: visible to Flight org members in Dashboard.
+- **NEC-03 Repo scaffold** — monorepo per §4, `AGENTS.md` from Cursor starter conventions minus agency IP, CI typecheck + vitest. AC: `bun test` green, App runs in Dashboard locally.
+- **NEC-04 App SDK shell + theme** — Sanity UI theme per §8, routing for 7 screens, deploy to org Dashboard (`sanity deploy`, app.id saved). AC: visible to org members in Dashboard.
 - **NEC-05 HQ schema** — §6 types as schema + TypeGen. AC: types deployed to `hq`; GROQ types generated.
 - **NEC-06 Workflow definitions** — `resurrection` + `page-ritual` per §5 with bench tests for: happy path, exhume failure → entombed, autopsy re-run, required-question gate, fan-out settle, recast loop, SLA haunted flag, duplicate start blocked. AC: all bench paths green; `workflows:deploy` to `hq` tag `necromancer`.
 - **NEC-07 Drain worker + Function kicker** — Vessel `/api/ritual/drain`, Blueprint Function on instance change + 1-min schedule, App-side kicker while open. AC: queued effect claimed within 60s with App closed.
@@ -316,8 +316,8 @@ Each ticket: branch `nec-XX-short-name`, PR with summary, screenshots, and "devi
 
 ## 14. Open decisions (Taylor)
 
-1. **Repo visibility** — public (helps judging, shows the Workflows code) vs private (Necromancer as future Flight IP). Recommend **public for the challenge**, relicense later if it becomes a product — nothing Flight-proprietary is in it.
-2. **Real test sites** — which 2–3? And which one (consenting or Flight-owned) goes in the public `showcase`?
+1. **Repo visibility** — public (helps judging, shows the Workflows code) vs private (keep the entry private until after submit). Recommend **public for the challenge**, relicense later if it becomes a product — nothing proprietary agency IP is in it.
+2. **Real test sites** — which 2–3? And which consenting one goes in the public `showcase`?
 3. **Submission team** — solo or add an NZ dev (up to 4)?
 
 ## Appendix — reference

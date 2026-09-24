@@ -1,12 +1,12 @@
 # Test-site recon (24 Sep 2026, Claude) — for NEC-08
 
-Three real test sites, all Flight clients. Resurrect into **private** `rip-*` datasets only. None goes in `showcase` without the client's OK.
+Three real test sites (agency client corpses). Resurrect into **private** `rip-*` datasets only. None goes in `showcase` without the client's OK.
 
-| Site                                 | Platform                   | Why it's a good corpse                                                                              |
-| ------------------------------------ | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| https://pnjbuild.co.nz               | Durable (Next.js-rendered) | The one Taylor picked. Flight is already rebuilding it by hand, so the manual brief is ground truth |
-| https://hewahihaumaru.org.nz         | WordPress 7.1.2            | Big site, a real WP sitemap index, custom post types                                                |
-| https://targetcleaningsupplies.co.nz | Old static PHP             | Apex → `www.` 301, `/html/*.php` URLs, product catalogue. Flight is rebuilding it too               |
+| Site                                 | Platform                   | Why it's a good corpse                                                                    |
+| ------------------------------------ | -------------------------- | ----------------------------------------------------------------------------------------- |
+| https://pnjbuild.co.nz               | Durable (Next.js-rendered) | The one Taylor picked. Already being rebuilt by hand, so the manual brief is ground truth |
+| https://hewahihaumaru.org.nz         | WordPress 7.1.2            | Big site, a real WP sitemap index, custom post types                                      |
+| https://targetcleaningsupplies.co.nz | Old static PHP             | Apex → `www.` 301, `/html/*.php` URLs, product catalogue. Also being rebuilt by hand      |
 
 ## pnjbuild.co.nz: what we found
 

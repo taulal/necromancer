@@ -47,7 +47,7 @@ Before every PR: `bun run typecheck && bun run test` are green, and the relevant
 
 1. **No Flight IP.** No `@flight-digital/*` packages, no FlightDeck, no Linaria, no Flight design tokens. The repo may go public.
 2. **No secrets in the browser.** The App bundle only sees `SANITY_APP_*` values, and those must be non-secret. Tokens and the Anthropic key live only in Vessel server code and Netlify env. `SANITY_APP_DRAIN_KICK` is **public-by-design**: any Dashboard user can read it. The Vessel treats it as a low-privilege kick (pending-only drain, skipped while a drain holds the single-flight lock, never tick-all; the App only polls every 20s while queued work exists and the tab is visible). Never put `DRAIN_SECRET` or write tokens in `SANITY_APP_*`.
-3. **Never touch project `dyewmg78`.** It's the Flight website. Our project is `v9dl2xdi`.
+3. **Never touch project `dyewmg78`.** Unrelated / out of scope. Our project is `v9dl2xdi`.
 4. **No destructive or org-level commands** (dataset delete, app/workflow/Function/schema deploy to shared datasets) without Taylor saying "go" in the ticket or PR.
 5. **Workflows packages are exact-version peers.** Every `@sanity/workflow-*` must be exactly `0.35.0`. Never bump one alone.
 6. **The engine is 0.x.** Before using a construct from the sandbox (written for 0.28), check `node_modules/@sanity/workflow-engine/CHANGELOG.md`. If behaviour differs from the brief, write it in the PR.

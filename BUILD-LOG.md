@@ -52,3 +52,8 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Progress bar prefers the workflow `exhumeProgress` field via `useDocumentWorkflows` → `useWorkflowSession`; falls back to seance field / pages÷cap while the instance is still resolving.
 - Screenshot side-by-side with prototype deferred — Dashboard iframe not captured in this agent session.
 - **Exhume drain gotcha:** returning undeclared effect `outputs` (pages/platform/…) makes `drainEffects` reject completion while the crawl already wrote pages — claim sits until lease expiry. Handlers must return void or only declared outputs.
+
+### Org move · personal Sanity org
+
+- Moved Necromancer to Taylor's personal org `or6mff29v` (Growth); project `v9dl2xdi` transferring there. The org ID was hardcoded in `apps/app/sanity.cli.ts`, which is why `.env` alone didn't fix Dashboard routing — now reads `SANITY_ORG_ID` from the root `.env`.
+- **Empty plot on `dev:app` preview:** HashRouter was reading the Dashboard host URL/hash and falling through to the `*` route (“This plot is empty”). Switched to `MemoryRouter`; unknown paths redirect to `/`.
