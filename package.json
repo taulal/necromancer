@@ -24,6 +24,7 @@
     "format:check": "prettier --check .",
     "workflows:deploy": "sanity-workflows deploy",
     "schema:deploy:hq": "bun run --filter @necro/studio schema:deploy",
+    "summon": "bun --env-file=.env run scripts/summon.ts",
     "prepare": "husky"
   },
   "devDependencies": {
