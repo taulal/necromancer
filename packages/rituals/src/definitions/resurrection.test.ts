@@ -106,6 +106,7 @@ async function acceptAnatomy(bench: any, instanceId: string) {
     action: 'accept-anatomy',
     actor: editor,
   })
+  await bench.tick({instanceId})
 }
 
 async function answerRequiredQuestions(bench: any) {
@@ -324,6 +325,141 @@ test('interrogation SLA sets haunted without leaving the stage', async () => {
 
   const haunted = after.instance.fields?.find((f: {name: string}) => f.name === 'haunted')
   expect(haunted?.value).toBe(true)
+})
+
+test('page-ritual cast failure still reaches reviewing with castFailed', async () => {
+  const {bench, instance} = await startResurrection()
+  await throughReanimating(bench, instance._id)
+  const [child] = await bench.children({instanceId: instance._id, activity: 'page-rituals'})
+  expect(child).toBeTruthy()
+
+  await completeEffect(bench, child!._id, EFFECTS.cast, 'failed')
+  expect(await bench.currentStage(child!._id)).toBe('reviewing')
+  const after = await bench.getInstance({instanceId: child!._id})
+  const flag = after.fields?.find((f: {name: string}) => f.name === 'castFailed')
+  expect(flag?.value).toBe(true)
+})
+
+test('ritual settles immediately when there are zero pages to fan out', async () => {
+  const bench = createBench({
+    now: T0,
+    documents: [
+      {
+        _id: 'seance-empty',
+        _type: 'seance',
+        url: 'https://empty.example',
+        slug: {current: 'empty'},
+        status: 'alive',
+        pageCap: 50,
+        targetMode: 'dataset',
+        visibility: 'private',
+      },
+    ],
+  })
+  await bench.deployDefinitions({definitions: [...definitions], expectedMinReaderModel: 10})
+  const {instance} = await bench.startInstance({
+    definition: 'resurrection',
+    initialFields: [subjectField('seance-empty', {type: 'seance'})],
+  })
+  await beginExhumation(bench, instance._id)
+  await completeEffect(bench, instance._id, EFFECTS.exhume)
+  await completeEffect(bench, instance._id, EFFECTS.autopsy)
+  await acceptAnatomy(bench, instance._id)
+  await completeEffect(bench, instance._id, EFFECTS.interrogate, 'done', {
+    ops: [
+      {
+        type: 'field.set',
+        target: {scope: 'workflow', field: 'openRequiredQuestions'},
+        value: {type: 'literal', value: 0},
+      },
+    ],
+  })
+  await completeEffect(bench, instance._id, EFFECTS.reanimate)
+  await completeEffect(bench, instance._id, EFFECTS.planRitual)
+  expect(await bench.currentStage(instance._id)).toBe('rising')
+})
+
+test('accept-anatomy waits for pending autopsy-rerun before leaving autopsy', async () => {
+  const {bench, instance} = await startResurrection()
+  await throughAutopsyInference(bench, instance._id)
+  await bench.fireAction({
+    instanceId: instance._id,
+    activity: 'accept',
+    action: 'rerun-autopsy',
+    actor: editor,
+  })
+  // Accept while rerun is pending — flag set, but stage stays autopsy.
+  await bench.fireAction({
+    instanceId: instance._id,
+    activity: 'accept',
+    action: 'accept-anatomy',
+    actor: editor,
+  })
+  await bench.tick({instanceId: instance._id})
+  expect(await bench.currentStage(instance._id)).toBe('autopsy')
+
+  await completeEffect(bench, instance._id, EFFECTS.autopsyRerun)
+  await bench.tick({instanceId: instance._id})
+  expect(await bench.currentStage(instance._id)).toBe('interrogation')
+})
+
+test('rise failure can retry or entomb', async () => {
+  const {bench, instance} = await startResurrection()
+  await throughReanimating(bench, instance._id)
+  await blessAllChildren(bench, instance._id)
+  expect(await bench.currentStage(instance._id)).toBe('rising')
+
+  await bench.fireAction({
+    instanceId: instance._id,
+    activity: 'publish',
+    action: 'rise',
+    actor: editor,
+  })
+  await completeEffect(bench, instance._id, EFFECTS.rise, 'failed')
+  expect(await bench.currentStage(instance._id)).toBe('rising')
+
+  await bench.fireAction({
+    instanceId: instance._id,
+    activity: 'publish',
+    action: 'retry-rise',
+    actor: editor,
+  })
+  await completeEffect(bench, instance._id, EFFECTS.riseRetry, 'failed')
+
+  await bench.fireAction({
+    instanceId: instance._id,
+    activity: 'publish',
+    action: 'entomb-rise',
+    actor: editor,
+  })
+  expect(await bench.currentStage(instance._id)).toBe('entombed')
+})
+
+test('failed child does not satisfy all-settled (must be blessed)', async () => {
+  const {bench, instance} = await startResurrection()
+  await throughReanimating(bench, instance._id)
+  const children = await bench.children({instanceId: instance._id, activity: 'page-rituals'})
+
+  // Bless one; leave the other in reviewing with castFailed — not blessed.
+  await completeEffect(bench, children[0]!._id, EFFECTS.cast)
+  await bench.fireAction({
+    instanceId: children[0]!._id,
+    activity: 'review',
+    action: 'approve',
+    actor: editor,
+  })
+  await completeEffect(bench, children[1]!._id, EFFECTS.cast, 'failed')
+  await bench.tick({instanceId: instance._id})
+  expect(await bench.currentStage(instance._id)).toBe('ritual')
+
+  await bench.fireAction({
+    instanceId: children[1]!._id,
+    activity: 'review',
+    action: 'approve',
+    actor: editor,
+  })
+  await bench.tick({instanceId: instance._id})
+  expect(await bench.currentStage(instance._id)).toBe('rising')
 })
 
 test('duplicate start of the same seance is rejected', async () => {

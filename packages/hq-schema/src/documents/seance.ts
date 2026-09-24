@@ -1,5 +1,6 @@
 import {EarthGlobeIcon} from '@sanity/icons/EarthGlobe'
 import {defineArrayMember, defineField, defineType} from 'sanity'
+import {slugFromUrl} from '../slugFromUrl'
 
 /**
  * One resurrection attempt (BRIEF.md §6). Subject of the `resurrection` workflow.
@@ -27,8 +28,12 @@ export const seance = defineType({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
-      description: 'Short id used for the target dataset name (rip-<slug>) and Vessel route.',
-      options: {source: 'url', maxLength: 64},
+      description:
+        'Short id used for the target dataset name (rip-<slug>) and Vessel route. Derived from the hostname (www + TLD stripped), not the raw URL.',
+      options: {
+        source: (doc: {url?: string}) => (doc.url ? slugFromUrl(doc.url) : ''),
+        maxLength: 64,
+      },
       validation: (rule) => rule.required(),
     }),
     defineField({

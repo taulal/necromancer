@@ -33,3 +33,4 @@ export {
   task,
   redirectLedgerEntry,
 }
+export {slugFromUrl} from './slugFromUrl'
