@@ -18,6 +18,7 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Landed Claude's missing B1–B5/B7 via `push-batch2b.sh` → `origin/main` includes question-gate B7 (must re-deploy blueprints in NEC-07c).
 - `docs/batch-3.md` + `bun run summon` CLI (#11). Bones catalogue (#10). Autopsy engine (#12). Showcase target (#13).
 - **NEC-07c:** waiting on Netlify site URL + env. Cursor checklist once `VESSEL_URL` exists: `/.netlify/functions/drain-background` → 401 without secret; workspace packages resolve; unattended exhume claim within 60s with App closed; then `bunx sanity blueprints deploy`.
+- **NEC-09:** Autopsy pipeline `condense` → `propose_anatomy` → `validate` (+ one repair) → `schemaProposal` v(n+1). HQ usage fields need `schema:deploy:hq` (Taylor go). Live PNJ golden run unblocked once token fixed (below).
 
 ### Batch 3 · dataset quota → shared showcase
 
