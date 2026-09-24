@@ -2,10 +2,11 @@
 /**
  * NEC-08L — create a séance, start resurrection, begin exhumation, drain until autopsy.
  *
- *   bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project]
+ *   bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project] [--fast]
  *
- * Default target: dataset `showcase` (public). One resurrected site at a time —
- * pass --replace to wipe showcase on reanimate if it already holds another séance.
+ * Default target: dataset `showcase` (private until the demo site is chosen).
+ * One resurrected site at a time — pass --replace to wipe showcase on reanimate.
+ * Autopsy uses NECRO_MODEL_REASONING (Sonnet) unless --fast (Haiku / NECRO_MODEL_FAST).
  * Project mode is stretch (kept in code; not the default).
  */
 import {slugFromUrl} from '@necro/hq-schema'
@@ -23,7 +24,7 @@ const SHOWCASE = 'showcase'
 
 function usage(): never {
   console.error(
-    'Usage: bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project]',
+    'Usage: bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project] [--fast]',
   )
   process.exit(1)
 }
@@ -34,6 +35,7 @@ function parseArgs(argv: string[]) {
   let cap = 50
   let drain = true
   let replace = false
+  let fast = false
   let mode: 'dataset' | 'project' = 'dataset'
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!
@@ -44,6 +46,8 @@ function parseArgs(argv: string[]) {
       drain = false
     } else if (a === '--replace') {
       replace = true
+    } else if (a === '--fast') {
+      fast = true
     } else if (a === '--mode') {
       const m = args[++i]
       if (m !== 'dataset' && m !== 'project') usage()
@@ -64,11 +68,12 @@ function parseArgs(argv: string[]) {
     console.error(`Invalid URL: ${url}`)
     process.exit(1)
   }
-  return {url, cap, drain, replace, mode}
+  return {url, cap, drain, replace, mode, fast}
 }
 
 async function main() {
-  const {url, cap, drain, replace, mode} = parseArgs(process.argv)
+  const {url, cap, drain, replace, mode, fast} = parseArgs(process.argv)
+  if (fast) process.env.NECRO_AUTOPSY_FAST = '1'
   const slug = slugFromUrl(url)
   if (!slug) {
     console.error('Could not derive slug from URL')
@@ -76,7 +81,7 @@ async function main() {
   }
 
   const targetDataset = mode === 'dataset' ? SHOWCASE : undefined
-  const visibility = mode === 'dataset' ? 'public' : 'private'
+  const visibility = 'private'
   const client = getWorkflowClient()
   const engine = getEngine()
 
@@ -84,7 +89,7 @@ async function main() {
   console.log(
     `[summon] slug=${slug} mode=${mode}` +
       (targetDataset ? ` dataset=${targetDataset}` : '') +
-      ` replace=${replace} cap=${cap} project=${projectId} tag=${tag}`,
+      ` visibility=${visibility} replace=${replace} cap=${cap} fast=${fast} project=${projectId} tag=${tag}`,
   )
   if (mode === 'project') {
     console.log(

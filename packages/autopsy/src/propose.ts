@@ -20,14 +20,24 @@ export type ProposeCallResult = {
   toolUseId: string
 }
 
-function reasoningModel(): string {
-  // Prefer FAST (Haiku) when set — cheaper/faster for iteration; REASONING for final golden.
-  const model = process.env.NECRO_MODEL_FAST?.trim() || process.env.NECRO_MODEL_REASONING?.trim()
-  if (!model) {
-    throw new Error('NECRO_MODEL_FAST or NECRO_MODEL_REASONING must be set')
+function resolveProposeModel(opts?: {fast?: boolean}): string {
+  // Default: REASONING (Sonnet). Haiku only when --fast / NECRO_AUTOPSY_FAST=1.
+  const preferFast = opts?.fast === true || process.env.NECRO_AUTOPSY_FAST === '1'
+  if (preferFast) {
+    const fast = process.env.NECRO_MODEL_FAST?.trim()
+    if (fast) return fast
   }
-  return model
+  const reasoning = process.env.NECRO_MODEL_REASONING?.trim()
+  if (reasoning) return reasoning
+  const fastFallback = process.env.NECRO_MODEL_FAST?.trim()
+  if (fastFallback) return fastFallback
+  throw new Error(
+    'NECRO_MODEL_REASONING must be set (use NECRO_MODEL_FAST only with --fast / NECRO_AUTOPSY_FAST=1)',
+  )
 }
+
+/** @internal exported for tests */
+export {resolveProposeModel}
 
 function buildUserMessage(args: {
   corpse: Corpse
@@ -85,7 +95,7 @@ export async function propose(args: {
   client?: Anthropic
 }): Promise<ProposeCallResult> {
   const client = args.client ?? new Anthropic()
-  const model = reasoningModel()
+  const model = resolveProposeModel()
 
   const message = await client.messages.create({
     model,
@@ -120,7 +130,7 @@ export async function repairPropose(args: {
   client?: Anthropic
 }): Promise<ProposeCallResult> {
   const client = args.client ?? new Anthropic()
-  const model = args.previous.model || reasoningModel()
+  const model = args.previous.model || resolveProposeModel()
 
   const userContent = buildUserMessage({
     corpse: args.corpse,

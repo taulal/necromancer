@@ -28,7 +28,7 @@ export function SummonDrawer({open, onClose}: Props) {
 
   const [url, setUrl] = useState('')
   const [pageCap, setPageCap] = useState(50)
-  const [visibilityPublic, setVisibilityPublic] = useState(true)
+  const [visibilityPublic, setVisibilityPublic] = useState(false)
   const [replaceConfirmed, setReplaceConfirmed] = useState(false)
   const [occupancy, setOccupancy] = useState<ShowcaseOccupancy>({
     occupied: false,

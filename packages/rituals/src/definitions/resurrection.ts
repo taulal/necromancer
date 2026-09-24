@@ -74,6 +74,16 @@ export const resurrection = defineWorkflow({
       name: 'autopsyRerunBusy',
       // True while necro.autopsy-rerun is in flight (F6). Human `when` is illegal.
     }),
+    defineField({
+      type: 'string',
+      name: 'entombedFromStage',
+      // Set by *-failed actions before the to-entombed transition. Retry reads it.
+    }),
+    defineField({
+      type: 'boolean',
+      name: 'retryFromEntomb',
+      // Human Retry on entombed; transitions back to entombedFromStage.
+    }),
   ],
   stages: [
     /* ---------- summoned ---------- */
@@ -126,6 +136,13 @@ export const resurrection = defineWorkflow({
               name: 'exhume-failed',
               when: `$effectStatus['${EFFECTS.exhume}'] == 'failed'`,
               status: 'failed',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'entombedFromStage'},
+                  value: {type: 'literal', value: 'exhuming'},
+                },
+              ],
             }),
           ],
         }),
@@ -163,6 +180,13 @@ export const resurrection = defineWorkflow({
               name: 'autopsy-failed',
               when: `$effectStatus['${EFFECTS.autopsy}'] == 'failed'`,
               status: 'failed',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'entombedFromStage'},
+                  value: {type: 'literal', value: 'autopsy'},
+                },
+              ],
             }),
           ],
         }),
@@ -265,6 +289,13 @@ export const resurrection = defineWorkflow({
               name: 'interrogate-failed',
               when: `$effectStatus['${EFFECTS.interrogate}'] == 'failed'`,
               status: 'failed',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'entombedFromStage'},
+                  value: {type: 'literal', value: 'interrogation'},
+                },
+              ],
             }),
             // SLA: flag haunted, do not change stage.
             defineAction({
@@ -318,6 +349,13 @@ export const resurrection = defineWorkflow({
               name: 'reanimate-failed',
               when: `$effectStatus['${EFFECTS.reanimate}'] == 'failed'`,
               status: 'failed',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'entombedFromStage'},
+                  value: {type: 'literal', value: 'reanimating'},
+                },
+              ],
             }),
           ],
         }),
@@ -343,6 +381,13 @@ export const resurrection = defineWorkflow({
               name: 'plan-failed',
               when: `$effectStatus['${EFFECTS.planRitual}'] == 'failed'`,
               status: 'failed',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'entombedFromStage'},
+                  value: {type: 'literal', value: 'reanimating'},
+                },
+              ],
             }),
           ],
         }),
@@ -471,6 +516,13 @@ export const resurrection = defineWorkflow({
               title: 'Entomb',
               roles: ['editor'],
               status: 'failed',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'entombedFromStage'},
+                  value: {type: 'literal', value: 'rising'},
+                },
+              ],
             }),
           ],
         }),
@@ -484,7 +536,78 @@ export const resurrection = defineWorkflow({
     /* ---------- risen (terminal) ---------- */
     defineStage({name: 'risen', title: 'Risen'}),
 
-    /* ---------- entombed (off-ramp) ---------- */
-    defineStage({name: 'entombed', title: 'Entombed'}),
+    /* ---------- entombed (off-ramp; Retry returns to the stage that failed) ---------- */
+    defineStage({
+      name: 'entombed',
+      title: 'Entombed',
+      activities: [
+        defineActivity({
+          name: 'retry',
+          title: 'Retry from the stage that failed',
+          actions: [
+            defineAction({
+              name: 'enter-entombed',
+              when: 'true',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'retryFromEntomb'},
+                  value: {type: 'literal', value: false},
+                },
+              ],
+            }),
+            defineAction({
+              name: 'retry-from-entomb',
+              title: 'Retry',
+              roles: ['editor'],
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'retryFromEntomb'},
+                  value: {type: 'literal', value: true},
+                },
+              ],
+            }),
+            defineAction({
+              name: 'retry-acked',
+              when: '$fields.retryFromEntomb == true',
+              status: 'done',
+            }),
+          ],
+        }),
+      ],
+      transitions: [
+        defineTransition({
+          name: 'retry-to-exhuming',
+          to: 'exhuming',
+          when: '$fields.retryFromEntomb == true && $fields.entombedFromStage == "exhuming"',
+        }),
+        defineTransition({
+          name: 'retry-to-autopsy',
+          to: 'autopsy',
+          when: '$fields.retryFromEntomb == true && $fields.entombedFromStage == "autopsy"',
+        }),
+        defineTransition({
+          name: 'retry-to-interrogation',
+          to: 'interrogation',
+          when: '$fields.retryFromEntomb == true && $fields.entombedFromStage == "interrogation"',
+        }),
+        defineTransition({
+          name: 'retry-to-reanimating',
+          to: 'reanimating',
+          when: '$fields.retryFromEntomb == true && $fields.entombedFromStage == "reanimating"',
+        }),
+        defineTransition({
+          name: 'retry-to-ritual',
+          to: 'ritual',
+          when: '$fields.retryFromEntomb == true && $fields.entombedFromStage == "ritual"',
+        }),
+        defineTransition({
+          name: 'retry-to-rising',
+          to: 'rising',
+          when: '$fields.retryFromEntomb == true && $fields.entombedFromStage == "rising"',
+        }),
+      ],
+    }),
   ],
 })

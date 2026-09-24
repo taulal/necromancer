@@ -201,6 +201,22 @@ test('exhume failed moves to entombed', async () => {
   expect(await bench.currentStage(instance._id)).toBe('entombed')
 })
 
+test('retry from entombed returns to the stage that failed', async () => {
+  const {bench, instance} = await startResurrection()
+  await beginExhumation(bench, instance._id)
+  await completeEffect(bench, instance._id, EFFECTS.exhume, 'failed')
+  expect(await bench.currentStage(instance._id)).toBe('entombed')
+
+  await bench.fireAction({
+    instanceId: instance._id,
+    activity: 'retry',
+    action: 'retry-from-entomb',
+    actor: editor,
+  })
+  await bench.tick({instanceId: instance._id})
+  expect(await bench.currentStage(instance._id)).toBe('exhuming')
+})
+
 test('autopsy can be re-run before Accept anatomy', async () => {
   const {bench, instance} = await startResurrection()
   await throughAutopsyInference(bench, instance._id)

@@ -1,8 +1,11 @@
-import {Suspense} from 'react'
+import {Suspense, useState} from 'react'
 import {Link, NavLink, Outlet, useParams} from 'react-router'
 import {useDocumentProjection} from '@sanity/sdk-react'
-import {Box, Flex, Heading, Spinner, Stack, Text} from '@sanity/ui'
+import {useDocumentWorkflows, useWorkflowSession} from '@sanity/workflow-sdk'
+import {Box, Button, Flex, Heading, Spinner, Stack, Text} from '@sanity/ui'
 import {PendingWorkKicker} from '../lib/useDrainKicker'
+import {useNecroEngine} from '../lib/useNecroEngine'
+import {seanceGdrUri} from '../lib/seanceGdr'
 
 const STAGES = [
   {path: 'exhumation', label: 'Exhume'},
@@ -47,10 +50,9 @@ function SeanceHeader({seanceId}: {seanceId: string}) {
             {data?.url || '—'} · {data?.platform || 'unknown'} · {data?.status || '—'}
           </Text>
         </Stack>
-        {/* Workflow diagram lands with séance detail polish; slot reserved. */}
-        <Text size={1} style={{color: 'var(--necro-faint)'}}>
-          Diagram · later ticket
-        </Text>
+        <Suspense fallback={null}>
+          <EntombedRetry seanceId={seanceId} />
+        </Suspense>
       </Flex>
 
       <Flex as="nav" gap={1} wrap="wrap" style={{borderBottom: '1px solid var(--necro-line)'}}>
@@ -77,6 +79,46 @@ function SeanceHeader({seanceId}: {seanceId: string}) {
   )
 }
 
+function EntombedRetry({seanceId}: {seanceId: string}) {
+  const engine = useNecroEngine()
+  const list = useDocumentWorkflows({engine, document: seanceGdrUri(seanceId)})
+  const instanceId = list.instances?.[0]?._id
+  if (!instanceId) return null
+  return <EntombedRetrySession instanceId={instanceId} />
+}
+
+function EntombedRetrySession({instanceId}: {instanceId: string}) {
+  const engine = useNecroEngine()
+  const session = useWorkflowSession({engine, instanceId})
+  const [pending, setPending] = useState(false)
+  const stage = (session.evaluation?.instance as {currentStage?: string} | undefined)?.currentStage
+  const from = session.evaluation?.instance.fields?.find(
+    (f) => f.name === 'entombedFromStage',
+  )?.value
+
+  if (stage !== 'entombed') return null
+
+  return (
+    <Stack space={2} style={{alignItems: 'flex-end'}}>
+      <Text size={1} style={{color: 'var(--necro-ember)'}}>
+        Entombed{typeof from === 'string' && from ? ` · failed at ${from}` : ''}
+      </Text>
+      <Button
+        text="Retry"
+        tone="caution"
+        disabled={pending || !session.ready}
+        loading={pending}
+        onClick={() => {
+          setPending(true)
+          void session
+            .fireAction({activity: 'retry', action: 'retry-from-entomb'})
+            .finally(() => setPending(false))
+        }}
+      />
+    </Stack>
+  )
+}
+
 /** Séance shell — BRIEF.md §8.2; stage screens render in the outlet. */
 export function SeanceLayout() {
   const {seanceId} = useParams()
@@ -84,7 +126,6 @@ export function SeanceLayout() {
 
   return (
     <Box style={{minHeight: '100vh', background: 'var(--necro-ground)'}} padding={5}>
-      {/* Pokes the drain only while a séance screen is open and work is queued. */}
       <Suspense fallback={null}>
         <PendingWorkKicker />
       </Suspense>

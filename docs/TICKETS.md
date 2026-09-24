@@ -18,7 +18,7 @@ Run these from `apps/studio`:
 
 - [ ] Delete `v9dl2xdi/production`: `bun x sanity datasets delete production --force -p v9dl2xdi`. **Irreversible**, and `--force` skips the prompt, so double-check the project id first.
 - [ ] Create `hq` as private: `bun x sanity datasets create hq --visibility private -p v9dl2xdi`
-- [ ] Confirm `showcase` is **public**: `bun x sanity datasets visibility get showcase -p v9dl2xdi` (set it with `... visibility set showcase public`)
+- [ ] Confirm `showcase` is **private** until the demo site is chosen: `bunx sanity datasets visibility set showcase private -p v9dl2xdi` (flip to public for NEC-16)
 - [ ] Add CORS origin `http://localhost:3000` (Vessel dev) and the Netlify URL when known
 - [ ] Create tokens → `.env` (see `.env.example`): `SANITY_HQ_WRITE_TOKEN` (project, editor), `SANITY_ORG_TOKEN` (org robot)
 - [ ] Enable the Knowledge Base beta: sanity.io/manage → org → Apps (for NEC-15)

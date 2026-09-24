@@ -64,3 +64,10 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Node canvas is deterministic (singletons top-right, Bones strip, documents by evidence). Inspector edits `schemaProposal.types` via `useEditDocument` (rename, merge into…, drop, toggle required, Bones mapping). Merge-hint at ≥75% field Jaccard. Version diff vs v(n−1). **Re-run autopsy** / **Accept anatomy** use `useWorkflowSession().fireAction` (not `engine.fireAction`); disabled while autopsy/rerun busy; Accept stamps `acceptedAt`.
 - Surprise: `useEditDocument` path typing needs an explicit generic when HQ TypeGen isn’t wired into the App (`useEditDocument<string>({path:'acceptedAt'})`), otherwise `never`.
 - Do not put generated mocks in `docs/submission/` — real Dashboard captures only (now in AGENTS.md).
+
+### Loose ends (post-UI2)
+
+- Entombed **Retry** action returns to `entombedFromStage` (set by each `*-failed` action); séance header shows Retry via `session.fireAction`.
+- Summon / séance default `visibility: 'private'`; showcase dataset flipped to **private** (`sanity datasets visibility set showcase private`) until Taylor picks the public demo site.
+- App router back on **HashRouter** with `path="*"` → `<Navigate to="/" />` and non-route hash scrubbing (Dashboard host junk was the empty-plot cause).
+- Autopsy propose defaults to `NECRO_MODEL_REASONING` (Sonnet); Haiku only with `bun run summon … --fast` / `NECRO_AUTOPSY_FAST=1`.
