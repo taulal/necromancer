@@ -2,7 +2,8 @@
  * Platform fingerprints, lifted from runbooks/wp-modernisation-runbook.md.
  * TODO(NEC-08): add confidence weighting + header checks (x-powered-by, server, x-wix-*).
  */
-export type Platform = 'wordpress' | 'durable' | 'wix' | 'squarespace' | 'webflow' | 'static' | 'unknown'
+export type Platform =
+  'wordpress' | 'durable' | 'wix' | 'squarespace' | 'webflow' | 'static' | 'unknown'
 
 export const FINGERPRINTS: Record<Exclude<Platform, 'static' | 'unknown'>, RegExp[]> = {
   wordpress: [/wp-content\//, /wp-json\//, /<meta[^>]+generator[^>]+WordPress/i],

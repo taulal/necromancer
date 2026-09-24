@@ -14,6 +14,7 @@ Start with `BRIEF.md`, then `AGENTS.md`, then `docs/TICKETS.md`.
 cp .env.example .env   # fill in
 bun install
 bun run typecheck && bun run test
+bun run build:app && bun run build:vessel
 bun run dev:app        # opens in the Sanity Dashboard
 bun run dev:vessel
 ```

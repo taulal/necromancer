@@ -3,7 +3,11 @@
  * TODO(NEC-14): fetch page by slug, render Bones blocks, fall back to the
  * schema-driven renderer for inferred types, theme from siteSettings.brand.
  */
-export default async function SitePage({params}: {params: Promise<{site: string; slug?: string[]}>}) {
+export default async function SitePage({
+  params,
+}: {
+  params: Promise<{site: string; slug?: string[]}>
+}) {
   const {site, slug} = await params
   return (
     <main>

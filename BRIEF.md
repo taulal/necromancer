@@ -11,15 +11,15 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 
 - **Real use case.** It's `runbooks/wp-modernisation-runbook.md` turned into a product. We replatform Durable / WordPress / old PHP sites repeatedly (PNJ Build, NZ Sheds, Target Cleaning). Every hour Necromancer removes from that ~70hr "$20k website play" is margin.
 - **Real test bed for Editorial Workflows.** Extends the PDF → RAG ingestion pattern proven in the sandbox (AI effect → candidates → per-item child workflow → human gate → publish) from "one PDF" to "one whole website".
-- **Challenge fit.** Path Two judges on: honest build write-up, finished functionality, **schema thoughtfulness**, creativity. The product's core output *is* a schema. Bonus points for **App SDK** and **Workflows** — we use both as the spine, not as garnish.
+- **Challenge fit.** Path Two judges on: honest build write-up, finished functionality, **schema thoughtfulness**, creativity. The product's core output _is_ a schema. Bonus points for **App SDK** and **Workflows** — we use both as the spine, not as garnish.
 
 ## 2. Roles & ways of working
 
-| Who | Role | Owns |
-|---|---|---|
-| **Taylor** | Product owner / approver | Decisions, real-site selection + consent, Sanity org admin actions (tokens, beta access, dataset delete), final demo + submission |
-| **Claude (Cowork)** | Designer + PM | This brief, clickable HTML prototype, ticket breakdown + acceptance criteria, reviewing each Cursor PR against the brief, build log, DEV write-up draft |
-| **Cursor agent** | Developer | All code in the `necromancer` repo, bench tests, deploys. Works ticket-by-ticket (§12). Starts from `flight-cursor-starter` conventions (rules, skills) but **no `@flight-digital/*` packages** |
+| Who                 | Role                     | Owns                                                                                                                                                                                            |
+| ------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Taylor**          | Product owner / approver | Decisions, real-site selection + consent, Sanity org admin actions (tokens, beta access, dataset delete), final demo + submission                                                               |
+| **Claude (Cowork)** | Designer + PM            | This brief, clickable HTML prototype, ticket breakdown + acceptance criteria, reviewing each Cursor PR against the brief, build log, DEV write-up draft                                         |
+| **Cursor agent**    | Developer                | All code in the `necromancer` repo, bench tests, deploys. Works ticket-by-ticket (§12). Starts from `flight-cursor-starter` conventions (rules, skills) but **no `@flight-digital/*` packages** |
 
 **Loop:** Claude writes ticket → Cursor builds on a branch → Cursor posts summary + screenshots → Claude reviews against acceptance criteria → Taylor merges. Cursor keeps its chat transcripts (they're an optional-but-encouraged submission artefact). Claude maintains `BUILD-LOG.md` daily — the honest writeup is judged more heavily than polish ("a rough app with an honest writeup beats a polished one with three sentences").
 
@@ -28,6 +28,7 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 ## 3. Scope
 
 ### MVP (must ship by 3 Oct)
+
 1. App SDK app deployed to the Flight org Dashboard with: Graveyard, Séance view (all stages), Autopsy board, Interrogation, Ritual list, workflow diagram.
 2. Workflow definitions (engine 0.35) for the resurrection + per-page child ritual, with bench tests.
 3. Exhumation of server-rendered sites (WordPress, Durable, static/PHP) up to 50 pages.
@@ -39,6 +40,7 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 9. At least 2 real sites resurrected end to end; one public showcase.
 
 ### Stretch (only if MVP is green by 1 Oct)
+
 - **Knowledge Base contradictions** (Sanity Context KB over the dead site) — see §7.4. MVP has a Claude-only contradiction pass as fallback.
 - Production mode: new **project** per site (MVP: new dataset in the sandbox project).
 - Media Library as the asset home (MVP: dataset assets).
@@ -47,6 +49,7 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 - Visual before/after slider using screenshots.
 
 ### Out of scope
+
 - Te Reo / any translation.
 - FlightDeck, `@flight-digital/*` packages, Flight design system or any Flight IP in the repo or Vessel.
 - Auth/multi-tenant beyond what Sanity org membership gives us.
@@ -84,6 +87,7 @@ _Last updated: 24 Sep 2026 (scaffold landed) · Submission deadline: **Sun 4 Oct
 **Why the worker lives in the Vessel, not a Function:** crawling + multi-page Claude calls will exceed Function time limits, and it's the pattern already working in the sandbox (`src/app/api/workflows/drain`). The Function is the trigger; the Next route is the muscle. Re-evaluate if Durable Functions ship before deadline (they won't).
 
 ### Repo
+
 New repo `necromancer` (monorepo, bun workspaces):
 
 ```
@@ -103,6 +107,7 @@ BRIEF.md · BUILD-LOG.md · AGENTS.md
 Port from `sanity-sandbox` (copy, don't import): `src/workflows/{client,engine,drain,runDrain,effect-handlers}.ts` patterns, the `refId`/`asDocumentId` helpers and the README's "gotchas" list. **Pin every `@sanity/workflow-*` package to exactly `0.35.0`** (exact-version peers; latest as of 23 Sep, and the first line that pairs with `@sanity/sdk` 3.x). The sandbox was written for 0.28 — read the 0.29→0.35 CHANGELOGs in `node_modules/@sanity/workflow-engine` before porting any construct.
 
 ### Sanity project reset (Taylor-approved step, ticket NEC-01)
+
 - Base project: **`v9dl2xdi`** (confirmed from `.env.development`). ⚠️ `flight.json` in the sandbox points at `dyewmg78` — that's the **Flight website**. Never touch it.
 - Delete dataset `v9dl2xdi/production` (irreversible — Taylor runs or explicitly approves the command). `showcase` ✅ created by Taylor 24 Sep (check it's set **public**). Create `hq` (private). `rip-*` datasets are created by the app.
 - The sandbox repo itself stays as-is on disk (it's the Flight site codebase — not published).
@@ -118,29 +123,32 @@ summoned ─▶ exhuming ─▶ autopsy ─▶ interrogation ─▶ reanimating 
    └─ start.requirements: singleSubject (one open run per séance)
 ```
 
-| Stage | Entry work | Human gate | Exit when |
-|---|---|---|---|
-| `summoned` | — | "Begin exhumation" button (confirm URL, page cap, target mode) | action fired |
-| `exhuming` | effect `necro.exhume` (progress field `exhumeProgress`) | — | `$effectStatus['necro.exhume'] == 'done'` |
-| `autopsy` | effect `necro.autopsy` → writes `schemaProposal` | Reviewer edits proposal in Autopsy board, then **"Accept anatomy"** | action fired; guard freezes proposal after |
-| `interrogation` | effect `necro.interrogate` → writes `question` docs | every `required` question answered (gate: GROQ count of open required questions == 0) | trigger |
-| `reanimating` | effect `necro.reanimate`: create dataset → deploy schema → create release → import docs as release versions → upload assets → write `redirect` docs; then effect `necro.plan-ritual` → writes `task` docs | — | both effects `done` |
-| `ritual` | **fan-out**: one `page-ritual` child per target page (`forEach` over pages) | tasks worked in children | all children settled (`$subworkflows`) |
-| `risen` | action "Rise" → effect `necro.rise` publishes the release | Rise button (roles: administrator/editor) | terminal |
+| Stage           | Entry work                                                                                                                                                                                                | Human gate                                                                            | Exit when                                  |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `summoned`      | —                                                                                                                                                                                                         | "Begin exhumation" button (confirm URL, page cap, target mode)                        | action fired                               |
+| `exhuming`      | effect `necro.exhume` (progress field `exhumeProgress`)                                                                                                                                                   | —                                                                                     | `$effectStatus['necro.exhume'] == 'done'`  |
+| `autopsy`       | effect `necro.autopsy` → writes `schemaProposal`                                                                                                                                                          | Reviewer edits proposal in Autopsy board, then **"Accept anatomy"**                   | action fired; guard freezes proposal after |
+| `interrogation` | effect `necro.interrogate` → writes `question` docs                                                                                                                                                       | every `required` question answered (gate: GROQ count of open required questions == 0) | trigger                                    |
+| `reanimating`   | effect `necro.reanimate`: create dataset → deploy schema → create release → import docs as release versions → upload assets → write `redirect` docs; then effect `necro.plan-ritual` → writes `task` docs | —                                                                                     | both effects `done`                        |
+| `ritual`        | **fan-out**: one `page-ritual` child per target page (`forEach` over pages)                                                                                                                               | tasks worked in children                                                              | all children settled (`$subworkflows`)     |
+| `risen`         | action "Rise" → effect `necro.rise` publishes the release                                                                                                                                                 | Rise button (roles: administrator/editor)                                             | terminal                                   |
 
 Plus: **SLA trigger** — if `interrogation` sits > 48h, move séance `status` to `haunted` (flag only, no stage change) and highlight in Graveyard. Uses the `$now` deadline pattern from the sandbox.
 
 ### 5.2 Child: `page-ritual` (lifecycle: `child`, subject: target page ref)
+
 ```
 casting ─▶ reviewing ─▶ blessed
    ▲            │
    └─(recast)───┘
 ```
+
 - `casting`: triggered action runs every **auto** task for this page (effect `necro.cast`, Agent Actions). Progress via `ctx.setProgress`.
 - `reviewing`: human tasks for this page listed as a step-through; guard freezes AI-touched fields until reviewer approves or sends back ("Recast" → back to casting with stage-scoped `note`).
 - `blessed`: terminal. Parent only sees settled/active (per sandbox README design note) — page outcome written to `task.status` so the parent's Rise gate can query it.
 
 ### 5.3 Engine gotchas to carry over (from sandbox README, found on 0.28 — re-verify on 0.35)
+
 1. `forEach` reads `$fields.subject._id`, not `.id`.
 2. Actor ids must be account-global (`g…` users, `p-…` robots).
 3. Duplicate start throws `StartNotAllowedError`.
@@ -151,16 +159,16 @@ casting ─▶ reviewing ─▶ blessed
 
 This is the schema judges will read. Everything is a document so it's queryable, auditable and drivable by workflow.
 
-| Type | Purpose | Key fields |
-|---|---|---|
-| `seance` | One resurrection attempt | `url`, `slug`, `platform` (enum: wordpress/durable/wix/squarespace/webflow/static/unknown + `confidence`), `targetMode` (dataset\|project), `targetDataset`, `targetProjectId`, `visibility` (private\|public), `pageCap`, `brand` {colors[], fonts[], logo}, `stats` {pages, images, words, links}, `status` (display: alive/haunted/risen/entombed), `startedBy` |
-| `exhumedPage` | Raw evidence per crawled URL | `seance`↗, `url`, `path`, `httpStatus`, `title`, `meta` {description, ogImage, canonical}, `headings[]`, `sections[]` {kind guess, html excerpt, text}, `images[]` {src, alt, w, h}, `links[]`, `detectedEntities` {phones[], emails[], addresses[], prices[]}, `contentHash` |
-| `schemaProposal` | The inferred anatomy (editable) | `seance`↗, `version`, `types[]` → `proposedType` |
-| `proposedType` (object) | One doc/object type | `name`, `title`, `kind` (document\|object\|singleton), `bonesMatch` (Bones block name or null), `fields[]` → `proposedField`, `rationale`, `evidence[]` (exhumedPage↗ + excerpt), `confidence`, `decision` (keep/merge/drop) + `mergeInto` |
-| `proposedField` (object) | | `name`, `type`, `of[]`, `to[]`, `required`, `validation` {max, min, regex}, `description`, `evidenceCount` |
-| `question` | Interrogation item | `seance`↗, `kind` (contradiction/authenticity/keep-or-kill/mapping/missing-info), `prompt`, `evidence[]` {page↗, quote, url}, `options[]`, `answer`, `answeredBy`, `required`, `source` (claude\|knowledgeBase), `spawnsTasks` |
-| `task` | Ritual to-do | `seance`↗, `page` (target doc id), `mode` (auto\|human), `action` (enum: rewrite-placeholder, generate-alt, generate-meta, fix-contact, normalise-headings, map-block, verify-testimonial, supply-asset, custom), `agentAction` {kind: generate/transform/patch, instruction, target paths}, `status` (todo/casting/done/failed/skipped), `fromQuestion`↗, `result` |
-| `redirectLedgerEntry` | 301 map | `seance`↗, `from`, `to`, `status` (mapped/unmapped/dropped) |
+| Type                     | Purpose                         | Key fields                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `seance`                 | One resurrection attempt        | `url`, `slug`, `platform` (enum: wordpress/durable/wix/squarespace/webflow/static/unknown + `confidence`), `targetMode` (dataset\|project), `targetDataset`, `targetProjectId`, `visibility` (private\|public), `pageCap`, `brand` {colors[], fonts[], logo}, `stats` {pages, images, words, links}, `status` (display: alive/haunted/risen/entombed), `startedBy`  |
+| `exhumedPage`            | Raw evidence per crawled URL    | `seance`↗, `url`, `path`, `httpStatus`, `title`, `meta` {description, ogImage, canonical}, `headings[]`, `sections[]` {kind guess, html excerpt, text}, `images[]` {src, alt, w, h}, `links[]`, `detectedEntities` {phones[], emails[], addresses[], prices[]}, `contentHash`                                                                                       |
+| `schemaProposal`         | The inferred anatomy (editable) | `seance`↗, `version`, `types[]` → `proposedType`                                                                                                                                                                                                                                                                                                                    |
+| `proposedType` (object)  | One doc/object type             | `name`, `title`, `kind` (document\|object\|singleton), `bonesMatch` (Bones block name or null), `fields[]` → `proposedField`, `rationale`, `evidence[]` (exhumedPage↗ + excerpt), `confidence`, `decision` (keep/merge/drop) + `mergeInto`                                                                                                                          |
+| `proposedField` (object) |                                 | `name`, `type`, `of[]`, `to[]`, `required`, `validation` {max, min, regex}, `description`, `evidenceCount`                                                                                                                                                                                                                                                          |
+| `question`               | Interrogation item              | `seance`↗, `kind` (contradiction/authenticity/keep-or-kill/mapping/missing-info), `prompt`, `evidence[]` {page↗, quote, url}, `options[]`, `answer`, `answeredBy`, `required`, `source` (claude\|knowledgeBase), `spawnsTasks`                                                                                                                                      |
+| `task`                   | Ritual to-do                    | `seance`↗, `page` (target doc id), `mode` (auto\|human), `action` (enum: rewrite-placeholder, generate-alt, generate-meta, fix-contact, normalise-headings, map-block, verify-testimonial, supply-asset, custom), `agentAction` {kind: generate/transform/patch, instruction, target paths}, `status` (todo/casting/done/failed/skipped), `fromQuestion`↗, `result` |
+| `redirectLedgerEntry`    | 301 map                         | `seance`↗, `from`, `to`, `status` (mapped/unmapped/dropped)                                                                                                                                                                                                                                                                                                         |
 
 Target datasets (`rip-*`, `showcase`) get: `siteSettings` (singleton: name, contact, brand tokens, nav), `page` (slug + `body[]` of Bones blocks), inferred collection types (e.g. `service`, `product`, `teamMember`, `post`, `testimonial`), `redirect`.
 
@@ -169,6 +177,7 @@ Target datasets (`rip-*`, `showcase`) get: `siteSettings` (singleton: name, cont
 Model: current Claude Sonnet for reasoning steps, Haiku for cheap classification; confirm model IDs at build. All calls server-side in the Vessel worker. Every AI output that makes a claim carries **evidence** (page ref + quote) — same discipline as TouchGrass `sourceQuote`. Use tool-use/structured output, never free-text parsing.
 
 ### 7.1 Exhume (`necro.exhume`)
+
 - Fetch `robots.txt`, `sitemap.xml` (+ index), fall back to link crawl from `/`; same-origin; respect `pageCap` (default 50); 5 concurrent.
 - Platform fingerprints (from the runbook): `wp-content/`, `wp-json/`, generator meta → WordPress; `cdn.durable.co` → Durable; `static.wixstatic.com` → Wix; `squarespace.com` → Squarespace; `webflow.com` → Webflow.
 - Parse with cheerio; strip nav/footer by repetition detection across pages (a block that appears on >70% of pages = chrome → `siteSettings` candidate).
@@ -177,8 +186,9 @@ Model: current Claude Sonnet for reasoning steps, Haiku for cheap classification
 - Write `exhumedPage` docs + `seance.stats`. Report progress per page.
 
 ### 7.2 Autopsy (`necro.autopsy`) — the schema thoughtfulness engine
+
 - Input: condensed `exhumedPage` sections (dedup by `contentHash`), the Bones catalogue (names + field shapes), and rules:
-  1. **Reuse Bones blocks first** for page sections; only propose a new *object* type when no block fits.
+  1. **Reuse Bones blocks first** for page sections; only propose a new _object_ type when no block fits.
   2. **Repeated structured things become document types** (3+ instances with same shape → collection: services, products, team, testimonials, posts).
   3. **Chrome becomes a singleton** (`siteSettings`, `navigation`).
   4. **Facts live once** (phone/email/address in `siteSettings`, referenced, never duplicated in page copy).
@@ -187,31 +197,36 @@ Model: current Claude Sonnet for reasoning steps, Haiku for cheap classification
 - Output `schemaProposal` v1. Re-running writes v2 (keep history — nice for the writeup).
 
 ### 7.3 Interrogate (`necro.interrogate`)
+
 Generates `question` docs. Kinds:
+
 - **contradiction** — same entity, different values across pages (phones, hours, prices, addresses).
 - **authenticity** — template/placeholder copy (Durable/theme boilerplate detection), stock testimonials, lorem ipsum.
 - **keep-or-kill** — thin/orphan/duplicate pages, stale blog posts, 404s linked internally.
 - **mapping** — low-confidence type/block mappings from autopsy.
 - **missing-info** — no meta descriptions, missing alt text, no contact page.
-Each answer can `spawnsTasks` (e.g. "021 152 6894 is correct" → auto task fix-contact across 4 pages).
+  Each answer can `spawnsTasks` (e.g. "021 152 6894 is correct" → auto task fix-contact across 4 pages).
 
 ### 7.4 Knowledge Base (stretch, but the headline if it works)
+
 - Build a Sanity Context **Knowledge Base** with the dead site URL as a source. KBs "identify contradictions in and between sources" with origins — exactly the contradiction question kind, with provenance from Sanity rather than our prompt.
 - Questions from the KB get `source: knowledgeBase` and a distinct badge in the UI.
 - **Taylor action:** enable KB beta in sanity.io/manage → org → Apps. **Spike first (NEC-15):** confirm a KB can be created and read programmatically (MCP endpoint) from the worker. If not → Claude-only contradiction pass (already MVP) and we say so honestly in the writeup.
 
 ### 7.5 Plan ritual (`necro.plan-ritual`)
+
 Turns answers + findings into `task` docs, classified `auto` (has a deterministic Agent Action recipe) vs `human` (judgement or missing asset). Every task has a one-line "why".
 
 ### 7.6 Cast (`necro.cast`) — Agent Actions on target docs
-| Task action | Agent Action | Notes |
-|---|---|---|
-| rewrite-placeholder | **Transform** | instruction includes brand tone summary from autopsy; field paths scoped |
-| generate-alt | **Generate** (image fields) | needs image field setup per docs |
-| generate-meta | **Generate** | title ≤ 60, description ≤ 155 |
-| fix-contact / normalise-headings | **Patch** (no LLM) | schema-aware, deterministic |
-| custom | **Prompt** → then Patch | fallback |
-Requires the target schema to be **deployed** first (hence reanimate before ritual). **Spike (NEC-12):** confirm Agent Actions can target release versions; if not, cast on drafts and add docs to the release after.
+
+| Task action                                                                                                                                                                                                           | Agent Action                | Notes                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------ |
+| rewrite-placeholder                                                                                                                                                                                                   | **Transform**               | instruction includes brand tone summary from autopsy; field paths scoped |
+| generate-alt                                                                                                                                                                                                          | **Generate** (image fields) | needs image field setup per docs                                         |
+| generate-meta                                                                                                                                                                                                         | **Generate**                | title ≤ 60, description ≤ 155                                            |
+| fix-contact / normalise-headings                                                                                                                                                                                      | **Patch** (no LLM)          | schema-aware, deterministic                                              |
+| custom                                                                                                                                                                                                                | **Prompt** → then Patch     | fallback                                                                 |
+| Requires the target schema to be **deployed** first (hence reanimate before ritual). **Spike (NEC-12):** confirm Agent Actions can target release versions; if not, cast on drafts and add docs to the release after. |
 
 ## 8. The App (App SDK) — screens
 
@@ -227,16 +242,17 @@ Design direction: **dark, occult, precise.** Near-black base, bone-white type, o
 
 ## 9. Vessel (Next.js) + Bones
 
-**No Flight IP.** The Vessel proves the *schema*, not our design system.
+**No Flight IP.** The Vessel proves the _schema_, not our design system.
 
 - **Bones** (`packages/bones`) — a small, open, deliberately plain block kit. Each block = Sanity object schema + React renderer: `hero`, `richText`, `mediaText`, `cardGrid`, `gallery`, `testimonial`, `faq`, `cta`, `contactBlock`, `logoStrip`, `stats`, `embed`. Plus `page`, `siteSettings`, `redirect`. Styling via CSS variables fed from `siteSettings.brand` — **the corpse keeps its face** (its own colours, fonts and logo).
-- **Schema-driven fallback renderer** — for inferred types Bones doesn't know (e.g. `service`, `product`), the Vessel reads the séance's compiled schema and renders by field type: string→heading/text, image→figure, array of refs→card list, portable text→prose, number+currency-ish→price. Collection types get auto index + detail routes. This is how the front end *shows the schema* rather than hiding it.
+- **Schema-driven fallback renderer** — for inferred types Bones doesn't know (e.g. `service`, `product`), the Vessel reads the séance's compiled schema and renders by field type: string→heading/text, image→figure, array of refs→card list, portable text→prose, number+currency-ish→price. Collection types get auto index + detail routes. This is how the front end _shows the schema_ rather than hiding it.
 - Routing: `/[site]/[[...slug]]` where `site` → target dataset. Showcase gets a clean domain route.
 - Perspectives: published by default; `?perspective=<releaseId>` for the Rise preview.
 - Middleware serves 301s from `redirect` docs (cache per dataset).
 - Hosts the drain worker (`/api/ritual/drain`, secret-authenticated).
 
 ## 10. Security & config
+
 - Browser (App): user's Sanity session only. **No tokens in the App bundle.** Only `SANITY_APP_*` non-secret vars.
 - Worker (Vessel, Netlify env): `ANTHROPIC_API_KEY`, `SANITY_HQ_WRITE_TOKEN`, `SANITY_ORG_TOKEN` (org robot: create datasets/projects, deploy schemas), `DRAIN_SECRET`.
 - Function → Vessel calls signed with `DRAIN_SECRET`.
@@ -245,28 +261,28 @@ Design direction: **dark, occult, precise.** Near-black base, bone-white type, o
 
 ## 11. Risks & fallbacks
 
-| Risk | Likelihood | Fallback |
-|---|---|---|
-| Workflows 0.x breaking change mid-build | Med | Pinned to 0.35.0 exact; no upgrades until after submission |
-| Agent Actions can't target release versions | Med | Cast on drafts, then add to release |
-| No programmatic schema deploy API (only CLI/MCP) | Med | Worker calls the same HTTP endpoint the CLI uses (spike in NEC-10), or runs `sanity schema deploy` against a generated temp workspace |
-| KB beta not accessible / not API-drivable | Med-High | Claude contradiction pass (MVP); document honestly |
-| Crawl too slow / blocked | Med | Sitemap-first, cap 50, cache HTML in `exhumedPage` so reruns don't refetch |
-| Judges can't log into our org to use the App | High | Public `showcase` dataset + public Vessel URL + GIFs/video + Cursor transcripts in the post |
-| Real client content in public | Low (if we follow §10) | `showcase` uses a consenting or Flight-owned site only |
-| Scope creep vs 10 days | High | §3 cut line; Claude calls it daily in the build log |
+| Risk                                             | Likelihood             | Fallback                                                                                                                              |
+| ------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Workflows 0.x breaking change mid-build          | Med                    | Pinned to 0.35.0 exact; no upgrades until after submission                                                                            |
+| Agent Actions can't target release versions      | Med                    | Cast on drafts, then add to release                                                                                                   |
+| No programmatic schema deploy API (only CLI/MCP) | Med                    | Worker calls the same HTTP endpoint the CLI uses (spike in NEC-10), or runs `sanity schema deploy` against a generated temp workspace |
+| KB beta not accessible / not API-drivable        | Med-High               | Claude contradiction pass (MVP); document honestly                                                                                    |
+| Crawl too slow / blocked                         | Med                    | Sitemap-first, cap 50, cache HTML in `exhumedPage` so reruns don't refetch                                                            |
+| Judges can't log into our org to use the App     | High                   | Public `showcase` dataset + public Vessel URL + GIFs/video + Cursor transcripts in the post                                           |
+| Real client content in public                    | Low (if we follow §10) | `showcase` uses a consenting or Flight-owned site only                                                                                |
+| Scope creep vs 10 days                           | High                   | §3 cut line; Claude calls it daily in the build log                                                                                   |
 
 ## 12. Plan & tickets
 
-| Day | Date | Focus |
-|---|---|---|
-| D0 | Thu 24 – Fri 25 Sep | Brief ✔, prototype, NEC-01…04 |
-| D1–2 | Sat 26 – Sun 27 | Exhume + HQ schema + workflow definitions + bench |
-| D3–4 | Mon 28 – Tue 29 | Autopsy + Interrogation (worker + screens) |
-| D5–6 | Wed 30 – Thu 1 Oct | Reanimate, Ritual/Agent Actions, Vessel |
-| D7 | Fri 2 Oct | Real-site runs, bug bash, stretch if green |
-| D8 | Sat 3 Oct | Showcase run, GIFs/video, writeup final |
-| — | Sun 4 Oct | Buffer + submit |
+| Day  | Date                | Focus                                             |
+| ---- | ------------------- | ------------------------------------------------- |
+| D0   | Thu 24 – Fri 25 Sep | Brief ✔, prototype, NEC-01…04                     |
+| D1–2 | Sat 26 – Sun 27     | Exhume + HQ schema + workflow definitions + bench |
+| D3–4 | Mon 28 – Tue 29     | Autopsy + Interrogation (worker + screens)        |
+| D5–6 | Wed 30 – Thu 1 Oct  | Reanimate, Ritual/Agent Actions, Vessel           |
+| D7   | Fri 2 Oct           | Real-site runs, bug bash, stretch if green        |
+| D8   | Sat 3 Oct           | Showcase run, GIFs/video, writeup final           |
+| —    | Sun 4 Oct           | Buffer + submit                                   |
 
 Each ticket: branch `nec-XX-short-name`, PR with summary, screenshots, and "deviations from brief".
 
@@ -289,6 +305,7 @@ Each ticket: branch `nec-XX-short-name`, PR with summary, screenshots, and "devi
 - **NEC-17 Writeup** (Claude + Taylor) — DEV post: problem, the ritual, schema decisions with examples, what broke (honest), Cursor transcript excerpts, project ID `v9dl2xdi` + showcase dataset URL, `#sanitychallenge`.
 
 ## 13. Demo script (for the post + video)
+
 1. Graveyard → Summon a real dead Durable site.
 2. Watch the sitemap tree grow; platform sigil lands on "Durable, 97%".
 3. Autopsy: "it found 6 services → made a `service` document type, not six pages" (schema thoughtfulness moment). Merge two near-duplicate types live.
@@ -298,11 +315,13 @@ Each ticket: branch `nec-XX-short-name`, PR with summary, screenshots, and "devi
 7. Rise.
 
 ## 14. Open decisions (Taylor)
+
 1. **Repo visibility** — public (helps judging, shows the Workflows code) vs private (Necromancer as future Flight IP). Recommend **public for the challenge**, relicense later if it becomes a product — nothing Flight-proprietary is in it.
 2. **Real test sites** — which 2–3? And which one (consenting or Flight-owned) goes in the public `showcase`?
 3. **Submission team** — solo or add an NZ dev (up to 4)?
 
 ## Appendix — reference
+
 - Sandbox: `~/Documents/Personal projects/sanity-sandbox` — `src/workflows/README.md` (engine patterns + gotchas), `sanity.workflow.ts`, `src/app/api/workflows/drain`.
 - Runbook: `Claude/runbooks/wp-modernisation-runbook.md` (platform detection, extraction, redirects).
 - Sanity docs: App SDK (sanity.io/docs/app-sdk), App SDK deployment, Agent Actions, Schema deployment, Functions, MCP server (mcp.sanity.io — has create_dataset/deploy_schema/create_release tools, useful reference for the underlying APIs).

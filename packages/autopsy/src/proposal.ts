@@ -3,8 +3,20 @@
  * TODO(NEC-09/10): compileToSchemaJson(proposal), compileToTypeScript(proposal)
  */
 export type FieldType =
-  | 'string' | 'text' | 'number' | 'boolean' | 'date' | 'datetime' | 'url' | 'slug'
-  | 'image' | 'file' | 'array' | 'object' | 'reference' | 'portableText'
+  | 'string'
+  | 'text'
+  | 'number'
+  | 'boolean'
+  | 'date'
+  | 'datetime'
+  | 'url'
+  | 'slug'
+  | 'image'
+  | 'file'
+  | 'array'
+  | 'object'
+  | 'reference'
+  | 'portableText'
 
 export interface ProposedField {
   name: string
