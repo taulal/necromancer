@@ -1,0 +1,10 @@
+node_modules
+dist
+.next
+.sanity
+.netlify
+coverage
+bun.lock
+*.tsbuildinfo
+sanity.types.ts
+apps/studio/schema.json

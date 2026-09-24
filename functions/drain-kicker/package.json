@@ -3,6 +3,13 @@
   "private": true,
   "type": "module",
   "main": "index.ts",
-  "scripts": { "typecheck": "tsc -p tsconfig.json" },
-  "dependencies": { "@sanity/functions": "^1.8.0" }
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@sanity/functions": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2"
+  }
 }

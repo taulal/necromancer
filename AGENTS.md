@@ -14,18 +14,18 @@ Sanity Challenge 2026 entry (Path Two). An **App SDK app** in the Sanity org Das
 
 ## Map
 
-| Path | What |
-|---|---|
-| `apps/app` | App SDK app (React + Vite via `sanity dev`, Sanity UI). Renders only inside the Dashboard. |
-| `apps/vessel` | Next.js 16 front end + `/api/ritual/drain` worker. Next 16 uses `src/proxy.ts`, not middleware. |
-| `apps/studio` | Internal HQ Studio. Exists to deploy the HQ schema and inspect raw docs. Not a product surface. |
-| `packages/rituals` | Workflow definitions, effect handlers, drain runtime. Bench tests live here. |
-| `packages/exhume` | Crawler, platform fingerprints, extractors. |
-| `packages/autopsy` | Schema proposal model + compiler. |
-| `packages/bones` | Open block kit (schemas + renderers). |
-| `packages/hq-schema` | HQ content model. |
-| `functions/drain-kicker` + `sanity.blueprint.ts` | Sanity Function that pokes the drain route. |
-| `sanity.workflow.ts` | `sanity-workflows deploy` config (hq dataset, tag `necromancer`). |
+| Path                                             | What                                                                                            |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `apps/app`                                       | App SDK app (React + Vite via `sanity dev`, Sanity UI). Renders only inside the Dashboard.      |
+| `apps/vessel`                                    | Next.js 16 front end + `/api/ritual/drain` worker. Next 16 uses `src/proxy.ts`, not middleware. |
+| `apps/studio`                                    | Internal HQ Studio. Exists to deploy the HQ schema and inspect raw docs. Not a product surface. |
+| `packages/rituals`                               | Workflow definitions, effect handlers, drain runtime. Bench tests live here.                    |
+| `packages/exhume`                                | Crawler, platform fingerprints, extractors.                                                     |
+| `packages/autopsy`                               | Schema proposal model + compiler.                                                               |
+| `packages/bones`                                 | Open block kit (schemas + renderers).                                                           |
+| `packages/hq-schema`                             | HQ content model.                                                                               |
+| `functions/drain-kicker` + `sanity.blueprint.ts` | Sanity Function that pokes the drain route.                                                     |
+| `sanity.workflow.ts`                             | `sanity-workflows deploy` config (hq dataset, tag `necromancer`).                               |
 
 Workspace packages are **source-only** (`exports` → `src/index.ts`). There's no build step; Vite and Next transpile them.
 
@@ -41,7 +41,7 @@ bun run dev:studio       # internal HQ Studio
 bun run workflows:deploy # Taylor-approved only
 ```
 
-Before every PR: `bun run typecheck && bun run test` are green, and the relevant app builds (`bun --cwd apps/app run build`, `bun --cwd apps/vessel run build`).
+Before every PR: `bun run typecheck && bun run test` are green, and the relevant app builds (`bun run build:app`, `bun run build:vessel`).
 
 ## Hard rules
 
@@ -63,7 +63,7 @@ Before every PR: `bun run typecheck && bun run test` are green, and the relevant
 - Lists → `useDocuments` handles → `useDocumentProjection`. Edits → `useEditDocument` on change. Never `useState`-then-save.
 - Use `documentId` as the React key.
 - Workflows in the app: `@sanity/workflow-sdk` (`useWorkflowSession`, `useWorkflowInstances`, `useDocumentWorkflows`) and `@sanity/workflow-diagram`.
-- First deploy: `bun --cwd apps/app run deploy -- --create --title "Necromancer" --yes --json`, then save `application.id` to `deployment.appId` in `apps/app/sanity.cli.ts`. Taylor approves this.
+- First deploy: `bun run --filter @necro/app deploy -- --create --title "Necromancer" --yes --json`, then save `application.id` to `deployment.appId` in `apps/app/sanity.cli.ts`. Taylor approves this.
 
 ## Design
 

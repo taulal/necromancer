@@ -5,7 +5,14 @@ import {Card, Heading, Stack, Text} from '@sanity/ui'
  * Graveyard (NEC-04) · Exhumation (NEC-08) · Autopsy (NEC-09) · Interrogation (NEC-11)
  * Ritual (NEC-13) · Rise (NEC-16)
  */
-export const SCREENS = ['graveyard', 'exhumation', 'autopsy', 'interrogation', 'ritual', 'rise'] as const
+export const SCREENS = [
+  'graveyard',
+  'exhumation',
+  'autopsy',
+  'interrogation',
+  'ritual',
+  'rise',
+] as const
 export type Screen = (typeof SCREENS)[number]
 
 export function Placeholder({screen}: {screen: Screen}) {

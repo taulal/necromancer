@@ -3,7 +3,13 @@
   "private": true,
   "type": "module",
   "description": "Open block kit: plain Sanity object schemas + React renderers. No Flight IP.",
-  "exports": { ".": "./src/index.ts" },
-  "scripts": { "typecheck": "tsc -p tsconfig.json" },
-  "dependencies": { "react": "^19.2.0" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "react": "^19.2.0"
+  }
 }
