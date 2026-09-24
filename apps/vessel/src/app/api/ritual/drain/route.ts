@@ -78,7 +78,21 @@ function backgroundUrl(): string | null {
 
 export async function POST(req: Request) {
   const kind = authorise(req)
-  if (!kind) return new Response('Unauthorised', {status: 401})
+  if (!kind) {
+    const header = req.headers.get('authorization') ?? ''
+    const token = header.startsWith('Bearer ') ? header.slice(7).trim() : ''
+    const secretConfigured = Boolean(env('DRAIN_SECRET'))
+    return Response.json(
+      {
+        error: 'Unauthorised',
+        secretConfigured,
+        tokenProvided: Boolean(token),
+        tokenLen: token.length,
+        secretLen: env('DRAIN_SECRET').length,
+      },
+      {status: 401},
+    )
+  }
 
   const mode = await readMode(req.clone(), kind)
   const holder = kind === 'kick' ? 'app-kick' : mode === 'schedule' ? 'schedule' : 'secret-kick'
