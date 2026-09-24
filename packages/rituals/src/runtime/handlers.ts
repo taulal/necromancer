@@ -1,0 +1,36 @@
+/**
+ * Stub effect handlers for NEC-07. Real work lands in later tickets;
+ * stubs mark done and report progress so UI bars can light up early.
+ *
+ * Handler signature on 0.35: `(params, ctx)` — progress is 0–100.
+ */
+import type {EffectHandler} from '@sanity/workflow-engine'
+import {EFFECTS} from '../effects/names'
+import {asDocumentId} from './refId'
+
+const stub =
+  (label: string): EffectHandler =>
+  async (params, ctx) => {
+    const seance = params.seance != null ? asDocumentId(params.seance) : undefined
+    const page = params.page != null ? asDocumentId(params.page) : undefined
+    try {
+      await ctx.setProgress('exhumeProgress', 15)
+      await new Promise((r) => setTimeout(r, 50))
+      await ctx.setProgress('exhumeProgress', 100)
+    } catch {
+      /* progress field only exists on the parent; child casts may lack it */
+    }
+    ctx.log(`[stub] ${label}`, {seance, page})
+  }
+
+/** Every effect name the definitions queue — stubs until their ticket lands. */
+export const effectHandlers: Record<string, EffectHandler> = {
+  [EFFECTS.exhume]: stub('necro.exhume'),
+  [EFFECTS.autopsy]: stub('necro.autopsy'),
+  [EFFECTS.autopsyRerun]: stub('necro.autopsy-rerun'),
+  [EFFECTS.interrogate]: stub('necro.interrogate'),
+  [EFFECTS.reanimate]: stub('necro.reanimate'),
+  [EFFECTS.planRitual]: stub('necro.plan-ritual'),
+  [EFFECTS.cast]: stub('necro.cast'),
+  [EFFECTS.rise]: stub('necro.rise'),
+}

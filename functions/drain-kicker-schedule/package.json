@@ -1,0 +1,15 @@
+{
+  "name": "@necro/fn-drain-kicker-schedule",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@sanity/functions": "^1.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22"
+  }
+}
