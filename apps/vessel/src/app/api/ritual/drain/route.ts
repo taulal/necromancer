@@ -10,11 +10,13 @@
  */
 import {
   isDrainLockHeld,
+  kickDrainBackground,
   releaseDrainLock,
   runDrain,
   summariseDrain,
   tryAcquireDrainLock,
   type DrainMode,
+  type DrainRunOutcome,
 } from '@necro/rituals'
 
 type AuthKind = 'secret' | 'kick'
@@ -46,11 +48,16 @@ async function runLocked(mode: DrainMode, holder: string) {
   if (!lock.ok) {
     return {skipped: 'busy' as const}
   }
+  let outcome: DrainRunOutcome | undefined
   try {
-    const results = await runDrain(mode)
-    return summariseDrain(results)
+    outcome = await runDrain(mode)
+    return summariseDrain(outcome)
   } finally {
     await releaseDrainLock(lock.rev)
+    if (outcome?.budgetExhausted && outcome.pendingAfter > 0) {
+      // Local / after-lock continue (Netlify path uses drain-background's own continue).
+      await kickDrainBackground(mode, holder)
+    }
   }
 }
 

@@ -1,14 +1,18 @@
 /**
  * Netlify Background Function — up to 15 minutes (review F2).
  * Invoked by `/api/ritual/drain` after auth; does the lock + drain work.
+ * Loops pending work inside the lock; if the time budget expires with work
+ * still queued, releases the lock then self-invokes so the chain continues.
  */
 import type {Context} from '@netlify/functions'
 import {
+  kickDrainBackground,
   releaseDrainLock,
   runDrain,
   summariseDrain,
   tryAcquireDrainLock,
   type DrainMode,
+  type DrainRunOutcome,
 } from '@necro/rituals'
 
 export default async (req: Request, _context: Context) => {
@@ -34,15 +38,23 @@ export default async (req: Request, _context: Context) => {
     return Response.json({skipped: 'busy'}, {status: 202})
   }
 
+  let outcome: DrainRunOutcome | undefined
+  let response: Response
   try {
-    const results = await runDrain(mode)
-    return Response.json(summariseDrain(results))
+    outcome = await runDrain(mode)
+    response = Response.json(summariseDrain(outcome))
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    return Response.json({error: message}, {status: 500})
+    response = Response.json({error: message}, {status: 500})
   } finally {
     await releaseDrainLock(lock.rev)
   }
+
+  if (outcome?.budgetExhausted && outcome.pendingAfter > 0) {
+    await kickDrainBackground(mode, holder)
+  }
+
+  return response
 }
 
 // No `config.path` on purpose (B2): the Vessel route calls the default
