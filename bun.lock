@@ -6,6 +6,7 @@
       "devDependencies": {
         "@commitlint/cli": "^21.2.3",
         "@commitlint/config-conventional": "^21.2.3",
+        "@netlify/functions": "^6.0.0",
         "@sanity/blueprints": "^0.27.0",
         "@sanity/workflow-cli": "0.35.0",
         "@sanity/workflow-engine-test": "0.35.0",
@@ -690,6 +691,10 @@
     "@necro/studio": ["@necro/studio@workspace:apps/studio"],
 
     "@necro/vessel": ["@necro/vessel@workspace:apps/vessel"],
+
+    "@netlify/functions": ["@netlify/functions@6.0.0", "", { "dependencies": { "@netlify/types": "3.0.0" } }, "sha512-Pee+FoFnAtdejTkl62a7mZxj6Wx4eqVNuYyDc5T4XPJN9GaAWaUf4cZQFlf2m4Fqq0HoghjtcPKo+BZviVPPKA=="],
+
+    "@netlify/types": ["@netlify/types@3.0.0", "", {}, "sha512-zRCidsQgI4CZWrZB/kmwdPf0QbSNljakfNSLizFvrsSA3UcUrTWSBNMVKmZnob92/8ESeUN0ewXLOlffJU+ATQ=="],
 
     "@next/env": ["@next/env@16.3.6", "", {}, "sha512-x9Vblze1EbtltQYnNH38xCPWU3TVfBd1eXqA3+w9+BTpedkkdNpAaltXlGQ/nsc1+E0mVTNrtcbX3GoO09zeLQ=="],
 

@@ -1,9 +1,9 @@
 /**
- * Schedule twin of drain-kicker — same POST, different Blueprint trigger.
+ * Schedule twin — POSTs with mode=schedule so Vessel ticks all instances + sweeps.
  */
 import {scheduledEventHandler} from '@sanity/functions'
 
-async function kickVessel(): Promise<void> {
+export const handler = scheduledEventHandler(async () => {
   const base = process.env.VESSEL_URL?.replace(/\/$/, '')
   const secret = process.env.DRAIN_SECRET
   if (!base || !secret) {
@@ -12,11 +12,11 @@ async function kickVessel(): Promise<void> {
   }
   const res = await fetch(`${base}/api/ritual/drain`, {
     method: 'POST',
-    headers: {authorization: `Bearer ${secret}`},
+    headers: {
+      authorization: `Bearer ${secret}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({mode: 'schedule'}),
   })
   console.log(`[drain-kicker-schedule] drain → ${res.status}`)
-}
-
-export const handler = scheduledEventHandler(async () => {
-  await kickVessel()
 })

@@ -46,7 +46,7 @@ Before every PR: `bun run typecheck && bun run test` are green, and the relevant
 ## Hard rules
 
 1. **No Flight IP.** No `@flight-digital/*` packages, no FlightDeck, no Linaria, no Flight design tokens. The repo may go public.
-2. **No secrets in the browser.** The App bundle only sees `SANITY_APP_*` values, and those must be non-secret. Tokens and the Anthropic key live only in Vessel server code and Netlify env.
+2. **No secrets in the browser.** The App bundle only sees `SANITY_APP_*` values, and those must be non-secret. Tokens and the Anthropic key live only in Vessel server code and Netlify env. `SANITY_APP_DRAIN_KICK` is **public-by-design**: any Dashboard user can read it. The Vessel treats it as a low-privilege kick (pending-only drain, single-flight lock ≥10s effective, never tick-all). Never put `DRAIN_SECRET` or write tokens in `SANITY_APP_*`.
 3. **Never touch project `dyewmg78`.** It's the Flight website. Our project is `v9dl2xdi`.
 4. **No destructive or org-level commands** (dataset delete, app/workflow/Function/schema deploy to shared datasets) without Taylor saying "go" in the ticket or PR.
 5. **Workflows packages are exact-version peers.** Every `@sanity/workflow-*` must be exactly `0.35.0`. Never bump one alone.

@@ -1,7 +1,9 @@
 /**
- * Sanity Functions for Necromancer.
- * Blueprint deploy: NO-GO until F1–F3 drain work merges and Vessel is on Netlify.
- * Combines question-gate (NEC-06b) with drain kickers (NEC-07).
+ * Sanity Functions for Necromancer (review F1 + NEC-06b).
+ * Document kick: only when there is unclaimed pending work.
+ * Schedule: tick-all + sweep (Vessel interprets mode=schedule).
+ * question-gate: recompute openRequiredQuestions on question changes.
+ * Blueprint deploy: NO-GO until Vessel is on Netlify.
  */
 import {defineBlueprint, defineDocumentFunction, defineScheduledFunction} from '@sanity/blueprints'
 
@@ -34,7 +36,10 @@ export default defineBlueprint({
       memory: 1,
       event: {
         on: ['create', 'update'],
-        filter: '_type == "sanity.workflow.instance" && tag == "necromancer"',
+        // Unclaimed pending effects only (0.35: claim absence = available).
+        // Prefer delta when the Functions runtime supports it.
+        filter:
+          '_type == "sanity.workflow.instance" && tag == "necromancer" && count(pendingEffects[!defined(claim)]) > 0 && delta::changedAny(pendingEffects)',
         resource: {type: 'dataset', id: `${PROJECT_ID}.${HQ}`},
       },
       env: {
@@ -51,6 +56,7 @@ export default defineBlueprint({
       env: {
         VESSEL_URL: process.env.VESSEL_URL ?? '',
         DRAIN_SECRET: process.env.DRAIN_SECRET ?? '',
+        DRAIN_MODE: 'schedule',
       },
     }),
   ],

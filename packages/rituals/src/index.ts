@@ -3,10 +3,16 @@ export {EFFECTS, type EffectName} from './effects/names'
 export {
   getEngine,
   getWorkflowClient,
+  runDrain,
   runDrainPass,
   runDrainAndTickAll,
+  pendingInstanceIds,
   summariseDrain,
+  tryAcquireDrainLock,
+  releaseDrainLock,
+  createProgressThrottle,
   effectHandlers,
   asDocumentId,
   type DrainPassResult,
+  type DrainMode,
 } from './runtime'
