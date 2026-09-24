@@ -71,7 +71,14 @@ async function runLocked(mode: DrainMode, holder: string) {
 
 function backgroundUrl(): string | null {
   const site = env('URL') || env('DEPLOY_PRIME_URL') || env('VESSEL_URL')
-  if (!site || !env('NETLIFY')) return null
+  if (!site) return null
+  // Next on Netlify sometimes omits NETLIFY=true; URL/DEPLOY_PRIME_URL are reliable.
+  const hosted =
+    Boolean(env('NETLIFY')) ||
+    Boolean(env('URL')) ||
+    Boolean(env('DEPLOY_PRIME_URL')) ||
+    site.includes('netlify.app')
+  if (!hosted) return null
   // Default Functions v2 URL: drain-background.mts has no custom `config.path` (B2).
   return `${site.replace(/\/$/, '')}/.netlify/functions/drain-background`
 }
