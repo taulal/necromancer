@@ -1544,6 +1544,13 @@
         },
         "optional": true
       },
+      "entombedReason": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "startedBy": {
         "type": "objectAttribute",
         "value": {

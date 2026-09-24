@@ -1,6 +1,14 @@
 import {loadRobots, isAllowed} from './robots'
 import {collectSitemapUrls} from './sitemap'
-import {DEFAULT_CONCURRENCY, DEFAULT_PAGE_CAP, fetchText, normaliseUrl, sameOrigin} from './http'
+import {
+  OffSiteRedirectError,
+  isSameSiteRedirect,
+  DEFAULT_CONCURRENCY,
+  DEFAULT_PAGE_CAP,
+  fetchText,
+  normaliseUrl,
+  sameOrigin,
+} from './http'
 import {detectPlatform, type Platform} from '../fingerprints'
 import {extractPage, type ExtractedPage} from '../extract/page'
 import {extractBrand, type BrandExtraction} from '../extract/brand'
@@ -63,6 +71,10 @@ export async function crawl(options: CrawlOptions): Promise<CrawlResult> {
   // F8: resolve apex → www (or similar) before locking origin / robots / sitemap.
   const startRes = await fetchPage(start)
   const finalStart = startRes.finalUrl || start
+  // B5: only follow www/apex and http→https hops; anything else is a different site.
+  if (!isSameSiteRedirect(start, finalStart)) {
+    throw new OffSiteRedirectError(start, finalStart)
+  }
   const origin = new URL(finalStart).origin
 
   let robotsTxt = ''

@@ -245,6 +245,7 @@ export type Seance = {
   }
   exhumeProgress?: number
   status?: 'alive' | 'haunted' | 'risen' | 'entombed'
+  entombedReason?: string
   startedBy?: string
 }
 

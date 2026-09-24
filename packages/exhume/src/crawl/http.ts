@@ -170,3 +170,33 @@ export function normaliseUrl(href: string, base: string): string | null {
     return null
   }
 }
+
+/** Thrown when the start URL redirects somewhere that isn't the same site (B5). */
+export class OffSiteRedirectError extends Error {
+  readonly from: string
+  readonly to: string
+  constructor(from: string, to: string) {
+    super(`Redirects off-site: ${from} → ${to}`)
+    this.name = 'OffSiteRedirectError'
+    this.from = from
+    this.to = to
+  }
+}
+
+/**
+ * The only redirects we follow when locking the crawl origin (B5): the same host with
+ * `www.` added or removed, and/or http → https. Anything else (a parked domain, a
+ * platform landing page) means the site we were asked to exhume isn't there.
+ */
+export function isSameSiteRedirect(from: string, to: string): boolean {
+  try {
+    const a = new URL(from)
+    const b = new URL(to)
+    const bare = (h: string) => h.toLowerCase().replace(/^www\./, '')
+    if (bare(a.hostname) !== bare(b.hostname)) return false
+    if (a.protocol === b.protocol) return true
+    return a.protocol === 'http:' && b.protocol === 'https:'
+  } catch {
+    return false
+  }
+}

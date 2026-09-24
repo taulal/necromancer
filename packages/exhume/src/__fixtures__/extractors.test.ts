@@ -10,7 +10,7 @@ import {detectChrome} from '../extract/chrome'
 import {decodeCfEmail, extractDurable} from '../extract/durable'
 import {sanitizeStoredHtml} from '../extract/sanitizeHtml'
 import {looksLikeSitemapXml} from '../crawl/sitemap'
-import {sameOrigin} from '../crawl/http'
+import {OffSiteRedirectError, isSameSiteRedirect, sameOrigin} from '../crawl/http'
 import {crawl} from '../crawl/crawl'
 import type {FetchResult} from '../crawl/http'
 
@@ -293,5 +293,30 @@ describe('F11 durable + cfemail + sitemap soft-404', () => {
     expect(
       looksLikeSitemapXml('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>'),
     ).toBe(true)
+  })
+})
+
+describe('B5 off-site redirects', () => {
+  test('isSameSiteRedirect allows www/apex and http→https only', () => {
+    expect(isSameSiteRedirect('https://a.example/', 'https://www.a.example/')).toBe(true)
+    expect(isSameSiteRedirect('http://a.example/', 'https://www.a.example/')).toBe(true)
+    expect(isSameSiteRedirect('https://www.a.example/', 'https://a.example/x')).toBe(true)
+    expect(isSameSiteRedirect('https://a.example/', 'http://a.example/')).toBe(false)
+    expect(isSameSiteRedirect('https://a.example/', 'https://parked.example/')).toBe(false)
+    expect(isSameSiteRedirect('https://a.example/', 'https://a.example.parked.io/')).toBe(false)
+  })
+
+  test('crawl throws OffSiteRedirectError instead of crawling another site', async () => {
+    const fetchPage = async (url: string): Promise<FetchResult> => ({
+      ok: true,
+      status: 200,
+      headers: new Headers({'content-type': 'text/html'}),
+      body: '<!doctype html><html><body>Domain for sale</body></html>',
+      finalUrl: url.startsWith('https://gone.example') ? 'https://parking.example/lander' : url,
+      kind: 'html',
+    })
+    await expect(
+      crawl({url: 'https://gone.example/', pageCap: 5, fetchPage}),
+    ).rejects.toBeInstanceOf(OffSiteRedirectError)
   })
 })

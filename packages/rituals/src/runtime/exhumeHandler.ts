@@ -1,7 +1,7 @@
 /**
  * necro.exhume — crawl the dead site and write exhumedPage docs + seance stats.
  */
-import {crawl} from '@necro/exhume'
+import {crawl, OffSiteRedirectError} from '@necro/exhume'
 import type {EffectHandler} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
 import {asDocumentId} from './refId'
@@ -35,14 +35,26 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
   const progress = createProgressThrottle((field, value) => ctx.setProgress(field, value))
   await progress(1)
 
-  const result = await crawl({
-    url: seance.url,
-    pageCap,
-    onProgress: async ({fetched, totalHint}) => {
-      const pct = Math.min(99, Math.round((fetched / Math.max(totalHint, pageCap, 1)) * 100))
-      await progress(Math.max(1, pct))
-    },
-  })
+  let result: Awaited<ReturnType<typeof crawl>>
+  try {
+    result = await crawl({
+      url: seance.url,
+      pageCap,
+      onProgress: async ({fetched, totalHint}) => {
+        const pct = Math.min(99, Math.round((fetched / Math.max(totalHint, pageCap, 1)) * 100))
+        await progress(Math.max(1, pct))
+      },
+    })
+  } catch (err) {
+    // B5: leave a readable reason on the séance before the effect fails → entombed.
+    if (err instanceof OffSiteRedirectError) {
+      await client
+        .patch(seance._id)
+        .set({status: 'entombed', entombedReason: `Redirects off-site to ${err.to}`})
+        .commit()
+    }
+    throw err
+  }
 
   const existing = await client.fetch<string[]>(
     `*[_type == "exhumedPage" && seance._ref in $ids]._id`,

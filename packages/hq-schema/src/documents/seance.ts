@@ -213,6 +213,15 @@ export const seance = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'entombedReason',
+      title: 'Why it was entombed',
+      type: 'string',
+      description:
+        'Set when the resurrection stops for good, e.g. robots.txt disallows us or the site redirects off-site.',
+      readOnly: true,
+      hidden: ({document}) => document?.status !== 'entombed',
+    }),
+    defineField({
       name: 'startedBy',
       title: 'Started by',
       type: 'string',
