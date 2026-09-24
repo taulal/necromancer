@@ -60,6 +60,7 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 
 ### NEC-UI2 · Autopsy board
 
-- Built against batch-4 + BRIEF §8 (Autopsy.dc.html `<main>` is corrupted — ~8k duplicated edge SVG fragments — so board chrome/microcopy was reconstructed from surviving header/nav, System tokens, and the batch-4 checklist).
-- Node canvas is deterministic (singletons top-right, Bones strip, documents by evidence). Inspector edits `schemaProposal.types` via `useEditDocument` (rename, merge into…, drop, toggle required, Bones mapping). Merge-hint at ≥75% field Jaccard. Version diff vs v(n−1). **Re-run autopsy** / **Accept anatomy** fire workflow actions; disabled while autopsy/rerun busy; Accept stamps `acceptedAt`.
+- Built against batch-4 + BRIEF §8. Replaced corrupted `docs/prototype/Autopsy.dc.html` with Claude's fixed copy (was ~100k lines of duplicated SVG from a bad build script).
+- Node canvas is deterministic (singletons top-right, Bones strip, documents by evidence). Inspector edits `schemaProposal.types` via `useEditDocument` (rename, merge into…, drop, toggle required, Bones mapping). Merge-hint at ≥75% field Jaccard. Version diff vs v(n−1). **Re-run autopsy** / **Accept anatomy** use `useWorkflowSession().fireAction` (not `engine.fireAction`); disabled while autopsy/rerun busy; Accept stamps `acceptedAt`.
 - Surprise: `useEditDocument` path typing needs an explicit generic when HQ TypeGen isn’t wired into the App (`useEditDocument<string>({path:'acceptedAt'})`), otherwise `never`.
+- Do not put generated mocks in `docs/submission/` — real Dashboard captures only (now in AGENTS.md).

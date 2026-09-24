@@ -728,8 +728,7 @@ function AutopsyActionsSession({
     setPending(action === 'rerun-autopsy' ? 'rerun' : 'accept')
     try {
       if (action === 'accept-anatomy') await onAccept()
-      await engine.fireAction({
-        instanceId,
+      await session.fireAction({
         activity: 'accept',
         action,
       })
@@ -752,7 +751,6 @@ function AutopsyActionsSession({
         tone="positive"
         disabled={busy || pending != null}
         loading={pending === 'accept'}
-        className={busy ? undefined : 'necro-flicker'}
         onClick={() => void fire('accept-anatomy')}
       />
     </Flex>

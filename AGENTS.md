@@ -70,6 +70,8 @@ Before every PR: `bun run typecheck && bun run test` are green, and the relevant
 
 Build against `docs/prototype/` (from Claude) and BRIEF §8: dark, occult, precise, with the theme carried in copy and motion, not clutter. Use Sanity UI primitives with the custom theme in `apps/app/src/theme/`. Respect `prefers-reduced-motion`.
 
+**`docs/submission/` is for real captures only** (Dashboard/Vessel screenshots, GIFs, screen recordings). Never commit generated / AI mock images there. Put design mocks elsewhere or omit them; side-by-side prototype compare in a PR uses a real capture once Taylor (or you) has signed into the Dashboard.
+
 ## PR template
 
 ```
