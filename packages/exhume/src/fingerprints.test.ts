@@ -1,18 +1,16 @@
-import {describe, expect, it} from 'vitest'
+import {describe, expect, test} from 'vitest'
 import {detectPlatform} from './fingerprints'
 
-describe('detectPlatform', () => {
-  it('spots WordPress', () => {
-    expect(detectPlatform('<link href="/wp-content/themes/x/style.css">').platform).toBe(
-      'wordpress',
-    )
+describe('detectPlatform (legacy)', () => {
+  test('wordpress from wp-content', () => {
+    expect(detectPlatform('<link href="/wp-content/themes/x.css">').platform).toBe('wordpress')
   })
-  it('spots Durable', () => {
-    expect(detectPlatform('<img src="https://cdn.durable.co/blocks/a.jpg">').platform).toBe(
-      'durable',
-    )
+
+  test('durable from cdn', () => {
+    expect(detectPlatform('<script src="https://cdn.durable.co/x.js">').platform).toBe('durable')
   })
-  it('falls back to static', () => {
-    expect(detectPlatform('<html><body>hi</body></html>').platform).toBe('static')
+
+  test('empty → unknown', () => {
+    expect(detectPlatform('').platform).toBe('unknown')
   })
 })
