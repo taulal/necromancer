@@ -1,0 +1,33 @@
+{
+  "name": "@necro/app",
+  "private": true,
+  "type": "module",
+  "description": "Necromancer — App SDK app for the Sanity org Dashboard.",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@necro/autopsy": "workspace:*",
+    "@necro/rituals": "workspace:*",
+    "@sanity/icons": "^5.2.0",
+    "@sanity/sdk": "^3.5.0",
+    "@sanity/sdk-react": "^3.5.0",
+    "@sanity/ui": "^3.5.0",
+    "@sanity/workflow-components": "0.35.0",
+    "@sanity/workflow-diagram": "0.35.0",
+    "@sanity/workflow-engine": "0.35.0",
+    "@sanity/workflow-react": "0.35.0",
+    "@sanity/workflow-sdk": "0.35.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "styled-components": "^6.4.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "sanity": "^6.16.0"
+  }
+}

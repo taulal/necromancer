@@ -1,0 +1,21 @@
+{
+  "name": "@necro/studio",
+  "private": true,
+  "type": "module",
+  "description": "Internal HQ Studio: deploys the HQ schema (needed by Agent Actions, TypeGen, Dashboard) and lets us inspect raw docs.",
+  "scripts": {
+    "dev": "sanity dev",
+    "schema:deploy": "sanity schema deploy",
+    "typegen": "sanity schema extract && sanity typegen generate",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@necro/hq-schema": "workspace:*",
+    "@sanity/vision": "^6.16.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "sanity": "^6.16.0",
+    "styled-components": "^6.4.2"
+  },
+  "devDependencies": { "@types/react": "^19.2.0" }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@necro/rituals",
+  "private": true,
+  "type": "module",
+  "description": "Workflow definitions (resurrection + page-ritual), effect handlers and the drain runtime.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc -p tsconfig.json" },
+  "dependencies": { "@sanity/workflow-engine": "0.35.0", "@sanity/client": "^8.7.0", "@anthropic-ai/sdk": "^0.128.0", "@necro/exhume": "workspace:*", "@necro/autopsy": "workspace:*" }
+}

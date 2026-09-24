@@ -1,0 +1,14 @@
+---
+description: Necromancer house rules. Always applies.
+alwaysApply: true
+---
+
+Read `AGENTS.md` (rules) and `BRIEF.md` (source of truth) before any change. Work one ticket from `docs/TICKETS.md` per branch (`nec-XX-short-name`).
+
+Non-negotiables:
+- No Flight IP (`@flight-digital/*`, FlightDeck, Linaria). No secrets in the App bundle.
+- Never touch Sanity project `dyewmg78`. Ours is `v9dl2xdi`.
+- Every `@sanity/workflow-*` package is exactly `0.35.0`. Check the engine CHANGELOG before porting sandbox (0.28) code.
+- No destructive or org-level commands without Taylor's explicit go.
+- `bun run typecheck && bun run test` green before every PR. Use the PR template in AGENTS.md, including "Deviations from brief" and "Build-log notes".
+- If the brief is wrong, stop and say so in the PR. Don't invent around it.
