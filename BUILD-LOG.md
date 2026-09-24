@@ -13,11 +13,24 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
   - The official `app-sanity-ui` template's loading `<Flex width="100vw">` fails typecheck against current Sanity UI. Fixed with `style`.
   - Next 16 deprecates `middleware.ts` in favour of `proxy.ts`.
 
+### Batch 3 kickoff
+
+- Landed Claude's missing B1–B5/B7 via `push-batch2b.sh` → `origin/main` includes question-gate B7 (must re-deploy blueprints in NEC-07c).
+- `docs/batch-3.md` + `bun run summon` CLI (#11). Bones catalogue (#10). Autopsy engine (#12). Showcase target (#13).
+- **NEC-07c:** waiting on Netlify site URL + env. Cursor checklist once `VESSEL_URL` exists: `/.netlify/functions/drain-background` → 401 without secret; workspace packages resolve; unattended exhume claim within 60s with App closed; then `bunx sanity blueprints deploy`.
+
 ### Batch 3 · dataset quota → shared showcase
 
 - Project `v9dl2xdi` plan limit: **`maxDatasets: 2`** (`hq` + `showcase`). Creating `rip-*` → `402 Quota exceeded`. Raising the quota (or NEC-10p project-per-site) deferred.
 - **Decision (skip NEC-10p for now):** every séance defaults to `targetMode: 'dataset'`, `targetDataset: 'showcase'`, `visibility: 'public'`. Project mode stays in the schema/code (`--mode project` on summon) but is **not** the default.
 - **One site at a time:** `showcase` holds a single resurrection. `necro.reanimate` refuses if showcase already has another séance's content unless `replaceTarget` is set (`bun run summon <url> --replace`; App confirm later). Replace wipes showcase **documents + deployed schemas** first — never touches `hq`.
 - Spike cleanup (24 Sep): deleted `_.schemas.spike` from showcase; archived+deleted release `r3xHWiOV`. Left `_.schemas.nec10s-spike` on `hq` alone (do not touch hq).
-- **Token gotcha:** `.env` had inline comments glued to token values (`sk…# project robot…`). `bun --env-file` still lost to a stale shell-exported `SANITY_HQ_WRITE_TOKEN`. After stripping comments, the project robot `necromancer-worker` auth works (200).
-- Spikes NEC-10s / NEC-12s: both **GO** (schema-store PUT; Agent Actions on `versions.<releaseId>.<docId>`). Full write-ups live on PR #12 / nec-09 branch until that merges.
+- **Token gotcha:** `.env` had inline comments glued to token values (`sk…# project robot…`). Stale shell-exported `SANITY_HQ_WRITE_TOKEN` overrode `bun --env-file`. After stripping comments, project robot `necromancer-worker` auth works (200). Live summon unblocked.
+
+### NEC-10s spike — schema deploy without Studio
+
+**Verdict: GO** — worker `PUT https://api.sanity.io/v2025-03-01/projects/{id}/datasets/{ds}/schemas` with `ManifestSchemaType[]` + project write token. No Studio build. MCP deploy_schema NO-GO (wrong grants). Blocked for `rip-*` only by dataset quota.
+
+### NEC-12s spike — Agent Actions × Content Releases
+
+**Verdict: GO** — cast `transform` / `generate` on `versions.<releaseId>.<docId>` (`apiVersion: 'vX'`). Draft→release fallback also works. ~1.5–2.1s per action.
