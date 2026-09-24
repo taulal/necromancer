@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineField, defineType} from '@sanity/types'
 import {portableTextMembers} from './portableText'
 
 export const mediaText = defineType({

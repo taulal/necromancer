@@ -37,5 +37,14 @@ jobs:
       - name: Build App
         run: bun run build:app
 
+      # Catches Studio imports pulled into server routes (Turbopack + swr react-server).
       - name: Build Vessel
         run: bun run build:vessel
+
+      - name: No Studio imports in Vessel/Functions packages
+        run: |
+          if rg -n "from ['\"]sanity['\"]|from ['\"]sanity/" packages/bones packages/hq-schema packages/exhume packages/autopsy packages/rituals functions --glob '*.{ts,tsx}'; then
+            echo "::error::Packages used by Vessel/Functions must import from @sanity/types, @sanity/client, or @sanity/schema — not sanity"
+            exit 1
+          fi
+          echo "ok: no sanity Studio imports in shared packages"

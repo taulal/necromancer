@@ -1,4 +1,4 @@
-import type {SchemaTypeDefinition} from 'sanity'
+import type {SchemaTypeDefinition} from '@sanity/types'
 import {cardGrid} from './cardGrid'
 import {contactBlock} from './contactBlock'
 import {cta} from './cta'

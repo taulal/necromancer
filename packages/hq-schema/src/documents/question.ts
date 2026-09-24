@@ -1,5 +1,5 @@
 import {HelpCircleIcon} from '@sanity/icons/HelpCircle'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from '@sanity/types'
 import {evidenceObject} from '../objects/evidence'
 
 /**

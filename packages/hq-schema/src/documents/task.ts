@@ -1,5 +1,5 @@
 import {CheckmarkCircleIcon} from '@sanity/icons/CheckmarkCircle'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from '@sanity/types'
 
 /**
  * One ritual to-do — auto (Agent Actions) or human (BRIEF.md §6 / §7.5–7.6).

@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineField, defineType} from '@sanity/types'
 
 /**
  * Shared link object: exactly one of external `href` or internal `page` ref.

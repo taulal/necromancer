@@ -1,5 +1,5 @@
 import {CubeIcon} from '@sanity/icons/Cube'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from '@sanity/types'
 
 /**
  * One proposed document/object/singleton type from the autopsy (BRIEF.md §6).

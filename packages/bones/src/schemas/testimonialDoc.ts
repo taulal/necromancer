@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineField, defineType} from '@sanity/types'
 
 /**
  * Reusable testimonial document. Named `testimonialDoc` so it does not collide with the

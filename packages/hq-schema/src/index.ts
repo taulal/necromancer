@@ -2,7 +2,7 @@
  * HQ content model — BRIEF.md §6.
  * This is the schema judges read: every type and field carries a human description.
  */
-import type {SchemaTypeDefinition} from 'sanity'
+import type {SchemaTypeDefinition} from '@sanity/types'
 import {exhumedPage} from './documents/exhumedPage'
 import {question} from './documents/question'
 import {redirectLedgerEntry} from './documents/redirectLedgerEntry'

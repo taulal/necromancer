@@ -65,6 +65,10 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Surprise: `useEditDocument` path typing needs an explicit generic when HQ TypeGen isn’t wired into the App (`useEditDocument<string>({path:'acceptedAt'})`), otherwise `never`.
 - Do not put generated mocks in `docs/submission/` — real Dashboard captures only (now in AGENTS.md).
 
+### Vessel build · no `sanity` in shared packages
+
+- `bun run build:vessel` failed: Turbopack couldn't bundle Studio into the drain server route because `packages/bones` and `packages/hq-schema` imported `defineType`/`defineField` from `sanity` (pulls `swr`'s react-server build, which has no default export). Fixed by importing from `@sanity/types` instead. AGENTS.md rule 11; CI already had `build:vessel`, plus a grep that bans `from 'sanity'` in Vessel/Functions packages.
+
 ### Loose ends (post-UI2)
 
 - Entombed **Retry** action returns to `entombedFromStage` (set by each `*-failed` action); séance header shows Retry via `session.fireAction`.

@@ -56,6 +56,7 @@ Before every PR: `bun run typecheck && bun run test` are green, and the relevant
    8a. **Every object in a Sanity array needs a unique `_key`** (typed members also need `_type`). Stamp with `withArrayKeys` / `arrayKey` from `@necro/hq-schema` at every create/patch write boundary. Primitive arrays (string, number, url) do not need keys.
 9. **Crawler etiquette:** same-origin only, honour robots.txt, page cap, 10s timeout, UA `NecromancerBot`.
 10. **If the brief is wrong, stop and say so** in the PR with the fallback from BRIEF §11. Don't silently invent around it.
+11. **No `sanity` imports in packages used by the Vessel or Functions.** Turbopack cannot bundle the full Studio into server routes (`swr`'s react-server build has no default export). Import schema helpers from `@sanity/types`, clients from `@sanity/client`, and schema tooling from `@sanity/schema` — never from `sanity`. Studio apps (`apps/studio`, `apps/app`) may still depend on `sanity` directly.
 
 ## App SDK essentials
 

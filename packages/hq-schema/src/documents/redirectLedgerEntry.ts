@@ -1,5 +1,5 @@
 import {LinkIcon} from '@sanity/icons/Link'
-import {defineField, defineType} from 'sanity'
+import {defineField, defineType} from '@sanity/types'
 
 /**
  * One 301 mapping from an old URL to its new Vessel path (BRIEF.md §6).
