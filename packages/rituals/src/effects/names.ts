@@ -9,6 +9,8 @@ export const EFFECTS = {
   planRitual: 'necro.plan-ritual',
   cast: 'necro.cast',
   rise: 'necro.rise',
+  /** Unique key for retry after rise-failed (0.35 unique effect names). */
+  riseRetry: 'necro.rise-retry',
 } as const
 
 export type EffectName = (typeof EFFECTS)[keyof typeof EFFECTS]

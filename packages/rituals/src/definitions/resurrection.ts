@@ -55,9 +55,24 @@ export const resurrection = defineWorkflow({
     defineField({
       type: 'number',
       name: 'openRequiredQuestions',
-      editable: true,
-      // Set by necro.interrogate; App decrements via editField as answers land.
-      // Lake scans are illegal in action `when` on 0.35 — this is the gate signal.
+      // System / interrogate completion / question-gate write this (F4).
+      // Not listed for `editor` — App must not decrement it.
+      editable: ['administrator'],
+    }),
+    defineField({
+      type: 'boolean',
+      name: 'riseFailed',
+      // Set when necro.rise fails; retry-rise clears it (F5).
+    }),
+    defineField({
+      type: 'boolean',
+      name: 'anatomyAccepted',
+      // Human Accept anatomy sets this; cascade finalize waits for rerun (F6).
+    }),
+    defineField({
+      type: 'boolean',
+      name: 'autopsyRerunBusy',
+      // True while necro.autopsy-rerun is in flight (F6). Human `when` is illegal.
     }),
   ],
   stages: [
@@ -159,18 +174,52 @@ export const resurrection = defineWorkflow({
               name: 'accept-anatomy',
               title: 'Accept anatomy',
               roles: ['editor'],
+              // Human button — no `when` (would cascade-fire). Flag only (F6).
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'anatomyAccepted'},
+                  value: {type: 'literal', value: true},
+                },
+              ],
+            }),
+            defineAction({
+              name: 'accept-ready',
+              // Finalize only when Accept was clicked AND no autopsy re-run is in flight (F6).
+              when: '$fields.anatomyAccepted == true && !($fields.autopsyRerunBusy == true)',
               status: 'done',
             }),
             defineAction({
               name: 'rerun-autopsy',
               title: 'Re-run autopsy',
               roles: ['editor'],
-              // Effect names are unique per definition on 0.35 — dedicated key, same handler.
-              // No `when`: human buttons cannot be cascade-fired.
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'anatomyAccepted'},
+                  value: {type: 'literal', value: false},
+                },
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'autopsyRerunBusy'},
+                  value: {type: 'literal', value: true},
+                },
+              ],
               effects: [
                 {
                   name: EFFECTS.autopsyRerun,
                   bindings: {seance: '$fields.subject._id'},
+                },
+              ],
+            }),
+            defineAction({
+              name: 'clear-rerun-busy',
+              when: `$effectStatus['${EFFECTS.autopsyRerun}'] == 'done' || $effectStatus['${EFFECTS.autopsyRerun}'] == 'failed'`,
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'autopsyRerunBusy'},
+                  value: {type: 'literal', value: false},
                 },
               ],
             }),
@@ -332,7 +381,9 @@ export const resurrection = defineWorkflow({
             }),
             defineAction({
               name: 'all-settled',
-              when: "count($subworkflows[activity == 'page-rituals' && current]) > 0 && count($subworkflows[activity == 'page-rituals' && current && status == 'active']) == 0",
+              // F5: zero children is done. F6: every current child must be blessed
+              // (failed/aborted no longer count as settled for Rise).
+              when: "count($subworkflows[activity == 'page-rituals' && current]) == 0 || (count($subworkflows[activity == 'page-rituals' && current && status == 'active']) == 0 && count($subworkflows[activity == 'page-rituals' && current && stage != 'blessed']) == 0)",
               status: 'done',
             }),
           ],
@@ -356,6 +407,7 @@ export const resurrection = defineWorkflow({
               name: 'rise',
               title: 'Rise',
               roles: ['editor'],
+              // Human button — no `when` (cascade). App hides while riseFailed.
               effects: [
                 {
                   name: EFFECTS.rise,
@@ -371,12 +423,62 @@ export const resurrection = defineWorkflow({
             defineAction({
               name: 'rise-failed',
               when: `$effectStatus['${EFFECTS.rise}'] == 'failed'`,
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'riseFailed'},
+                  value: {type: 'literal', value: true},
+                },
+              ],
+            }),
+            defineAction({
+              name: 'retry-rise',
+              title: 'Retry Rise',
+              roles: ['editor'],
+              // Human button; App only shows when riseFailed.
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'riseFailed'},
+                  value: {type: 'literal', value: false},
+                },
+              ],
+              effects: [
+                {
+                  name: EFFECTS.riseRetry,
+                  bindings: {seance: '$fields.subject._id'},
+                },
+              ],
+            }),
+            defineAction({
+              name: 'rise-retry-done',
+              when: `$effectStatus['${EFFECTS.riseRetry}'] == 'done'`,
+              status: 'done',
+            }),
+            defineAction({
+              name: 'rise-retry-failed',
+              when: `$effectStatus['${EFFECTS.riseRetry}'] == 'failed'`,
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'riseFailed'},
+                  value: {type: 'literal', value: true},
+                },
+              ],
+            }),
+            defineAction({
+              name: 'entomb-rise',
+              title: 'Entomb',
+              roles: ['editor'],
               status: 'failed',
             }),
           ],
         }),
       ],
-      transitions: [defineTransition({name: 'to-risen', to: 'risen', when: '$allActivitiesDone'})],
+      transitions: [
+        defineTransition({name: 'to-risen', to: 'risen', when: '$allActivitiesDone'}),
+        defineTransition({name: 'to-entombed', to: 'entombed', when: '$anyActivityFailed'}),
+      ],
     }),
 
     /* ---------- risen (terminal) ---------- */

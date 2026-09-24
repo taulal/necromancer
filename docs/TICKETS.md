@@ -67,7 +67,18 @@ In `packages/rituals/src/definitions`: `resurrection` (parent) and `page-ritual`
 
 AC: all bench paths green in CI. `bun run workflows:deploy` dry run output pasted in the PR. The real deploy waits for Taylor's go.
 
-## ⬜ NEC-07 Drain worker + kicker (C)
+## ⬜ NEC-06b Workflow follow-ups (C)
+
+Review F4–F7 from Batch 1 (#3 / #2):
+
+- F4: `openRequiredQuestions` recomputed by `question-gate` Function (App never writes)
+- F5: cast-failed → reviewing + flag; rise retry/entomb; zero-row fan-out settles; tests
+- F6: gate accept-anatomy while autopsy-rerun pending; Rise requires children **blessed**
+- F7: `seance.slug` from hostname (not raw URL)
+
+AC: bench green; PR notes Blueprint still NO-GO (combine with NEC-07 filter before deploy).
+
+---
 
 - Port `engine.ts` / `drain.ts` / `runDrain.ts` / `client.ts` from the sandbox into `packages/rituals/src/runtime/`, against 0.35.
 - `apps/vessel/src/app/api/ritual/drain/route.ts`: auth via `DRAIN_SECRET`, claim + run effects, return a summary.

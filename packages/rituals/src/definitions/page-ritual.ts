@@ -35,6 +35,11 @@ export const pageRitual = defineWorkflow({
       types: ['exhumedPage'],
     }),
     defineField({type: 'actor', name: 'reviewer'}),
+    defineField({
+      type: 'boolean',
+      name: 'castFailed',
+      // Set when necro.cast fails so reviewing can still open (F5).
+    }),
   ],
   stages: [
     defineStage({
@@ -62,8 +67,16 @@ export const pageRitual = defineWorkflow({
             }),
             defineAction({
               name: 'cast-failed',
+              // Mark activity done (not failed) so we can enter reviewing with a flag (F5).
               when: `$effectStatus['${EFFECTS.cast}'] == 'failed'`,
-              status: 'failed',
+              status: 'done',
+              ops: [
+                {
+                  type: 'field.set',
+                  target: {scope: 'workflow', field: 'castFailed'},
+                  value: {type: 'literal', value: true},
+                },
+              ],
             }),
           ],
         }),
