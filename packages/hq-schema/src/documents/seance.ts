@@ -1,5 +1,5 @@
 import {EarthGlobeIcon} from '@sanity/icons/EarthGlobe'
-import {defineArrayMember, defineField, defineType, type SanityDocument} from 'sanity'
+import {defineArrayMember, defineField, defineType, type SanityDocument} from '@sanity/types'
 import {slugFromUrl} from '../slugFromUrl'
 
 /**

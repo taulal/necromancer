@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineField, defineType} from '@sanity/types'
 
 export const cta = defineType({
   name: 'cta',

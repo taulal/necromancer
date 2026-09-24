@@ -1,5 +1,5 @@
 import {SchemaIcon} from '@sanity/icons/Schema'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from '@sanity/types'
 
 /**
  * Inferred anatomy for a séance. Versions are kept for the write-up (BRIEF.md §6 / §7.2).

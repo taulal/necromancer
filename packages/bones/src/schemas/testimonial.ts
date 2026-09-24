@@ -1,4 +1,4 @@
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from '@sanity/types'
 
 /**
  * Testimonial band. Items may be refs to `testimonialDoc` documents or inline quotes.

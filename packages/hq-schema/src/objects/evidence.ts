@@ -1,4 +1,4 @@
-import {defineArrayMember, defineField} from 'sanity'
+import {defineArrayMember, defineField} from '@sanity/types'
 
 /** Shared: every claim about the dead site carries a page + quote. */
 export const evidenceFields = [

@@ -1,5 +1,6 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "necromancer",
@@ -116,6 +117,7 @@
     "packages/bones": {
       "name": "@necro/bones",
       "dependencies": {
+        "@sanity/types": "^6.15.0",
         "react": "^19.2.0",
         "sanity": "^6.16.0",
       },
@@ -132,6 +134,7 @@
       "name": "@necro/hq-schema",
       "dependencies": {
         "@sanity/icons": "^5.2.2",
+        "@sanity/types": "^6.15.0",
         "sanity": "^6.16.0",
       },
     },

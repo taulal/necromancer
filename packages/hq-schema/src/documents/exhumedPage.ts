@@ -1,5 +1,5 @@
 import {DocumentIcon} from '@sanity/icons/Document'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType} from '@sanity/types'
 
 /**
  * Raw evidence for one crawled URL (BRIEF.md §6). HTML is cached so reruns skip refetch.

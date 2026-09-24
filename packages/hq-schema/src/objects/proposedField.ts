@@ -1,5 +1,5 @@
 import {ComposeIcon} from '@sanity/icons/Compose'
-import {defineField, defineType} from 'sanity'
+import {defineField, defineType} from '@sanity/types'
 
 /**
  * One field inside a proposed content type (BRIEF.md §6).

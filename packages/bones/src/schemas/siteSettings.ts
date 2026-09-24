@@ -1,4 +1,4 @@
-import {defineField, defineType} from 'sanity'
+import {defineField, defineType} from '@sanity/types'
 
 /**
  * Singleton stub for site-wide facts and brand. contactBlock reads contact fields from here.
