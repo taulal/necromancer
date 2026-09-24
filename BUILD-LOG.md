@@ -57,3 +57,10 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 
 - Moved Necromancer to Taylor's personal org `or6mff29v` (Growth); project `v9dl2xdi` transferring there. The org ID was hardcoded in `apps/app/sanity.cli.ts`, which is why `.env` alone didn't fix Dashboard routing — now reads `SANITY_ORG_ID` from the root `.env`.
 - **Empty plot on `dev:app` preview:** HashRouter was reading the Dashboard host URL/hash and falling through to the `*` route (“This plot is empty”). Switched to `MemoryRouter`; unknown paths redirect to `/`.
+
+### NEC-UI2 · Autopsy board
+
+- Built against batch-4 + BRIEF §8. Replaced corrupted `docs/prototype/Autopsy.dc.html` with Claude's fixed copy (was ~100k lines of duplicated SVG from a bad build script).
+- Node canvas is deterministic (singletons top-right, Bones strip, documents by evidence). Inspector edits `schemaProposal.types` via `useEditDocument` (rename, merge into…, drop, toggle required, Bones mapping). Merge-hint at ≥75% field Jaccard. Version diff vs v(n−1). **Re-run autopsy** / **Accept anatomy** use `useWorkflowSession().fireAction` (not `engine.fireAction`); disabled while autopsy/rerun busy; Accept stamps `acceptedAt`.
+- Surprise: `useEditDocument` path typing needs an explicit generic when HQ TypeGen isn’t wired into the App (`useEditDocument<string>({path:'acceptedAt'})`), otherwise `never`.
+- Do not put generated mocks in `docs/submission/` — real Dashboard captures only (now in AGENTS.md).

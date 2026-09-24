@@ -4,6 +4,7 @@ import {Flex, Spinner} from '@sanity/ui'
 import {Graveyard} from './screens/Graveyard'
 import {SeanceLayout} from './screens/SeanceLayout'
 import {Exhumation} from './screens/Exhumation'
+import {Autopsy} from './screens/Autopsy'
 import {PlaceholderStage} from './screens/PlaceholderStage'
 
 function Loading() {
@@ -28,7 +29,7 @@ export function AppRouter() {
           <Route path="/seance/:seanceId" element={<SeanceLayout />}>
             <Route index element={<Navigate to="exhumation" replace />} />
             <Route path="exhumation" element={<Exhumation />} />
-            <Route path="autopsy" element={<PlaceholderStage stage="autopsy" />} />
+            <Route path="autopsy" element={<Autopsy />} />
             <Route path="interrogation" element={<PlaceholderStage stage="interrogation" />} />
             <Route path="ritual" element={<PlaceholderStage stage="ritual" />} />
             <Route path="rise" element={<PlaceholderStage stage="rise" />} />
