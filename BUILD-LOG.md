@@ -29,3 +29,4 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Surprise: crawl already returned `platformHits` / `chromeBlocks` but exhume never wrote them on the séance. Handler now patches them so the Exhumation rail can show evidence + chrome without a schema deploy (Content Lake accepts undeclared fields; Studio won't list them until HQ schema catches up).
 - Progress bar prefers the workflow `exhumeProgress` field via `useDocumentWorkflows` → `useWorkflowSession`; falls back to seance field / pages÷cap while the instance is still resolving.
 - Screenshot side-by-side with prototype deferred — Dashboard iframe not captured in this agent session.
+- **Exhume drain gotcha:** returning undeclared effect `outputs` (pages/platform/…) makes `drainEffects` reject completion while the crawl already wrote pages — claim sits until lease expiry. Handlers must return void or only declared outputs.
