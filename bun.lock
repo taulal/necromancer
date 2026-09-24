@@ -80,6 +80,15 @@
         "@types/node": "^26.6.2",
       },
     },
+    "functions/drain-kicker-schedule": {
+      "name": "@necro/fn-drain-kicker-schedule",
+      "dependencies": {
+        "@sanity/functions": "^1.8.0",
+      },
+      "devDependencies": {
+        "@types/node": "^22",
+      },
+    },
     "functions/question-gate": {
       "name": "@necro/fn-question-gate",
       "dependencies": {
@@ -669,6 +678,8 @@
     "@necro/exhume": ["@necro/exhume@workspace:packages/exhume"],
 
     "@necro/fn-drain-kicker": ["@necro/fn-drain-kicker@workspace:functions/drain-kicker"],
+
+    "@necro/fn-drain-kicker-schedule": ["@necro/fn-drain-kicker-schedule@workspace:functions/drain-kicker-schedule"],
 
     "@necro/fn-question-gate": ["@necro/fn-question-gate@workspace:functions/question-gate"],
 

@@ -2,6 +2,7 @@ import {SanityApp} from '@sanity/sdk-react'
 import {Flex, Spinner} from '@sanity/ui'
 import {AppRouter} from './AppRouter'
 import {sanityConfigs} from './lib/config'
+import {useDrainKicker} from './lib/useDrainKicker'
 import {NecroUI} from './theme/NecroUI'
 
 function Loading() {
@@ -17,11 +18,17 @@ function Loading() {
   )
 }
 
+function RoutedApp() {
+  // Kick while any app screen is open; tighten to séance routes when Shell lands.
+  useDrainKicker(true)
+  return <AppRouter />
+}
+
 export default function App() {
   return (
     <NecroUI>
       <SanityApp config={sanityConfigs} fallback={<Loading />}>
-        <AppRouter />
+        <RoutedApp />
       </SanityApp>
     </NecroUI>
   )
