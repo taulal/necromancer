@@ -26,8 +26,12 @@ function fieldToSchema(field: ProposedField): ManifestSchemaType {
     })
   } else if (field.type === 'reference' && field.to?.length) {
     base.to = field.to.map((n) => ({type: n}))
-  } else if (field.type === 'object' && field.of?.length) {
-    base.fields = field.of.map((n) => ({name: n, type: 'string'}))
+  } else if (field.type === 'object') {
+    // Sanity objects always need a fields array — never leave it undefined.
+    base.fields =
+      field.of?.length && field.of.length > 0
+        ? field.of.map((n) => ({name: n, type: 'string'}))
+        : [{name: 'value', type: 'string'}]
   }
 
   return base
@@ -35,25 +39,39 @@ function fieldToSchema(field: ProposedField): ManifestSchemaType {
 
 function typeToSchema(t: ProposedType): ManifestSchemaType {
   const sanityType = t.kind === 'object' ? 'object' : 'document'
+  const fields = Array.isArray(t.fields) ? t.fields : []
   return {
     name: t.name,
-    title: t.title,
+    title: t.title || t.name,
     type: sanityType,
-    fields: t.fields.map(fieldToSchema),
+    // Schema.compile errors if fields is missing/undefined on document|object.
+    fields: fields.length > 0 ? fields.map(fieldToSchema) : [{name: 'title', type: 'string'}],
   }
 }
 
 /**
  * Structural compile of a proposal into Sanity schema type defs (array).
  * Bones block stubs are included so page.body.of members resolve under Schema.compile.
+ * Also stubs `link` (shared object used by CTAs/cards).
  */
 export function compileToSchemaJson(types: ProposedType[]): ManifestSchemaType[] {
-  const boneStubs: ManifestSchemaType[] = BONES.map((name) => ({
-    name,
-    title: name,
-    type: 'object',
-    fields: [{name: 'placeholder', type: 'string'}],
-  }))
+  const boneStubs: ManifestSchemaType[] = [
+    ...BONES.map((name) => ({
+      name,
+      title: name,
+      type: 'object' as const,
+      fields: [{name: 'placeholder', type: 'string'}],
+    })),
+    {
+      name: 'link',
+      title: 'Link',
+      type: 'object',
+      fields: [
+        {name: 'label', type: 'string'},
+        {name: 'href', type: 'url'},
+      ],
+    },
+  ]
 
   const proposed = types.map(typeToSchema)
   const names = new Set(proposed.map((t) => String(t.name)))

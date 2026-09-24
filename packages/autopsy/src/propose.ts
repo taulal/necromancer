@@ -21,9 +21,10 @@ export type ProposeCallResult = {
 }
 
 function reasoningModel(): string {
-  const model = process.env.NECRO_MODEL_REASONING?.trim()
+  // Prefer FAST (Haiku) when set — cheaper/faster for iteration; REASONING for final golden.
+  const model = process.env.NECRO_MODEL_FAST?.trim() || process.env.NECRO_MODEL_REASONING?.trim()
   if (!model) {
-    throw new Error('NECRO_MODEL_REASONING is not set')
+    throw new Error('NECRO_MODEL_FAST or NECRO_MODEL_REASONING must be set')
   }
   return model
 }

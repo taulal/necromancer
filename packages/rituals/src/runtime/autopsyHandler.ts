@@ -142,14 +142,12 @@ export const autopsyHandler: EffectHandler = async (params, ctx) => {
 
   await progress(100)
 
-  return {
-    outputs: {
-      version: proposal.version,
-      typeCount: proposal.types.length,
-      model: usage.model,
-      inputTokens: usage.inputTokens,
-      outputTokens: usage.outputTokens,
-      repairRounds: usage.repairRounds,
-    },
-  }
+  ctx.log('[autopsy] wrote schemaProposal', {
+    version: proposal.version,
+    typeCount: proposal.types.length,
+    model: usage.model,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    repairRounds: usage.repairRounds,
+  })
 }

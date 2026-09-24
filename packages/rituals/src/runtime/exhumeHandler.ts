@@ -97,13 +97,4 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
     .commit()
 
   await progress(100)
-
-  return {
-    outputs: {
-      pages: result.stats.pages,
-      platform: result.platform,
-      chromeBlocks: result.chromeBlocks.length,
-      assetLinks: result.assetLinks.length,
-    },
-  }
 }

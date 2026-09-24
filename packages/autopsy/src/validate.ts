@@ -133,14 +133,20 @@ function collectRefAndBoneErrors(types: ProposedType[]): string[] {
     }
 
     for (const field of type.fields) {
-      if (field.to) {
-        for (const target of field.to) {
-          if (!docNames.has(target) && !allNames.has(target)) {
-            errors.push(
-              `Dangling ref "${type.name}.${field.name}" → "${target}" (not a proposed type)`,
-            )
+      if (field.to?.length) {
+        // `to` only applies to reference fields (or array-of-reference). Bones belong in `of`.
+        const isRefField =
+          field.type === 'reference' || (field.type === 'array' && field.of?.includes('reference'))
+        if (isRefField) {
+          for (const target of field.to) {
+            if (!docNames.has(target) && !allNames.has(target)) {
+              errors.push(
+                `Dangling ref "${type.name}.${field.name}" → "${target}" (not a proposed type)`,
+              )
+            }
           }
         }
+        // If the model stuffed Bones names into `to` on an array, treat as soft — compile uses `of`.
       }
       if (field.of) {
         for (const member of field.of) {
@@ -199,7 +205,15 @@ function collectCompileErrors(types: ProposedType[]): string[] {
     for (const group of problems) {
       for (const problem of group.problems) {
         if (problem.severity !== 'error') continue
-        const path = group.path.map(String).join('.')
+        const path = Array.isArray(group.path)
+          ? group.path
+              .map((segment) =>
+                typeof segment === 'object' && segment !== null && 'name' in segment
+                  ? String((segment as {name: unknown}).name)
+                  : String(segment),
+              )
+              .join('.')
+          : String(group.path)
         errors.push(`Schema validate: ${path}: ${problem.message}`)
       }
     }
@@ -217,6 +231,7 @@ function collectCompileErrors(types: ProposedType[]): string[] {
 export function validateProposal(types: ProposedType[], corpse: Corpse): ValidateResult {
   let next = filterEvidence(types, corpse)
   next = ensurePageAndSiteSettings(next)
+  next = normalizeArrayMembership(next)
 
   const errors = [
     ...collectNameErrors(next),
@@ -225,4 +240,20 @@ export function validateProposal(types: ProposedType[], corpse: Corpse): Validat
   ]
 
   return {types: next, errors}
+}
+
+/** Model sometimes puts Bones names in `to[]` on array fields — move them to `of[]`. */
+function normalizeArrayMembership(types: ProposedType[]): ProposedType[] {
+  const boneSet = new Set<string>([...BONES, 'link'])
+  return types.map((type) => ({
+    ...type,
+    fields: type.fields.map((field) => {
+      if (field.type !== 'array' || !field.to?.length) return field
+      const boneTargets = field.to.filter((n) => boneSet.has(n))
+      if (boneTargets.length === 0) return field
+      const of = [...new Set([...(field.of ?? []), ...boneTargets])]
+      const to = field.to.filter((n) => !boneSet.has(n))
+      return {...field, of, to: to.length ? to : undefined}
+    }),
+  }))
 }
