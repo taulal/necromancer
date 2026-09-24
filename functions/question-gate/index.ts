@@ -4,12 +4,11 @@
  */
 import {createClient} from '@sanity/client'
 import {documentEventHandler} from '@sanity/functions'
-import {createEngine, ENGINE_API_VERSION, type Actor} from '@sanity/workflow-engine'
+import {createEngine, ENGINE_API_VERSION} from '@sanity/workflow-engine'
 
 const PROJECT_ID = process.env.SANITY_PROJECT_ID ?? 'v9dl2xdi'
 const DATASET = process.env.SANITY_HQ_DATASET ?? 'hq'
 const TAG = process.env.SANITY_WORKFLOW_TAG ?? 'necromancer'
-const actor: Actor = {kind: 'system', id: 'question-gate'}
 
 type QuestionDoc = {
   seance?: {_ref?: string}
@@ -37,7 +36,7 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
     {published, draft: `drafts.${published}`},
   )
 
-  const instanceId = await c.fetch<string | null>(
+  const instanceId = await c.fetch(
     `*[
       _type == "sanity.workflow.instance" &&
       tag == $tag &&
@@ -52,7 +51,7 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
     {tag: TAG, published, draft: `drafts.${published}`},
   )
 
-  if (!instanceId) {
+  if (typeof instanceId !== 'string' || !instanceId) {
     console.log(`[question-gate] no active resurrection for ${published}; count=${count}`)
     return count
   }
@@ -65,12 +64,12 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
     executionContext: {kind: 'server', id: 'question-gate'},
   })
 
+  // Actor is derived from the client token (EngineScopeArgs), not passed here.
   await engine.editField({
     instanceId,
     target: {scope: 'workflow', field: 'openRequiredQuestions'},
     mode: 'set',
     value: count,
-    actor,
   })
   console.log(`[question-gate] ${instanceId} openRequiredQuestions=${count}`)
   return count
@@ -84,7 +83,6 @@ export const handler = documentEventHandler(async ({event}) => {
     console.warn('[question-gate] question event without seance ref — skip')
     return
   }
-  // Only required questions affect the gate; optional answers are noise.
   if (after?.required === false && before?.required === false) return
   await syncOpenRequiredQuestions(seanceId)
 })

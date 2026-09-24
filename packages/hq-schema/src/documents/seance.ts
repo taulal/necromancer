@@ -1,5 +1,5 @@
 import {EarthGlobeIcon} from '@sanity/icons/EarthGlobe'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineArrayMember, defineField, defineType, type SanityDocument} from 'sanity'
 import {slugFromUrl} from '../slugFromUrl'
 
 /**
@@ -31,7 +31,10 @@ export const seance = defineType({
       description:
         'Short id used for the target dataset name (rip-<slug>) and Vessel route. Derived from the hostname (www + TLD stripped), not the raw URL.',
       options: {
-        source: (doc: {url?: string}) => (doc.url ? slugFromUrl(doc.url) : ''),
+        source: (doc: SanityDocument) => {
+          const url = typeof doc.url === 'string' ? doc.url : ''
+          return url ? slugFromUrl(url) : ''
+        },
         maxLength: 64,
       },
       validation: (rule) => rule.required(),
