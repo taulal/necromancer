@@ -1,16 +1,15 @@
 #!/usr/bin/env bun
 /**
- * Pre-bundle the Netlify background drain into a single CJS file.
+ * Pre-bundle the Netlify background drain into a single ESM file.
  *
- * Why full CJS, no externals (NEC-07c):
- * - `node_bundler = "none"` ships the file as-is with no npm resolve.
- * - Leaving `@sanity/*` external made the BG crash after Netlify's immediate
- *   202 (no necro.drainLog, never claimed). Bundle everything the worker needs.
- * - Handlers import `@necro/hq-schema/arrayKey` (not the schema barrel) so
- *   `@sanity/icons` / react stay out of this graph.
+ * Why fully bundled ESM (NEC-07c):
+ * - `node_bundler = "none"` has no npm resolve — external `@sanity/*` crashed
+ *   the BG after Netlify's immediate 202 (no drainLog / never claimed).
+ * - CJS `exports.default` is easy for Netlify's BG loader to miss; ESM
+ *   `export default` matches Functions v2 + `-background` Fetch handlers.
+ * - Handlers import `@necro/hq-schema/arrayKey` so react/icons stay out.
  *
- * Output: `netlify/functions/drain-background.js` (`-background` → 15 min).
- * `netlify/functions/package.json` forces CJS (repo root is `"type":"module"`).
+ * Output: `netlify/functions/drain-background.mjs`
  */
 import * as esbuild from 'esbuild'
 import {mkdirSync, unlinkSync, existsSync, writeFileSync} from 'node:fs'
@@ -20,19 +19,22 @@ import {fileURLToPath} from 'node:url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const entry = join(root, 'netlify/drain/entry.mts')
 const outDir = join(root, 'netlify/functions')
-const outfile = join(outDir, 'drain-background.js')
+const outfile = join(outDir, 'drain-background.mjs')
 
 mkdirSync(outDir, {recursive: true})
 
-for (const stale of ['drain-background.mjs', 'drain-background.bundle.mjs']) {
+for (const stale of [
+  'drain-background.js',
+  'drain-background.bundle.mjs',
+  'drain-background.cjs',
+]) {
   const p = join(outDir, stale)
   if (existsSync(p)) unlinkSync(p)
 }
 
-writeFileSync(
-  join(outDir, 'package.json'),
-  `${JSON.stringify({type: 'commonjs', private: true}, null, 2)}\n`,
-)
+// ESM package so .mjs is unambiguous; remove CJS package.json if present.
+const pkg = join(outDir, 'package.json')
+if (existsSync(pkg)) unlinkSync(pkg)
 
 await esbuild.build({
   entryPoints: [entry],
@@ -40,9 +42,18 @@ await esbuild.build({
   bundle: true,
   platform: 'node',
   target: 'node22',
-  format: 'cjs',
+  format: 'esm',
   sourcemap: false,
   packages: 'bundle',
+  banner: {
+    js: `import {createRequire as __necroCreateRequire} from 'node:module';
+import {fileURLToPath as __necroFileURLToPath} from 'node:url';
+import {dirname as __necroDirname} from 'node:path';
+const require = __necroCreateRequire(import.meta.url);
+const __filename = __necroFileURLToPath(import.meta.url);
+const __dirname = __necroDirname(__filename);
+`,
+  },
   logOverride: {
     'empty-import-meta': 'silent',
     'direct-eval': 'silent',
