@@ -166669,7 +166669,9 @@ var autopsyHandler = async (params, ctx) => {
         pageCount: pages.length,
       })
     } catch (logErr) {
-      ctx.log('[autopsy] failed to write necro.effectError', String(logErr))
+      ctx.log('[autopsy] failed to write necro.effectError', {
+        error: String(logErr),
+      })
     }
     throw err
   }
