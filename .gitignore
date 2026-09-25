@@ -6,6 +6,7 @@ dist
 .next
 .sanity
 .netlify
+netlify/functions/drain-background.js
 netlify/functions/drain-background.mjs
 *.tsbuildinfo
 .DS_Store

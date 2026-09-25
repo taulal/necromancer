@@ -5,12 +5,9 @@
  * - `DRAIN_SECRET` (Function / ops): full access; body `{mode:"schedule"}` for tick-all
  * - `DRAIN_KICK` / App `SANITY_APP_DRAIN_KICK`: public-by-design, pending-only, lock-throttled
  *
- * Returns 202 immediately. Work runs via Next.js `after()` (keeps the Vessel
- * isolate alive — Netlify's separate `*-background` function was accepting
- * kicks but never executing the handler). Background URL kick remains as a
- * best-effort parallel path after the pre-bundled function lands.
+ * On Netlify: auth → skip if lock held → invoke `drain-background` → 202.
+ * Never await the drain here (504s on full sites). Locally (no BG URL) run inline.
  */
-import {after} from 'next/server'
 import {
   isDrainLockHeld,
   kickDrainBackground,
@@ -25,8 +22,6 @@ import {
 /** Always read Netlify/runtime env — never bake an empty secret at build. */
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
-/** Autopsy / interrogate can exceed the default serverless cap. */
-export const maxDuration = 300
 
 type AuthKind = 'secret' | 'kick'
 
@@ -68,7 +63,6 @@ async function runLocked(mode: DrainMode, holder: string) {
   } finally {
     await releaseDrainLock(lock.rev)
     if (outcome?.budgetExhausted && outcome.pendingAfter > 0) {
-      // Local / after-lock continue (Netlify path uses drain-background's own continue).
       await kickDrainBackground(mode, holder)
     }
   }
@@ -77,14 +71,12 @@ async function runLocked(mode: DrainMode, holder: string) {
 function backgroundUrl(): string | null {
   const site = env('URL') || env('DEPLOY_PRIME_URL') || env('VESSEL_URL')
   if (!site) return null
-  // Next on Netlify sometimes omits NETLIFY=true; URL/DEPLOY_PRIME_URL are reliable.
   const hosted =
     Boolean(env('NETLIFY')) ||
     Boolean(env('URL')) ||
     Boolean(env('DEPLOY_PRIME_URL')) ||
     site.includes('netlify.app')
   if (!hosted) return null
-  // Default Functions v2 URL: drain-background.mts has no custom `config.path` (B2).
   return `${site.replace(/\/$/, '')}/.netlify/functions/drain-background`
 }
 
@@ -93,11 +85,10 @@ export async function POST(req: Request) {
   if (!kind) {
     const header = req.headers.get('authorization') ?? ''
     const token = header.startsWith('Bearer ') ? header.slice(7).trim() : ''
-    const secretConfigured = Boolean(env('DRAIN_SECRET'))
     return Response.json(
       {
         error: 'Unauthorised',
-        secretConfigured,
+        secretConfigured: Boolean(env('DRAIN_SECRET')),
         tokenProvided: Boolean(token),
         tokenLen: token.length,
         secretLen: env('DRAIN_SECRET').length,
@@ -109,32 +100,41 @@ export async function POST(req: Request) {
   const mode = await readMode(req.clone(), kind)
   const holder = kind === 'kick' ? 'app-kick' : mode === 'schedule' ? 'schedule' : 'secret-kick'
 
-  // Cheap read first: if a drain holds the lock, don't start another run.
   if (await isDrainLockHeld()) {
     return Response.json({skipped: 'busy'}, {status: 202})
   }
 
-  // App kick (public): return 202 immediately and continue via after().
-  // Secret / schedule (Function + ops): await the drain so autopsy (~1 min)
-  // actually finishes — Netlify was freezing after() mid-autopsy while the
-  // claim lease kept the effect stuck.
-  if (kind === 'kick') {
-    after(async () => {
-      try {
-        await runLocked(mode, holder)
-      } catch (err) {
-        console.error('[drain] after() run failed', err)
+  const bg = backgroundUrl()
+  if (bg) {
+    try {
+      const res = await fetch(bg, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${env('DRAIN_SECRET')}`,
+        },
+        body: JSON.stringify({mode, holder}),
+        signal: AbortSignal.timeout(10_000),
+      })
+      // Background functions always answer 202 at the edge (even on handler errors).
+      if (res.status !== 202 && !res.ok) {
+        console.error('[drain] background invoke returned', res.status)
+        return Response.json({error: `background ${res.status}`}, {status: 502})
       }
-    })
-    return Response.json({accepted: true, mode, via: 'after'}, {status: 202})
+    } catch (err) {
+      console.error('[drain] background invoke failed', err)
+      return Response.json({error: 'background invoke failed'}, {status: 502})
+    }
+    return Response.json({accepted: true, mode, via: 'background'}, {status: 202})
   }
 
+  // Local / non-Netlify: run inline.
   try {
     const summary = await runLocked(mode, holder)
     if ('skipped' in summary) {
       return Response.json(summary, {status: 202})
     }
-    return Response.json({accepted: true, mode, via: 'await', ...summary}, {status: 202})
+    return Response.json({accepted: true, mode, via: 'inline', ...summary}, {status: 202})
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return Response.json({error: message}, {status: 500})

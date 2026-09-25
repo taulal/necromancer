@@ -118,6 +118,12 @@ Autopsy model/tokens: **`claude-haiku-4-5-20251001`**, **7788** input / **2328**
 
 Follow-ups shipped same morning: secret drain **awaits** (`via: await`, #29); NEC-11 real `necro.interrogate` (#28).
 
+### NEC-07c · why drain-background was a no-op
+
+Root cause: `node_bundler = "none"` shipped a pre-bundle that still **externalised** `@sanity/client` and `@sanity/workflow-engine`. The BG isolate has no npm resolve path for those → process crashed after Netlify's immediate **202**, so effects never claimed and `necro.drainLog` never advanced past silence.
+
+Fix: fully bundle into `drain-background.js` (CJS; `netlify/functions/package.json` forces CJS under a `"type":"module"` repo), handlers import `@necro/hq-schema/arrayKey` (not the schema barrel / icons / react). Vessel `/api/ritual/drain` is kick-only again (`via: background`); no `after()` / await on the sync route.
+
 ### Loose ends (post-UI2)
 
 - Entombed **Retry** action returns to `entombedFromStage` (set by each `*-failed` action); séance header shows Retry via `session.fireAction`.

@@ -1,9 +1,10 @@
 /**
  * Netlify Background Function body — bundled by `scripts/build-drain-fn.ts`
- * into `drain-background.bundle.mjs` so deploy does not resolve `@necro/*` at
- * invoke time (NEC-07c B3).
+ * into `netlify/functions/drain-background.js` (CJS, fully inlined deps).
+ *
+ * Functions v2 Fetch handler. The `-background` filename suffix makes Netlify
+ * return 202 immediately and run this for up to 15 minutes.
  */
-import type {Context} from '@netlify/functions'
 import {
   getWorkflowClient,
   kickDrainBackground,
@@ -31,7 +32,7 @@ async function writeDrainLog(entry: Record<string, unknown>): Promise<void> {
   }
 }
 
-export default async (req: Request, _context: Context) => {
+export default async (req: Request): Promise<Response> => {
   const started = Date.now()
   const secret = process.env.DRAIN_SECRET?.trim()
   const auth = req.headers.get('authorization') ?? ''
