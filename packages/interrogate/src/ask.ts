@@ -3,6 +3,7 @@
  */
 import {createHash} from 'node:crypto'
 import Anthropic from '@anthropic-ai/sdk'
+import {parseToolUse} from '@necro/autopsy'
 import {INTERROGATE_SYSTEM_PROMPT} from './prompt'
 import {ASK_QUESTIONS_INPUT_JSON_SCHEMA, askQuestionsInputSchema} from './schema'
 import type {DraftQuestion, InterrogatePageInput, ProposedTypeSummary} from './types'
@@ -85,9 +86,9 @@ function buildUserMessage(args: {
   ].join('\n')
 }
 
-function parseToolInput(input: unknown): DraftQuestion[] {
-  const parsed = askQuestionsInputSchema.parse(input)
-  return parsed.questions.map((q) => {
+function extractToolUse(message: Anthropic.Message): DraftQuestion[] {
+  const {input} = parseToolUse(message, ASK_QUESTIONS_TOOL_NAME, askQuestionsInputSchema)
+  return input.questions.map((q) => {
     const required = q.kind === 'authenticity' ? true : q.required
     return {
       fingerprint: q.fingerprint?.trim() || fingerprintOf(q.kind, q.prompt),
@@ -105,16 +106,6 @@ function parseToolInput(input: unknown): DraftQuestion[] {
       rank: rankForKind(q.kind),
     }
   })
-}
-
-function extractToolUse(message: Anthropic.Message): DraftQuestion[] {
-  const block = message.content.find(
-    (b): b is Anthropic.ToolUseBlock => b.type === 'tool_use' && b.name === ASK_QUESTIONS_TOOL_NAME,
-  )
-  if (!block) {
-    throw new Error('Claude did not call ask_questions')
-  }
-  return parseToolInput(block.input)
 }
 
 const askTool: Anthropic.Tool = {
