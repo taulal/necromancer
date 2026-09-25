@@ -1,0 +1,17 @@
+{
+  "name": "@necro/interrogate",
+  "private": true,
+  "type": "module",
+  "description": "Interrogation engine: deterministic findings + Claude ask_questions → question docs.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@necro/autopsy": "workspace:*",
+    "zod": "^4.5.2"
+  }
+}
