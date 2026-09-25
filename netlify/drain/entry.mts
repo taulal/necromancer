@@ -118,3 +118,9 @@ export default async (req: Request): Promise<Response> => {
 
   return response
 }
+
+/** Opt out of Netlify re-bundling (Frameworks API). includedFiles keeps the entry. */
+export const config = {
+  nodeBundler: 'none' as const,
+  includedFiles: ['**'],
+}

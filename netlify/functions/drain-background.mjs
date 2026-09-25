@@ -33033,8 +33033,8 @@ var require_lastValueFrom = __commonJS({
     Object.defineProperty(exports2, '__esModule', {value: true})
     exports2.lastValueFrom = void 0
     var EmptyError_1 = require_EmptyError()
-    function lastValueFrom2(source, config2) {
-      var hasConfig = typeof config2 === 'object'
+    function lastValueFrom2(source, config3) {
+      var hasConfig = typeof config3 === 'object'
       return new Promise(function (resolve2, reject) {
         var _hasValue = false
         var _value
@@ -33048,7 +33048,7 @@ var require_lastValueFrom = __commonJS({
             if (_hasValue) {
               resolve2(_value)
             } else if (hasConfig) {
-              resolve2(config2.defaultValue)
+              resolve2(config3.defaultValue)
             } else {
               reject(new EmptyError_1.EmptyError())
             }
@@ -33068,8 +33068,8 @@ var require_firstValueFrom = __commonJS({
     exports2.firstValueFrom = void 0
     var EmptyError_1 = require_EmptyError()
     var Subscriber_1 = require_Subscriber()
-    function firstValueFrom(source, config2) {
-      var hasConfig = typeof config2 === 'object'
+    function firstValueFrom(source, config3) {
+      var hasConfig = typeof config3 === 'object'
       return new Promise(function (resolve2, reject) {
         var subscriber = new Subscriber_1.SafeSubscriber({
           next: function (value) {
@@ -33079,7 +33079,7 @@ var require_firstValueFrom = __commonJS({
           error: reject,
           complete: function () {
             if (hasConfig) {
-              resolve2(config2.defaultValue)
+              resolve2(config3.defaultValue)
             } else {
               reject(new EmptyError_1.EmptyError())
             }
@@ -33180,12 +33180,12 @@ var require_timeout = __commonJS({
         this.info = info
       }
     })
-    function timeout(config2, schedulerArg) {
-      var _a8 = isDate_1.isValidDate(config2)
-          ? {first: config2}
-          : typeof config2 === 'number'
-            ? {each: config2}
-            : config2,
+    function timeout(config3, schedulerArg) {
+      var _a8 = isDate_1.isValidDate(config3)
+          ? {first: config3}
+          : typeof config3 === 'number'
+            ? {each: config3}
+            : config3,
         first2 = _a8.first,
         each2 = _a8.each,
         _b = _a8.with,
@@ -33862,13 +33862,13 @@ var require_connectable = __commonJS({
       },
       resetOnDisconnect: true,
     }
-    function connectable(source, config2) {
-      if (config2 === void 0) {
-        config2 = DEFAULT_CONFIG2
+    function connectable(source, config3) {
+      if (config3 === void 0) {
+        config3 = DEFAULT_CONFIG2
       }
       var connection = null
-      var connector = config2.connector,
-        _a8 = config2.resetOnDisconnect,
+      var connector = config3.connector,
+        _a8 = config3.resetOnDisconnect,
         resetOnDisconnect = _a8 === void 0 ? true : _a8
       var subject = connector()
       var result = new Observable_1.Observable(function (subscriber) {
@@ -35752,11 +35752,11 @@ var require_connect2 = __commonJS({
         return new Subject_1.Subject()
       },
     }
-    function connect(selector, config2) {
-      if (config2 === void 0) {
-        config2 = DEFAULT_CONFIG2
+    function connect(selector, config3) {
+      if (config3 === void 0) {
+        config3 = DEFAULT_CONFIG2
       }
-      var connector = config2.connector
+      var connector = config3.connector
       return lift_1.operate(function (source, subscriber) {
         var subject = connector()
         innerFrom_1
@@ -37473,18 +37473,18 @@ var require_retry2 = __commonJS({
       if (configOrCount === void 0) {
         configOrCount = Infinity
       }
-      var config2
+      var config3
       if (configOrCount && typeof configOrCount === 'object') {
-        config2 = configOrCount
+        config3 = configOrCount
       } else {
-        config2 = {
+        config3 = {
           count: configOrCount,
         }
       }
-      var _a8 = config2.count,
+      var _a8 = config3.count,
         count = _a8 === void 0 ? Infinity : _a8,
-        delay = config2.delay,
-        _b = config2.resetOnSuccess,
+        delay = config3.delay,
+        _b = config3.resetOnSuccess,
         resetOnSuccess = _b === void 0 ? false : _b
       return count <= 0
         ? identity_1.identity
@@ -38356,9 +38356,9 @@ var require_throttle = __commonJS({
     var lift_1 = require_lift()
     var OperatorSubscriber_1 = require_OperatorSubscriber()
     var innerFrom_1 = require_innerFrom()
-    function throttle(durationSelector, config2) {
+    function throttle(durationSelector, config3) {
       return lift_1.operate(function (source, subscriber) {
-        var _a8 = config2 !== null && config2 !== void 0 ? config2 : {},
+        var _a8 = config3 !== null && config3 !== void 0 ? config3 : {},
           _b = _a8.leading,
           leading = _b === void 0 ? true : _b,
           _c = _a8.trailing,
@@ -38428,14 +38428,14 @@ var require_throttleTime = __commonJS({
     var async_1 = require_async()
     var throttle_1 = require_throttle()
     var timer_1 = require_timer()
-    function throttleTime(duration3, scheduler, config2) {
+    function throttleTime(duration3, scheduler, config3) {
       if (scheduler === void 0) {
         scheduler = async_1.asyncScheduler
       }
       var duration$ = timer_1.timer(duration3, scheduler)
       return throttle_1.throttle(function () {
         return duration$
-      }, config2)
+      }, config3)
     }
     exports2.throttleTime = throttleTime
   },
@@ -40831,7 +40831,7 @@ function formatTraceId(traceId) {
 function sliceWithEllipsis(str, max) {
   return str.length > max ? `${str.slice(0, max)}\u2026` : str
 }
-function defineRequester(envOptions, config2 = {}) {
+function defineRequester(envOptions, config3 = {}) {
   let applyFetchInit = (opts, next2) => {
       let fetchInit = opts.meta?.fetchInit
       if (typeof fetchInit != 'object' || !fetchInit) return next2(opts)
@@ -40853,12 +40853,12 @@ function defineRequester(envOptions, config2 = {}) {
       middleware: [
         retry({
           shouldRetry: shouldRetryRequest,
-          maxRetries: config2.maxRetries ?? 5,
-          ...(config2.retryDelay ? {retryDelay: config2.retryDelay} : {}),
+          maxRetries: config3.maxRetries ?? 5,
+          ...(config3.retryDelay ? {retryDelay: config3.retryDelay} : {}),
         }),
         ...envOptions.middleware,
         applyFetchInit,
-        printWarnings(config2),
+        printWarnings(config3),
       ],
     }),
     promise2 = (options) => {
@@ -40961,13 +40961,13 @@ function shouldRetryRequest(err, attempt, options) {
   }
   return isRetryableRequest(err, attempt, options)
 }
-function printWarnings(config2) {
+function printWarnings(config3) {
   let seen = {},
     shouldIgnore = (message) =>
-      config2.ignoreWarnings !== void 0 &&
-      (Array.isArray(config2.ignoreWarnings)
-        ? config2.ignoreWarnings
-        : [config2.ignoreWarnings]
+      config3.ignoreWarnings !== void 0 &&
+      (Array.isArray(config3.ignoreWarnings)
+        ? config3.ignoreWarnings
+        : [config3.ignoreWarnings]
       ).some((pattern) =>
         typeof pattern == 'string' ? message.includes(pattern) : pattern.test(message),
       )
@@ -42365,15 +42365,15 @@ function isValidURL(url3) {
 function hasTypeLike(path4) {
   return path4.some((segment) => typeof segment == 'string' && segment.match(/type/i) !== null)
 }
-function stegaEncodeSourceMap(result, resultSourceMap, config2) {
-  let {filter: filter5, logger, enabled: enabled2} = config2
+function stegaEncodeSourceMap(result, resultSourceMap, config3) {
+  let {filter: filter5, logger, enabled: enabled2} = config3
   if (!enabled2) {
     let msg = "config.enabled must be true, don't call this function otherwise"
     throw (
       logger?.error?.(`[@sanity/client]: ${msg}`, {
         result,
         resultSourceMap,
-        config: config2,
+        config: config3,
       }),
       TypeError(msg)
     )
@@ -42383,17 +42383,17 @@ function stegaEncodeSourceMap(result, resultSourceMap, config2) {
       logger?.error?.('[@sanity/client]: Missing Content Source Map from response body', {
         result,
         resultSourceMap,
-        config: config2,
+        config: config3,
       }),
       result
     )
-  if (!config2.studioUrl) {
+  if (!config3.studioUrl) {
     let msg = 'config.studioUrl must be defined'
     throw (
       logger?.error?.(`[@sanity/client]: ${msg}`, {
         result,
         resultSourceMap,
-        config: config2,
+        config: config3,
       }),
       TypeError(msg)
     )
@@ -42439,9 +42439,9 @@ function stegaEncodeSourceMap(result, resultSourceMap, config2) {
             length: value.length,
           })
         let {baseUrl, workspace, tool} = resolveStudioBaseRoute(
-          typeof config2.studioUrl == 'function'
-            ? config2.studioUrl(sourceDocument)
-            : config2.studioUrl,
+          typeof config3.studioUrl == 'function'
+            ? config3.studioUrl(sourceDocument)
+            : config3.studioUrl,
         )
         if (!baseUrl) return value
         let {_id: id, _type: type, _projectId: projectId3, _dataset: dataset3} = sourceDocument
@@ -42456,7 +42456,7 @@ function stegaEncodeSourceMap(result, resultSourceMap, config2) {
               id,
               type,
               path: sourcePath,
-              ...(!config2.omitCrossDatasetReferenceData && {
+              ...(!config3.omitCrossDatasetReferenceData && {
                 dataset: dataset3,
                 projectId: projectId3,
               }),
@@ -54654,44 +54654,44 @@ var init_credentials = __esm({
         }
         return null
       }
-      let config2
+      let config3
       try {
-        config2 = JSON.parse(configRaw)
+        config3 = JSON.parse(configRaw)
       } catch (err) {
         throw new Error(`failed to parse config file ${configPath}: ${err}`)
       }
-      if (!config2.authentication) {
+      if (!config3.authentication) {
         throw new Error(`config file ${configPath} is missing "authentication"`)
       }
-      const authType = config2.authentication.type
+      const authType = config3.authentication.type
       if (authType !== 'oidc_federation' && authType !== 'user_oauth') {
         throw new Error(`authentication.type "${authType}" is not a known authentication type`)
       }
-      config2.organization_id ?? (config2.organization_id = readEnv('ANTHROPIC_ORGANIZATION_ID'))
-      config2.workspace_id ?? (config2.workspace_id = readEnv('ANTHROPIC_WORKSPACE_ID'))
-      config2.base_url ?? (config2.base_url = readEnv('ANTHROPIC_BASE_URL'))
-      ;(_a8 = config2.authentication).scope ?? (_a8.scope = readEnv('ANTHROPIC_SCOPE'))
-      if (config2.authentication.type === 'oidc_federation') {
-        if (!config2.authentication.identity_token) {
+      config3.organization_id ?? (config3.organization_id = readEnv('ANTHROPIC_ORGANIZATION_ID'))
+      config3.workspace_id ?? (config3.workspace_id = readEnv('ANTHROPIC_WORKSPACE_ID'))
+      config3.base_url ?? (config3.base_url = readEnv('ANTHROPIC_BASE_URL'))
+      ;(_a8 = config3.authentication).scope ?? (_a8.scope = readEnv('ANTHROPIC_SCOPE'))
+      if (config3.authentication.type === 'oidc_federation') {
+        if (!config3.authentication.identity_token) {
           const identityTokenFile = readEnv('ANTHROPIC_IDENTITY_TOKEN_FILE')
           if (identityTokenFile) {
-            config2.authentication.identity_token = {
+            config3.authentication.identity_token = {
               source: 'file',
               path: identityTokenFile,
             }
           }
         }
-        if (!config2.authentication.federation_rule_id) {
-          config2.authentication.federation_rule_id = readEnv('ANTHROPIC_FEDERATION_RULE_ID') ?? ''
+        if (!config3.authentication.federation_rule_id) {
+          config3.authentication.federation_rule_id = readEnv('ANTHROPIC_FEDERATION_RULE_ID') ?? ''
         }
-        ;(_b = config2.authentication).service_account_id ??
+        ;(_b = config3.authentication).service_account_id ??
           (_b.service_account_id = readEnv('ANTHROPIC_SERVICE_ACCOUNT_ID'))
       }
-      return {config: config2, fromFile: true}
+      return {config: config3, fromFile: true}
     }
-    getCredentialsPath = async (config2, profile) => {
-      if (config2?.authentication.credentials_path) {
-        return config2.authentication.credentials_path
+    getCredentialsPath = async (config3, profile) => {
+      if (config3?.authentication.credentials_path) {
+        return config3.authentication.credentials_path
       }
       const rootConfigPath = await getRootConfigPath()
       if (!rootConfigPath) {
@@ -54796,10 +54796,10 @@ var init_identity_token = __esm({
 })
 
 // node_modules/@anthropic-ai/sdk/lib/credentials/oidc-federation.mjs
-function oidcFederationProvider(config2) {
+function oidcFederationProvider(config3) {
   return async () => {
-    requireSecureTokenEndpoint(config2.baseURL)
-    const jwt2 = await config2.identityTokenProvider()
+    requireSecureTokenEndpoint(config3.baseURL)
+    const jwt2 = await config3.identityTokenProvider()
     if (jwt2.length > 16 * 1024) {
       throw new WorkloadIdentityError(
         `Identity token is ${Math.ceil(jwt2.length / 1024)} KiB, exceeds the 16 KiB assertion limit`,
@@ -54808,25 +54808,25 @@ function oidcFederationProvider(config2) {
     const body = {
       grant_type: GRANT_TYPE_JWT_BEARER,
       assertion: jwt2,
-      federation_rule_id: config2.federationRuleId,
-      organization_id: config2.organizationId,
+      federation_rule_id: config3.federationRuleId,
+      organization_id: config3.organizationId,
     }
-    if (config2.serviceAccountId) {
-      body['service_account_id'] = config2.serviceAccountId
+    if (config3.serviceAccountId) {
+      body['service_account_id'] = config3.serviceAccountId
     }
-    if (config2.workspaceId) {
-      body['workspace_id'] = config2.workspaceId
+    if (config3.workspaceId) {
+      body['workspace_id'] = config3.workspaceId
     }
-    const url3 = `${config2.baseURL}${TOKEN_ENDPOINT}`
+    const url3 = `${config3.baseURL}${TOKEN_ENDPOINT}`
     let resp
     try {
-      resp = await config2.fetch(url3, {
+      resp = await config3.fetch(url3, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'anthropic-beta': `${OAUTH_API_BETA_HEADER},${FEDERATION_BETA_HEADER}`,
           'User-Agent':
-            config2.userAgent || `anthropic-sdk-typescript/${VERSION} oidcFederationProvider`,
+            config3.userAgent || `anthropic-sdk-typescript/${VERSION} oidcFederationProvider`,
         },
         body: JSON.stringify(body),
       })
@@ -54839,7 +54839,7 @@ function oidcFederationProvider(config2) {
       const redacted = redactSensitive(text5)
       let hint = ''
       if (resp.status === 401) {
-        const hintMiddle = config2.workspaceId
+        const hintMiddle = config3.workspaceId
           ? ''
           : "If your federation rule is scoped to multiple workspaces, set the ANTHROPIC_WORKSPACE_ID environment variable, the 'workspace_id' config key, or the `workspaceId` option. "
         hint = ` Ensure your federation rule matches your identity token. ${hintMiddle}View your authentication events in the Workload identity page of Claude Console for more details.`
@@ -54876,16 +54876,16 @@ var init_oidc_federation = __esm({
 })
 
 // node_modules/@anthropic-ai/sdk/lib/credentials/user-oauth.mjs
-function userOAuthProvider(config2) {
+function userOAuthProvider(config3) {
   return async (opts) => {
     const {fs: fs5} = await Promise.resolve().then(() => (init_node(), node_exports))
-    await checkCredentialsFileSafety(config2.credentialsPath, config2.onSafetyWarning)
+    await checkCredentialsFileSafety(config3.credentialsPath, config3.onSafetyWarning)
     let raw
     try {
-      raw = await fs5.promises.readFile(config2.credentialsPath, 'utf-8')
+      raw = await fs5.promises.readFile(config3.credentialsPath, 'utf-8')
     } catch (err) {
       throw new WorkloadIdentityError(
-        `Credentials file not found at ${config2.credentialsPath}: ${err}`,
+        `Credentials file not found at ${config3.credentialsPath}: ${err}`,
       )
     }
     let creds
@@ -54893,13 +54893,13 @@ function userOAuthProvider(config2) {
       creds = JSON.parse(raw)
     } catch (err) {
       throw new WorkloadIdentityError(
-        `Credentials file at ${config2.credentialsPath} is not valid JSON: ${err}`,
+        `Credentials file at ${config3.credentialsPath} is not valid JSON: ${err}`,
       )
     }
     const accessToken = creds.access_token
     if (!accessToken) {
       throw new WorkloadIdentityError(
-        `Credentials file at ${config2.credentialsPath} must include 'access_token'`,
+        `Credentials file at ${config3.credentialsPath} must include 'access_token'`,
       )
     }
     const expiresAt = creds.expires_at
@@ -54910,27 +54910,27 @@ function userOAuthProvider(config2) {
       return {token: accessToken, expiresAt: expiresAt ?? null}
     }
     const refreshToken = creds.refresh_token
-    if (!config2.clientId || !refreshToken) {
+    if (!config3.clientId || !refreshToken) {
       throw new WorkloadIdentityError(
-        `Access token at ${config2.credentialsPath} has expired and no refresh is available (client_id ${config2.clientId ? 'set' : 'empty'}, refresh_token ${refreshToken ? 'set' : 'empty'})`,
+        `Access token at ${config3.credentialsPath} has expired and no refresh is available (client_id ${config3.clientId ? 'set' : 'empty'}, refresh_token ${refreshToken ? 'set' : 'empty'})`,
       )
     }
-    requireSecureTokenEndpoint(config2.baseURL)
+    requireSecureTokenEndpoint(config3.baseURL)
     const body = {
       grant_type: GRANT_TYPE_REFRESH_TOKEN,
       refresh_token: refreshToken,
-      client_id: config2.clientId,
+      client_id: config3.clientId,
     }
-    const url3 = `${config2.baseURL}${TOKEN_ENDPOINT}`
+    const url3 = `${config3.baseURL}${TOKEN_ENDPOINT}`
     let resp
     try {
-      resp = await config2.fetch(url3, {
+      resp = await config3.fetch(url3, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'anthropic-beta': OAUTH_API_BETA_HEADER,
           'User-Agent':
-            config2.userAgent || `anthropic-sdk-typescript/${VERSION} userOAuthProvider`,
+            config3.userAgent || `anthropic-sdk-typescript/${VERSION} userOAuthProvider`,
         },
         body: JSON.stringify(body),
       })
@@ -54959,7 +54959,7 @@ function userOAuthProvider(config2) {
     }
     const newExpiresAt = nowAsSeconds() + expiresIn
     const newRefreshToken = data2.refresh_token || refreshToken
-    await writeCredentialsFileAtomic(config2.credentialsPath, {
+    await writeCredentialsFileAtomic(config3.credentialsPath, {
       ...creds,
       version: CREDENTIALS_FILE_VERSION,
       type: 'oauth_token',
@@ -54980,38 +54980,38 @@ var init_user_oauth = __esm({
 })
 
 // node_modules/@anthropic-ai/sdk/lib/credentials/credential-chain.mjs
-function resolveCredentialsFromConfig(config2, options) {
-  const credentialsPath = config2.authentication.credentials_path ?? null
-  const effectiveBaseURL = (config2.base_url || options.baseURL).replace(/\/+$/, '')
-  const provider = buildProvider(config2, credentialsPath, effectiveBaseURL, options)
+function resolveCredentialsFromConfig(config3, options) {
+  const credentialsPath = config3.authentication.credentials_path ?? null
+  const effectiveBaseURL = (config3.base_url || options.baseURL).replace(/\/+$/, '')
+  const provider = buildProvider(config3, credentialsPath, effectiveBaseURL, options)
   const extraHeaders = {}
-  if (config2.workspace_id && config2.authentication.type === 'user_oauth') {
-    extraHeaders['anthropic-workspace-id'] = config2.workspace_id
+  if (config3.workspace_id && config3.authentication.type === 'user_oauth') {
+    extraHeaders['anthropic-workspace-id'] = config3.workspace_id
   }
-  return {provider, extraHeaders, baseURL: config2.base_url || void 0}
+  return {provider, extraHeaders, baseURL: config3.base_url || void 0}
 }
 async function defaultCredentials(options, profile) {
   const loaded = await loadConfigWithSource(profile)
   if (!loaded) {
     return null
   }
-  const {config: config2, fromFile} = loaded
+  const {config: config3, fromFile} = loaded
   const withPath =
-    config2.authentication.credentials_path || !fromFile
-      ? config2
+    config3.authentication.credentials_path || !fromFile
+      ? config3
       : {
-          ...config2,
+          ...config3,
           authentication: {
-            ...config2.authentication,
-            credentials_path: (await getCredentialsPath(config2, profile)) ?? void 0,
+            ...config3.authentication,
+            credentials_path: (await getCredentialsPath(config3, profile)) ?? void 0,
           },
         }
   return resolveCredentialsFromConfig(withPath, options)
 }
-function buildProvider(config2, credentialsPath, baseURL, options) {
-  switch (config2.authentication.type) {
+function buildProvider(config3, credentialsPath, baseURL, options) {
+  switch (config3.authentication.type) {
     case 'oidc_federation': {
-      const auth = config2.authentication
+      const auth = config3.authentication
       const identityProvider = resolveIdentityTokenProvider(auth)
       if (!identityProvider) {
         throw new WorkloadIdentityError(
@@ -55023,7 +55023,7 @@ function buildProvider(config2, credentialsPath, baseURL, options) {
           "oidc_federation config requires 'federation_rule_id'. Set it in authentication.federation_rule_id in your profile, or via ANTHROPIC_FEDERATION_RULE_ID (profile takes precedence).",
         )
       }
-      if (!config2.organization_id) {
+      if (!config3.organization_id) {
         throw new WorkloadIdentityError(
           'oidc_federation config requires organization_id (set ANTHROPIC_ORGANIZATION_ID or config.organization_id)',
         )
@@ -55031,9 +55031,9 @@ function buildProvider(config2, credentialsPath, baseURL, options) {
       const exchange = oidcFederationProvider({
         identityTokenProvider: identityProvider,
         federationRuleId: auth.federation_rule_id,
-        organizationId: config2.organization_id,
+        organizationId: config3.organization_id,
         serviceAccountId: auth.service_account_id,
-        workspaceId: config2.workspace_id,
+        workspaceId: config3.workspace_id,
         baseURL,
         fetch: options.fetch,
         userAgent: options.userAgent,
@@ -55056,7 +55056,7 @@ function buildProvider(config2, credentialsPath, baseURL, options) {
       }
       return userOAuthProvider({
         credentialsPath,
-        clientId: config2.authentication.client_id,
+        clientId: config3.authentication.client_id,
         baseURL,
         fetch: options.fetch,
         userAgent: options.userAgent,
@@ -55064,7 +55064,7 @@ function buildProvider(config2, credentialsPath, baseURL, options) {
       })
     }
     default: {
-      const t = config2.authentication.type
+      const t = config3.authentication.type
       throw new WorkloadIdentityError(
         `authentication.type "${t}" is not a known authentication type`,
       )
@@ -89368,13 +89368,13 @@ var LF = 10
 var CR = 13
 var SPACE = 32
 var MAX_FIELD_PREFIX_LENGTH = 6
-function createParser(config2) {
-  if (typeof config2 === 'function') {
+function createParser(config3) {
+  if (typeof config3 === 'function') {
     throw new TypeError(
       '`config` must be an object, got a function instead. Did you mean `createParser({onEvent: fn})`?',
     )
   }
-  const {maxBufferSize, onComment, onError, onEvent, onId, onRetry} = config2
+  const {maxBufferSize, onComment, onError, onEvent, onId, onRetry} = config3
   const pendingFragments = []
   let pendingFragmentsLength = 0
   let bomPrefix = ''
@@ -90455,9 +90455,9 @@ var validateInsert = (at, selector, items) => {
   if (!Array.isArray(items))
     throw Error(`${signature} takes an "items"-argument which must be an array`)
 }
-var hasDataset = (config2) => {
-  if (config2.dataset) return config2.dataset
-  let resource = config2.resource
+var hasDataset = (config3) => {
+  if (config3.dataset) return config3.dataset
+  let resource = config3.resource
   if (resource && resource.type === 'dataset') {
     let segments = resource.id.split('.')
     if (segments.length !== 2)
@@ -90473,8 +90473,8 @@ var requestTag = (tag2) => {
     )
   return tag2
 }
-var resourceConfig = (config2) => {
-  let resource = config2.resource
+var resourceConfig = (config3) => {
+  let resource = config3.resource
   if (!resource) throw Error('`resource` must be provided to perform resource queries')
   let {type, id} = resource
   switch (type) {
@@ -90491,8 +90491,8 @@ var resourceConfig = (config2) => {
       throw Error(`Unsupported resource type: ${type.toString()}`)
   }
 }
-var resourceGuard = (service, config2) => {
-  if (config2.resource) throw Error(`\`${service}\` does not support resource-based operations`)
+var resourceGuard = (service, config3) => {
+  if (config3.resource) throw Error(`\`${service}\` does not support resource-based operations`)
 }
 function once(fn) {
   let didCall = false,
@@ -90564,15 +90564,15 @@ function validateApiPerspective(perspective) {
       'Invalid API perspective value: "raw". The raw-perspective can not be combined with other perspectives',
     )
 }
-var initConfig = (config2, prevConfig) => {
+var initConfig = (config3, prevConfig) => {
   let specifiedConfig = {
     ...prevConfig,
-    ...config2,
+    ...config3,
     stega: {
       ...(typeof prevConfig.stega == 'boolean'
         ? {enabled: prevConfig.stega}
         : prevConfig.stega || defaultConfig.stega),
-      ...(typeof config2.stega == 'boolean' ? {enabled: config2.stega} : config2.stega || {}),
+      ...(typeof config3.stega == 'boolean' ? {enabled: config3.stega} : config3.stega || {}),
     },
   }
   specifiedConfig.apiVersion || printNoApiVersionSpecifiedWarning()
@@ -91191,15 +91191,15 @@ var ObservableTransaction = class ObservableTransaction2 extends BaseTransaction
   }
 }
 var possibleStoreRequestOptions = ['headers', 'signal', 'tag', 'timeout', 'token']
-function requestOptions(config2, overrides = {}) {
+function requestOptions(config3, overrides = {}) {
   let headers = {}
-  config2.headers && Object.assign(headers, config2.headers)
-  let token = overrides.token || config2.token
+  config3.headers && Object.assign(headers, config3.headers)
+  let token = overrides.token || config3.token
   ;(token && (headers.Authorization = `Bearer ${token}`),
     !overrides.useGlobalApi &&
-      !config2.useProjectHostname &&
-      config2.projectId &&
-      (headers['X-Sanity-Project-ID'] = config2.projectId))
+      !config3.useProjectHostname &&
+      config3.projectId &&
+      (headers['X-Sanity-Project-ID'] = config3.projectId))
   let request = {
     url: overrides.url,
     headers: Object.assign(headers, overrides.headers || {}),
@@ -91208,11 +91208,11 @@ function requestOptions(config2, overrides = {}) {
     overrides.body !== void 0 && (request.body = overrides.body),
     overrides.query && (request.query = expandQueryArrays(overrides.query)),
     overrides.signal && (request.signal = overrides.signal),
-    (overrides.withCredentials === void 0 ? config2.withCredentials : overrides.withCredentials) &&
+    (overrides.withCredentials === void 0 ? config3.withCredentials : overrides.withCredentials) &&
       (request.credentials = 'include'),
     typeof overrides.maxRedirects == 'number' &&
       (request.redirect = overrides.maxRedirects === 0 ? 'manual' : 'follow'))
-  let timeout = overrides.timeout === void 0 ? config2.timeout : overrides.timeout
+  let timeout = overrides.timeout === void 0 ? config3.timeout : overrides.timeout
   ;((request.timeout = timeout === void 0 ? 3e5 : timeout !== 0 && timeout),
     overrides.useAbortSignal === false &&
       !request.signal &&
@@ -91222,12 +91222,12 @@ function requestOptions(config2, overrides = {}) {
           signal: false,
         }))
   let fetchOption =
-    typeof overrides.fetch == 'object' && typeof config2.fetch == 'object'
+    typeof overrides.fetch == 'object' && typeof config3.fetch == 'object'
       ? {
-          ...config2.fetch,
+          ...config3.fetch,
           ...overrides.fetch,
         }
-      : overrides.fetch || config2.fetch
+      : overrides.fetch || config3.fetch
   return (
     typeof fetchOption == 'function'
       ? (request.fetch = fetchOption)
@@ -91238,16 +91238,16 @@ function requestOptions(config2, overrides = {}) {
           fetchInit: fetchOption,
         }),
     !request.fetch &&
-      config2.resolveFetch &&
-      (request.fetch = config2.resolveFetch(
-        typeof config2.proxy == 'string' ? config2.proxy : void 0,
+      config3.resolveFetch &&
+      (request.fetch = config3.resolveFetch(
+        typeof config3.proxy == 'string' ? config3.proxy : void 0,
       )),
     typeof overrides.maxRetries == 'number' && (request.maxRetries = overrides.maxRetries),
-    typeof config2.lineage == 'string' &&
-      config2.lineage &&
+    typeof config3.lineage == 'string' &&
+      config3.lineage &&
       (request.meta = {
         ...request.meta,
-        lineage: config2.lineage,
+        lineage: config3.lineage,
       }),
     request
   )
@@ -91797,8 +91797,8 @@ function _unpublishVersion(client, httpRequest, versionId, publishedId2, options
   )
 }
 var hasDataConfig = (client) => {
-  let config2 = client.config()
-  return (config2.dataset !== void 0 && config2.projectId !== void 0) || config2.resource !== void 0
+  let config3 = client.config()
+  return (config3.dataset !== void 0 && config3.projectId !== void 0) || config3.resource !== void 0
 }
 var isQuery = (client, uri) => hasDataConfig(client) && uri.startsWith(_getDataUrl(client, 'query'))
 var isMutate = (client, uri) =>
@@ -91819,16 +91819,16 @@ function _prepareRequest(client, options) {
   options.uri !== void 0 && printDeprecatedUriOptionWarning()
   let uri = options.uri || options.url
   if (typeof uri != 'string') throw TypeError('Request options must include a `url`')
-  let config2 = client.config(),
+  let config3 = client.config(),
     canUseCdn =
       options.canUseCdn === void 0
         ? ['GET', 'HEAD'].indexOf(options.method || 'GET') >= 0 && isData(client, uri)
         : options.canUseCdn,
-    useCdn = (options.useCdn ?? config2.useCdn) && canUseCdn,
+    useCdn = (options.useCdn ?? config3.useCdn) && canUseCdn,
     tag2 =
-      options.tag && config2.requestTagPrefix
-        ? [config2.requestTagPrefix, options.tag].join('.')
-        : options.tag || config2.requestTagPrefix
+      options.tag && config3.requestTagPrefix
+        ? [config3.requestTagPrefix, options.tag].join('.')
+        : options.tag || config3.requestTagPrefix
   if (
     (tag2 &&
       options.tag !== null &&
@@ -91838,14 +91838,14 @@ function _prepareRequest(client, options) {
       }),
     ['GET', 'HEAD', 'POST'].indexOf(options.method || 'GET') >= 0 && isQuery(client, uri))
   ) {
-    let resultSourceMap = options.resultSourceMap ?? config2.resultSourceMap
+    let resultSourceMap = options.resultSourceMap ?? config3.resultSourceMap
     resultSourceMap !== void 0 &&
       resultSourceMap !== false &&
       (options.query = {
         resultSourceMap,
         ...options.query,
       })
-    let perspectiveOption = options.perspective || config2.perspective
+    let perspectiveOption = options.perspective || config3.perspective
     perspectiveOption !== void 0 &&
       (perspectiveOption === 'previewDrafts' && printPreviewDraftsDeprecationWarning(),
       validateApiPerspective(perspectiveOption),
@@ -91860,7 +91860,7 @@ function _prepareRequest(client, options) {
         perspectiveOption === 'drafts') &&
         useCdn &&
         ((useCdn = false), printCdnPreviewDraftsWarning()))
-    let variantOption = options.variant || config2.variant
+    let variantOption = options.variant || config3.variant
     ;(typeof variantOption == 'string' &&
       (options.query = {
         variant: variantOption,
@@ -91888,7 +91888,7 @@ function _prepareRequest(client, options) {
           ...options.query,
         }))
   }
-  return requestOptions(config2, Object.assign({}, options, {url: _getUrl(client, uri, useCdn)}))
+  return requestOptions(config3, Object.assign({}, options, {url: _getUrl(client, uri, useCdn)}))
 }
 function _observe(userSignal, run) {
   return new import_rxjs3.Observable((subscriber) => {
@@ -91945,16 +91945,16 @@ function _uploadObservable(client, options) {
   return options.signal ? request.pipe(_withAbortSignal(options.signal)) : request
 }
 function _getDataUrl(client, operation, path4) {
-  let config2 = client.config()
-  if (config2.resource)
+  let config3 = client.config()
+  if (config3.resource)
     return (
-      resourceConfig(config2),
-      `${resourceDataBase(config2)}/${path4 === void 0 ? operation : `${operation}/${path4}`}`.replace(
+      resourceConfig(config3),
+      `${resourceDataBase(config3)}/${path4 === void 0 ? operation : `${operation}/${path4}`}`.replace(
         /\/($|\?)/,
         '$1',
       )
     )
-  let baseUri = `/${operation}/${hasDataset(config2)}`
+  let baseUri = `/${operation}/${hasDataset(config3)}`
   return `/data${path4 === void 0 ? baseUri : `${baseUri}/${path4}`}`.replace(/\/($|\?)/, '$1')
 }
 function _getUrl(client, uri, canUseCdn = false) {
@@ -91981,8 +91981,8 @@ function _withAbortSignal(signal) {
 function _createAbortError(signal) {
   return new DOMException(signal?.reason ?? 'The operation was aborted.', 'AbortError')
 }
-var resourceDataBase = (config2) => {
-  let resource = config2.resource
+var resourceDataBase = (config3) => {
+  let resource = config3.resource
   if (!resource) throw Error('`resource` must be provided to perform resource queries')
   let {type, id} = resource
   switch (type) {
@@ -92171,10 +92171,10 @@ function _upload(client, _httpRequest, assetType, body, opts = {}) {
   validateAssetType(assetType)
   let meta3 = opts.extract || void 0
   meta3 && !meta3.length && (meta3 = ['none'])
-  let config2 = client.config(),
+  let config3 = client.config(),
     options = optionsFromFile(opts, body),
     {tag: tag2, label, title, description, creditLine, filename, source} = options,
-    isMediaLibrary = config2.resource?.type === 'media-library',
+    isMediaLibrary = config3.resource?.type === 'media-library',
     query = isMediaLibrary
       ? {
           title,
@@ -92196,7 +92196,7 @@ function _upload(client, _httpRequest, assetType, body, opts = {}) {
       tag: tag2,
       method: 'POST',
       timeout: options.timeout || 0,
-      url: buildAssetUploadUrl(config2, assetType),
+      url: buildAssetUploadUrl(config3, assetType),
       headers,
       query,
       body,
@@ -92232,9 +92232,9 @@ function appendQuery(url3, query) {
   ).toString()
   return qs ? url3 + (url3.includes('?') ? '&' : '?') + qs : url3
 }
-function buildAssetUploadUrl(config2, assetType) {
+function buildAssetUploadUrl(config3, assetType) {
   let assetTypeEndpoint = assetType === 'image' ? 'images' : 'files',
-    resource = config2.resource
+    resource = config3.resource
   if (resource) {
     let {type, id} = resource
     switch (type) {
@@ -92256,7 +92256,7 @@ function buildAssetUploadUrl(config2, assetType) {
         throw Error(`Unsupported resource type: ${type.toString()}`)
     }
   }
-  return `assets/${assetTypeEndpoint}/${hasDataset(config2)}`
+  return `assets/${assetTypeEndpoint}/${hasDataset(config3)}`
 }
 function optionsFromFile(opts, file2) {
   return typeof File > 'u' || !(file2 instanceof File)
@@ -92303,11 +92303,11 @@ function reconnectOnConnectionFailure() {
     )
   }
 }
-function resolveEventSourceFetch(config2, options = {}) {
+function resolveEventSourceFetch(config3, options = {}) {
   let extraHeaders = options.headers,
     credentials = options.withCredentials ? 'include' : void 0
   return function eventSourceFetch(url3, init) {
-    let baseFetch = pickBaseFetch(config2),
+    let baseFetch = pickBaseFetch(config3),
       mergedInit = {...init}
     if (extraHeaders) {
       let headers = new Headers(init?.headers)
@@ -92320,9 +92320,9 @@ function resolveEventSourceFetch(config2, options = {}) {
     )
   }
 }
-function pickBaseFetch(config2) {
-  return config2.resolveFetch
-    ? config2.resolveFetch(typeof config2.proxy == 'string' ? config2.proxy : void 0)
+function pickBaseFetch(config3) {
+  return config3.resolveFetch
+    ? config3.resolveFetch(typeof config3.proxy == 'string' ? config3.proxy : void 0)
     : globalThis.fetch.bind(globalThis)
 }
 var possibleOptions = [
@@ -92359,14 +92359,14 @@ function _listen$2(query, params, opts = {}) {
   return _connectListenEventSource(this, uri, listenFor)
 }
 function _connectListenEventSource(client, uri, listenFor) {
-  let config2 = client.config(),
-    {token, withCredentials, headers: configHeaders} = config2,
+  let config3 = client.config(),
+    {token, withCredentials, headers: configHeaders} = config3,
     headers = {}
   ;(token && (headers.Authorization = `Bearer ${token}`),
     configHeaders && Object.assign(headers, configHeaders))
   let initEventSource = () =>
     new EventSource(uri, {
-      fetch: resolveEventSourceFetch(config2, {
+      fetch: resolveEventSourceFetch(config3, {
         headers: Object.keys(headers).length ? headers : void 0,
         withCredentials,
       }),
@@ -93015,8 +93015,8 @@ var ContextClient = class {
         },
         ...options,
       }),
-      config2 = this.#client.config(),
-      putResponse = await (config2.resolveFetch?.(config2.proxy) ?? globalThis.fetch)(
+      config3 = this.#client.config(),
+      putResponse = await (config3.resolveFetch?.(config3.proxy) ?? globalThis.fetch)(
         staged.uploadUrl,
         {
           method: 'PUT',
@@ -93726,24 +93726,24 @@ var ObservableContextClient = class {
       ),
   }
 }
-function shareReplayLatest(configOrPredicate, config2) {
+function shareReplayLatest(configOrPredicate, config3) {
   return _shareReplayLatest(
     typeof configOrPredicate == 'function'
       ? {
           predicate: configOrPredicate,
-          ...config2,
+          ...config3,
         }
       : configOrPredicate,
   )
 }
-function _shareReplayLatest(config2) {
+function _shareReplayLatest(config3) {
   return (source) => {
     let latest,
       emitted = false,
-      {predicate, ...shareConfig} = config2,
+      {predicate, ...shareConfig} = config3,
       wrapped = source.pipe(
         (0, import_rxjs3.tap)((value) => {
-          config2.predicate(value) && ((emitted = true), (latest = value))
+          config3.predicate(value) && ((emitted = true), (latest = value))
         }),
         (0, import_rxjs3.finalize)(() => {
           ;((emitted = false), (latest = void 0))
@@ -93766,7 +93766,7 @@ var LiveClient = class {
    * Requires `apiVersion` to be `2021-03-25` or later.
    */
   events({includeDrafts = false, tag: _tag, waitFor} = {}) {
-    let config2 = this.#client.config(),
+    let config3 = this.#client.config(),
       {
         projectId: projectId3,
         apiVersion: _apiVersion,
@@ -93774,7 +93774,7 @@ var LiveClient = class {
         withCredentials,
         requestTagPrefix,
         headers: configHeaders,
-      } = config2,
+      } = config3,
       apiVersion = _apiVersion.replace(/^v/, '')
     if (apiVersion !== 'X' && apiVersion < requiredApiVersion)
       throw Error(
@@ -93794,13 +93794,13 @@ var LiveClient = class {
     ;(includeDrafts && token && (eventSourceHeaders.Authorization = `Bearer ${token}`),
       configHeaders && Object.assign(eventSourceHeaders, configHeaders))
     let eventSourceWithCredentials = !!(includeDrafts && withCredentials),
-      transportCache = eventsCache.get(config2.resolveFetch)
+      transportCache = eventsCache.get(config3.resolveFetch)
     transportCache ||
       ((transportCache = /* @__PURE__ */ new Map()),
-      eventsCache.set(config2.resolveFetch, transportCache))
+      eventsCache.set(config3.resolveFetch, transportCache))
     let cacheKey = JSON.stringify([
         url3.href,
-        typeof config2.proxy == 'string' ? config2.proxy : null,
+        typeof config3.proxy == 'string' ? config3.proxy : null,
         eventSourceHeaders,
         eventSourceWithCredentials,
       ]),
@@ -93808,7 +93808,7 @@ var LiveClient = class {
     if (existing) return existing
     let initEventSource = () =>
         new EventSource(url3.href, {
-          fetch: resolveEventSourceFetch(config2, {
+          fetch: resolveEventSourceFetch(config3, {
             headers: Object.keys(eventSourceHeaders).length ? eventSourceHeaders : void 0,
             withCredentials: eventSourceWithCredentials,
           }),
@@ -93824,7 +93824,7 @@ var LiveClient = class {
         new URL(this.#client.getUrl('/check/cors', false)),
         projectId3,
         eventSourceWithCredentials,
-        pickBaseFetch(config2),
+        pickBaseFetch(config3),
       ),
       observable = events
         .pipe(
@@ -93857,7 +93857,7 @@ var LiveClient = class {
         .pipe(
           (0, import_operators.finalize)(() => {
             ;(transportCache.delete(cacheKey),
-              transportCache.size === 0 && eventsCache.delete(config2.resolveFetch))
+              transportCache.size === 0 && eventsCache.delete(config3.resolveFetch))
           }),
           shareReplayLatest({predicate: (event) => event.type === 'welcome'}),
         )
@@ -93946,11 +93946,11 @@ var ObservableDatasetsClient = class {
    */
   list() {
     resourceGuard('dataset', this.#client.config())
-    let config2 = this.#client.config(),
-      projectId3 = config2.projectId,
+    let config3 = this.#client.config(),
+      projectId3 = config3.projectId,
       url3 = '/datasets'
     return (
-      config2.useProjectHostname === false && (url3 = `/projects/${projectId3}/datasets`),
+      config3.useProjectHostname === false && (url3 = `/projects/${projectId3}/datasets`),
       _requestObservable(this.#client, this.#httpRequest, {
         url: url3,
         tag: null,
@@ -94037,11 +94037,11 @@ var DatasetsClient = class {
    */
   list() {
     resourceGuard('dataset', this.#client.config())
-    let config2 = this.#client.config(),
-      projectId3 = config2.projectId,
+    let config3 = this.#client.config(),
+      projectId3 = config3.projectId,
       url3 = '/datasets'
     return (
-      config2.useProjectHostname === false && (url3 = `/projects/${projectId3}/datasets`),
+      config3.useProjectHostname === false && (url3 = `/projects/${projectId3}/datasets`),
       _request(this.#client, this.#httpRequest, {
         url: url3,
         tag: null,
@@ -94083,9 +94083,9 @@ var DatasetsClient = class {
   }
 }
 function _embeddingsSettingsUri(client, name2) {
-  let config2 = client.config()
-  return config2.useProjectHostname === false
-    ? `/projects/${config2.projectId}/datasets/${name2}/settings/embeddings`
+  let config3 = client.config()
+  return config3.useProjectHostname === false
+    ? `/projects/${config3.projectId}/datasets/${name2}/settings/embeddings`
     : `/datasets/${name2}/settings/embeddings`
 }
 function _modifyObservable(client, httpRequest, method, name2, options) {
@@ -94121,14 +94121,14 @@ var ASYNC_INVOCABLE_FUNCTION_TYPES = [
 var INVOCABLE_FUNCTION_TYPES = [
   .../* @__PURE__ */ new Set([...SYNC_INVOCABLE_FUNCTION_TYPES, ...ASYNC_INVOCABLE_FUNCTION_TYPES]),
 ]
-var scopeHeaders = (config2, request) => {
-  let organizationId = request?.organizationId || config2.organizationId
+var scopeHeaders = (config3, request) => {
+  let organizationId = request?.organizationId || config3.organizationId
   if (organizationId)
     return {
       'X-Sanity-Scope-Type': 'organization',
       'X-Sanity-Scope-Id': organizationId,
     }
-  let {projectId: projectId3} = config2
+  let {projectId: projectId3} = config3
   if (!projectId3)
     throw Error(
       '`functions.invoke()` requires a `projectId` to be set in the client config, or an `organizationId` for a stack deployed at organization scope',
@@ -94138,8 +94138,8 @@ var scopeHeaders = (config2, request) => {
     'X-Sanity-Scope-Id': projectId3,
   }
 }
-var resolveStackId = (config2, request) => {
-  let stackId = request?.stackId || config2.stackId
+var resolveStackId = (config3, request) => {
+  let stackId = request?.stackId || config3.stackId
   if (!stackId)
     throw Error(
       '`functions.invoke()` requires a `stackId`, either in the client config or on the request. Function names are only unique within a stack.',
@@ -94175,9 +94175,9 @@ function _resolveFunctionId(client, httpRequest, functionName, stackId, headers,
 }
 function _invoke(client, httpRequest, functionName, request, options) {
   return (0, import_rxjs3.defer)(() => {
-    let config2 = client.config(),
-      headers = scopeHeaders(config2, request),
-      stackId = resolveStackId(config2, request),
+    let config3 = client.config(),
+      headers = scopeHeaders(config3, request),
+      stackId = resolveStackId(config3, request),
       sync = options?.sync ?? false
     return _resolveFunctionId(
       client,
@@ -94236,8 +94236,8 @@ var ObservableMediaLibraryVideoClient = class {
    * @param options - Options for transformations and expiration
    */
   getPlaybackInfo(assetIdentifier, options = {}) {
-    let config2 = this.#client.config(),
-      configMediaLibraryId = (config2.resource || config2['~experimental_resource'])?.id,
+    let config3 = this.#client.config(),
+      configMediaLibraryId = (config3.resource || config3['~experimental_resource'])?.id,
       {instanceId, libraryId} = parseAssetInstanceId(assetIdentifier),
       effectiveLibraryId = libraryId || configMediaLibraryId
     if (!effectiveLibraryId)
@@ -94266,8 +94266,8 @@ var MediaLibraryVideoClient = class {
    * @param options - Options for transformations and expiration
    */
   getPlaybackInfo(assetIdentifier, options = {}) {
-    let config2 = this.#client.config(),
-      configMediaLibraryId = (config2.resource || config2['~experimental_resource'])?.id,
+    let config3 = this.#client.config(),
+      configMediaLibraryId = (config3.resource || config3['~experimental_resource'])?.id,
       {instanceId, libraryId} = parseAssetInstanceId(assetIdentifier),
       effectiveLibraryId = libraryId || configMediaLibraryId
     if (!effectiveLibraryId)
@@ -94993,8 +94993,8 @@ var ObservableSanityClient = class ObservableSanityClient2 {
    * @category Real-time
    */
   listen = _listen$2
-  constructor(httpRequest, config2 = defaultConfig) {
-    ;(this.config(config2),
+  constructor(httpRequest, config3 = defaultConfig) {
+    ;(this.config(config3),
       (this.#httpRequest = httpRequest),
       (this.assets = new ObservableAssetsClient(this, this.#httpRequest)),
       (this.datasets = new ObservableDatasetsClient(this, this.#httpRequest)),
@@ -95347,8 +95347,8 @@ var SanityClient = class SanityClient2 {
    * @category Real-time
    */
   listen = _listen$2
-  constructor(httpRequest, config2 = defaultConfig) {
-    ;(this.config(config2),
+  constructor(httpRequest, config3 = defaultConfig) {
+    ;(this.config(config3),
       (this.#httpRequest = httpRequest),
       (this.assets = new AssetsClient(this, this.#httpRequest)),
       (this.datasets = new DatasetsClient(this, this.#httpRequest)),
@@ -95361,7 +95361,7 @@ var SanityClient = class SanityClient2 {
       (this.functions = new FunctionsClient(this, this.#httpRequest)),
       (this.releases = new ReleasesClient(this, this.#httpRequest)),
       (this.context = new ContextClient(this, this.#httpRequest)),
-      (this.observable = new ObservableSanityClient(httpRequest, config2)))
+      (this.observable = new ObservableSanityClient(httpRequest, config3)))
   }
   /**
    * Clone the client - returns a new instance
@@ -95642,13 +95642,13 @@ var SanityClient = class SanityClient2 {
 }
 function defineCreateClientExports(envOptions, ClassConstructor) {
   let defaultRequester = defineRequester(envOptions).observable,
-    createClient2 = (config2) => {
+    createClient2 = (config3) => {
       let {observable: clientRequester, promise: clientRequesterPromise} = defineRequester(
           envOptions,
           {
-            ignoreWarnings: config2.ignoreWarnings,
-            maxRetries: config2.maxRetries,
-            retryDelay: config2.retryDelay,
+            ignoreWarnings: config3.ignoreWarnings,
+            maxRetries: config3.maxRetries,
+            retryDelay: config3.retryDelay,
           },
         ),
         performRequest = async (options) =>
@@ -95661,9 +95661,9 @@ function defineCreateClientExports(envOptions, ClassConstructor) {
         httpRequest = (options, requestHandler) =>
           requestHandler ? requestHandler(options, performRequest) : performRequest(options)
       return new ClassConstructor(httpRequest, {
-        ...config2,
+        ...config3,
         requester: clientRequester,
-        resolveFetch: config2.resolveFetch ?? envOptions.resolveFetch,
+        resolveFetch: config3.resolveFetch ?? envOptions.resolveFetch,
       })
     }
   return {
@@ -95672,8 +95672,8 @@ function defineCreateClientExports(envOptions, ClassConstructor) {
   }
 }
 function defineDeprecatedCreateClient(createClient2) {
-  return function deprecatedCreateClient2(config2) {
-    return (printNoDefaultExport(), createClient2(config2))
+  return function deprecatedCreateClient2(config3) {
+    return (printNoDefaultExport(), createClient2(config3))
   }
 }
 var name = '@sanity/client'
@@ -101752,7 +101752,7 @@ function buildTaggedClient(client, fallback) {
       transaction: () => wrapTransaction(client.transaction()),
       ...(client.withConfig !== void 0
         ? {
-            withConfig: (config2) => withRequestTag(client.withConfig(config2), fallback),
+            withConfig: (config3) => withRequestTag(client.withConfig(config3), fallback),
           }
         : {}),
       ...(client.action !== void 0
@@ -137895,7 +137895,7 @@ function attachSchema(issues, start, inst) {
     ;(_a8 = issues[i]).schema ?? (_a8.schema = inst)
   }
 }
-function finalizeIssue(iss, ctx, config2) {
+function finalizeIssue(iss, ctx, config3) {
   var _a8
   const traits = iss.inst?._zod?.traits
   if (traits?.has('$ZodType')) {
@@ -137908,8 +137908,8 @@ function finalizeIssue(iss, ctx, config2) {
     : (unwrapMessage(iss.inst?._zod.def?.error?.(iss)) ??
       unwrapMessage(schemaError?.(iss)) ??
       unwrapMessage(ctx?.error?.(iss)) ??
-      unwrapMessage(config2.customError?.(iss)) ??
-      unwrapMessage(config2.localeError?.(iss)) ??
+      unwrapMessage(config3.customError?.(iss)) ??
+      unwrapMessage(config3.localeError?.(iss)) ??
       'Invalid input')
   const full = {}
   for (const k of Object.keys(iss)) {
@@ -160758,17 +160758,17 @@ function resolveSearchConfig(type, maxDepth) {
 function normalizeMaxDepth(maxDepth) {
   return !isFinite_default(maxDepth) || maxDepth < 1 || maxDepth > 5 ? 4 : maxDepth - 1
 }
-function lazyGetter(target, key, getter, config2 = {}) {
+function lazyGetter(target, key, getter, config3 = {}) {
   return (
     Object.defineProperty(target, key, {
       configurable: true,
-      enumerable: config2.enumerable !== false,
+      enumerable: config3.enumerable !== false,
       get() {
         let val2 = getter()
         return (
           Object.defineProperty(target, key, {
             value: val2,
-            writable: !!config2.writable,
+            writable: !!config3.writable,
             configurable: false,
           }),
           val2
@@ -162646,8 +162646,9 @@ var Hash2 = class {
       }
       if (index2 >= 64) {
         this._int32(_word)
-        _word[0] = _word[16]
-        /* N.inputWords */
+        _word[0] =
+          _word[16]
+          /* N.inputWords */
       }
       this._size += index2 - start
     }
@@ -162708,11 +162709,11 @@ var Hash2 = class {
     const high32 = (bits64 - low32) / 4294967296
     if (high32)
       _word[14] =
-        /* N.highIndex */
+      /* N.highIndex */
         swap32(high32)
     if (low32)
       _word[15] =
-        /* N.lowIndex */
+      /* N.lowIndex */
         swap32(low32)
     this._int32(_word)
     return encoding === 'hex' ? this._hex() : this._bin()
@@ -168027,7 +168028,11 @@ var entry_default = async (req) => {
   }
   return response
 }
-export {entry_default as default}
+var config2 = {
+  nodeBundler: 'none',
+  includedFiles: ['**'],
+}
+export {config2 as config, entry_default as default}
 /*! Bundled license information:
 
 undici/lib/web/fetch/body.js:
