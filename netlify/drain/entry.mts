@@ -50,9 +50,19 @@ export default async (req: Request): Promise<Response> => {
   let mode: DrainMode = 'pending'
   let holder = 'background'
   try {
-    const body = (await req.json()) as {mode?: DrainMode; holder?: string}
+    const body = (await req.json()) as {
+      mode?: DrainMode
+      holder?: string
+      /** Secret-auth only: pin NECRO_MODEL_REASONING for this drain (and continues). */
+      modelReasoning?: string
+    }
     if (body.mode === 'schedule' || body.mode === 'pending') mode = body.mode
     if (body.holder) holder = body.holder
+    const override = body.modelReasoning?.trim()
+    if (override) {
+      process.env.NECRO_MODEL_REASONING = override
+      delete process.env.NECRO_AUTOPSY_FAST
+    }
   } catch {
     /* defaults */
   }
@@ -63,6 +73,10 @@ export default async (req: Request): Promise<Response> => {
     holder,
     hasWriteToken: Boolean(process.env.SANITY_HQ_WRITE_TOKEN?.trim()),
     hasAnthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+    // Non-secret model ids — acceptance / write-up evidence.
+    modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || null,
+    modelFast: process.env.NECRO_MODEL_FAST?.trim() || null,
+    autopsyFast: process.env.NECRO_AUTOPSY_FAST === '1',
   })
 
   const lock = await tryAcquireDrainLock(holder)
