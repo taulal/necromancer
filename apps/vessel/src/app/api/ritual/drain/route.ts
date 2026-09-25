@@ -114,23 +114,29 @@ export async function POST(req: Request) {
     return Response.json({skipped: 'busy'}, {status: 202})
   }
 
-  // Prefer Next.js `after()` so the Vessel's already-working `@necro/rituals`
-  // bundle runs the drain (Netlify `drain-background` was 202-no-op).
-  after(async () => {
-    try {
-      await runLocked(mode, holder)
-    } catch (err) {
-      console.error('[drain] after() run failed', err)
-    }
-  })
-
-  // Best-effort parallel kick of the pre-bundled background function (15 min).
-  const bg = backgroundUrl()
-  if (bg && env('DRAIN_SECRET')) {
-    void kickDrainBackground(mode, holder).catch((err) =>
-      console.error('[drain] background kick failed', err),
-    )
+  // App kick (public): return 202 immediately and continue via after().
+  // Secret / schedule (Function + ops): await the drain so autopsy (~1 min)
+  // actually finishes — Netlify was freezing after() mid-autopsy while the
+  // claim lease kept the effect stuck.
+  if (kind === 'kick') {
+    after(async () => {
+      try {
+        await runLocked(mode, holder)
+      } catch (err) {
+        console.error('[drain] after() run failed', err)
+      }
+    })
+    return Response.json({accepted: true, mode, via: 'after'}, {status: 202})
   }
 
-  return Response.json({accepted: true, mode, via: 'after'}, {status: 202})
+  try {
+    const summary = await runLocked(mode, holder)
+    if ('skipped' in summary) {
+      return Response.json(summary, {status: 202})
+    }
+    return Response.json({accepted: true, mode, via: 'await', ...summary}, {status: 202})
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return Response.json({error: message}, {status: 500})
+  }
 }
