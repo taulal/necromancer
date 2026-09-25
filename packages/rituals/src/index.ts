@@ -20,6 +20,8 @@ export {
   isDrainLockHeld,
   createProgressThrottle,
   effectHandlers,
+  interrogateHandler,
+  countOpenRequiredQuestions,
   asDocumentId,
   type DrainPassResult,
   type DrainRunOutcome,

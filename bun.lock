@@ -145,6 +145,14 @@
         "sanity": "^6.16.0",
       },
     },
+    "packages/interrogate": {
+      "name": "@necro/interrogate",
+      "dependencies": {
+        "@anthropic-ai/sdk": "^0.128.0",
+        "@necro/autopsy": "workspace:*",
+        "zod": "^4.5.2",
+      },
+    },
     "packages/rituals": {
       "name": "@necro/rituals",
       "dependencies": {
@@ -152,6 +160,7 @@
         "@necro/autopsy": "workspace:*",
         "@necro/exhume": "workspace:*",
         "@necro/hq-schema": "workspace:*",
+        "@necro/interrogate": "workspace:*",
         "@sanity/client": "^8.7.0",
         "@sanity/workflow-engine": "0.35.0",
       },
@@ -708,6 +717,8 @@
     "@necro/fn-question-gate": ["@necro/fn-question-gate@workspace:functions/question-gate"],
 
     "@necro/hq-schema": ["@necro/hq-schema@workspace:packages/hq-schema"],
+
+    "@necro/interrogate": ["@necro/interrogate@workspace:packages/interrogate"],
 
     "@necro/rituals": ["@necro/rituals@workspace:packages/rituals"],
 

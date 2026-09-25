@@ -8,6 +8,7 @@ import {asDocumentId} from './refId'
 import {createProgressThrottle} from './progressThrottle'
 import {autopsyHandler} from './autopsyHandler'
 import {exhumeHandler} from './exhumeHandler'
+import {interrogateHandler} from './interrogateHandler'
 import {reanimateHandler} from './reanimateHandler'
 
 const stub =
@@ -26,12 +27,12 @@ const stub =
     ctx.log(`[stub] ${label}`, {seance, page})
   }
 
-/** Real exhume, autopsy, and showcase-gated reanimate; stubs for the rest. */
+/** Real exhume, autopsy, interrogate, and showcase-gated reanimate; stubs for the rest. */
 export const effectHandlers: Record<string, EffectHandler> = {
   [EFFECTS.exhume]: exhumeHandler,
   [EFFECTS.autopsy]: autopsyHandler,
   [EFFECTS.autopsyRerun]: autopsyHandler,
-  [EFFECTS.interrogate]: stub('necro.interrogate'),
+  [EFFECTS.interrogate]: interrogateHandler,
   [EFFECTS.reanimate]: reanimateHandler,
   [EFFECTS.planRitual]: stub('necro.plan-ritual'),
   [EFFECTS.cast]: stub('necro.cast'),
