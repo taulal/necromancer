@@ -26,6 +26,9 @@ export default async (req: Request, _context: Context) => {
     env: {
       hasWriteToken: Boolean(process.env.SANITY_HQ_WRITE_TOKEN?.trim()),
       hasAnthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+      modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || null,
+      modelFast: process.env.NECRO_MODEL_FAST?.trim() || null,
+      autopsyFast: process.env.NECRO_AUTOPSY_FAST === '1',
       projectId: process.env.SANITY_PROJECT_ID ?? null,
       dataset: process.env.SANITY_HQ_DATASET ?? null,
       vesselUrl: process.env.VESSEL_URL ?? process.env.URL ?? null,
