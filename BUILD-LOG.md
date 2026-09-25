@@ -118,6 +118,8 @@ Autopsy model/tokens: **`claude-haiku-4-5-20251001`**, **7788** input / **2328**
 
 Follow-ups shipped same morning: secret drain **awaits** (`via: await`, #29); NEC-11 real `necro.interrogate` (#28).
 
+Interrogate (after Accept anatomy + Netlify `via: await` drain): **5 questions** written; effect completed on Vessel (`node` / `vessel-drain`). First HTTP probe hit Netlify **Inactivity Timeout** HTML while the await was still running — work finished anyway (pending cleared, questions present). Secret drain path is correct for long Claude effects; watch for gateway idle timeouts on the response.
+
 ### Loose ends (post-UI2)
 
 - Entombed **Retry** action returns to `entombedFromStage` (set by each `*-failed` action); séance header shows Retry via `session.fireAction`.
