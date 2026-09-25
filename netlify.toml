@@ -1,11 +1,17 @@
 [build]
-  command = "bun run build:vessel"
+  # Pre-bundle drain-background so Netlify does not resolve `@necro/*` at invoke (B3).
+  command = "bun run build:vessel && bun run build:drain-fn"
   publish = "apps/vessel/.next"
 
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  # @necro/* are source-only TS workspace packages: esbuild must bundle them (B3).
+  # Pre-bundled drain-background.mjs already inlines @necro/*; keep Sanity
+  # packages external (present in site node_modules). Matches build:drain-fn.
   external_node_modules = ["@sanity/client", "@sanity/workflow-engine"]
+
+[functions."drain-background"]
+  # Already a single ESM file from build:drain-fn — do not re-bundle.
+  node_bundler = "none"
 
 # Background functions: *-background get a 15-minute limit.

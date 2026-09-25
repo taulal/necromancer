@@ -1,0 +1,105 @@
+/**
+ * Netlify Background Function body — bundled by `scripts/build-drain-fn.ts`
+ * into `drain-background.bundle.mjs` so deploy does not resolve `@necro/*` at
+ * invoke time (NEC-07c B3).
+ */
+import type {Context} from '@netlify/functions'
+import {
+  getWorkflowClient,
+  kickDrainBackground,
+  releaseDrainLock,
+  runDrain,
+  summariseDrain,
+  tryAcquireDrainLock,
+  type DrainMode,
+  type DrainRunOutcome,
+} from '@necro/rituals'
+
+const LOG_ID = 'necro.drainLog'
+
+async function writeDrainLog(entry: Record<string, unknown>): Promise<void> {
+  try {
+    const client = getWorkflowClient()
+    await client.createOrReplace({
+      _id: LOG_ID,
+      _type: 'necro.drainLog',
+      at: new Date().toISOString(),
+      ...entry,
+    })
+  } catch (err) {
+    console.error('[drain-background] log write failed', err)
+  }
+}
+
+export default async (req: Request, _context: Context) => {
+  const started = Date.now()
+  const secret = process.env.DRAIN_SECRET?.trim()
+  const auth = req.headers.get('authorization') ?? ''
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : ''
+  if (!secret || token !== secret) {
+    await writeDrainLog({
+      phase: 'auth-failed',
+      secretConfigured: Boolean(secret),
+      tokenProvided: Boolean(token),
+      elapsedMs: Date.now() - started,
+    })
+    return new Response('Unauthorised', {status: 401})
+  }
+
+  let mode: DrainMode = 'pending'
+  let holder = 'background'
+  try {
+    const body = (await req.json()) as {mode?: DrainMode; holder?: string}
+    if (body.mode === 'schedule' || body.mode === 'pending') mode = body.mode
+    if (body.holder) holder = body.holder
+  } catch {
+    /* defaults */
+  }
+
+  await writeDrainLog({
+    phase: 'start',
+    mode,
+    holder,
+    hasWriteToken: Boolean(process.env.SANITY_HQ_WRITE_TOKEN?.trim()),
+    hasAnthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+  })
+
+  const lock = await tryAcquireDrainLock(holder)
+  if (!lock.ok) {
+    await writeDrainLog({phase: 'busy', mode, holder, elapsedMs: Date.now() - started})
+    return Response.json({skipped: 'busy'}, {status: 202})
+  }
+
+  let outcome: DrainRunOutcome | undefined
+  let response: Response
+  try {
+    outcome = await runDrain(mode)
+    const summary = summariseDrain(outcome)
+    await writeDrainLog({
+      phase: 'done',
+      mode,
+      holder,
+      ...summary,
+      elapsedMs: Date.now() - started,
+    })
+    response = Response.json(summary)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    await writeDrainLog({
+      phase: 'error',
+      mode,
+      holder,
+      error: message,
+      elapsedMs: Date.now() - started,
+    })
+    response = Response.json({error: message}, {status: 500})
+  } finally {
+    await releaseDrainLock(lock.rev)
+  }
+
+  if (outcome?.budgetExhausted && outcome.pendingAfter > 0) {
+    await kickDrainBackground(mode, holder)
+  }
+
+  return response
+}
