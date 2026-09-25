@@ -103,6 +103,21 @@ Séance `NUTbHt8Bunvcm3fS8gPQw0` / instance `necromancer.wf-instance.356b93135c5
 
 Root cause for Netlify no-op: separate `*-background` function accepted requests but the workspace-import handler never ran (no `necro.drainLog`). Mitigation: pre-bundle (`build:drain-fn`, #25/#26) + Vessel `/api/ritual/drain` now runs via Next.js `after()` against the working Vessel bundle. Full unattended Netlify path still needs **NEC-11** (real `necro.interrogate`) then a fresh retry/summon.
 
+### NEC-07c Netlify unattended (hewahihaumaru, Fri 25 Sep)
+
+Fresh séance `hUejHG5M0oLup8cv3UxtPb` / instance `necromancer.wf-instance.2ad4d50f5e4f` (`pageCap: 3`, App closed). Kick via `POST /api/ritual/drain` only (Vessel runtime `node` / `vessel-drain`).
+
+| Mark                               | Wall clock (UTC) | Delta                                                                                             |
+| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------- |
+| `begin-exhumation` / exhume queued | 07:36:11         | t0                                                                                                |
+| Exhume done (3 pages)              | 07:36:46         | **~35s**                                                                                          |
+| Autopsy stage + effect queued      | 07:36:50         | ~39s                                                                                              |
+| Autopsy done (proposal v1)         | 07:59:20         | **~22.5 min** (first `after()` freeze mid-Claude; completed after claim lease + schedule re-kick) |
+
+Autopsy model/tokens: **`claude-haiku-4-5-20251001`**, **7788** input / **2328** output, repairRounds **1**.
+
+Follow-ups shipped same morning: secret drain **awaits** (`via: await`, #29); NEC-11 real `necro.interrogate` (#28).
+
 ### Loose ends (post-UI2)
 
 - Entombed **Retry** action returns to `entombedFromStage` (set by each `*-failed` action); séance header shows Retry via `session.fireAction`.
