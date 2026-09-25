@@ -89,6 +89,20 @@ Honest, dated notes for the DEV write-up. What we tried, what broke, what we lea
 - Poll (~40s+): stage stayed `exhuming`, unclaimed=1 — Function did not clear work.
 - Manual `POST https://the-necromancer.netlify.app/api/ritual/drain` with local `DRAIN_SECRET` → **401**. Netlify site env `DRAIN_SECRET` does not match local/.blueprint bake (or is unset). Sync Netlify production env to the same `DRAIN_SECRET` (and `VESSEL_URL`), then re-kick / re-summon and log timings.
 
+### NEC-07c unattended test (Fri 25 Sep morning)
+
+Séance `NUTbHt8Bunvcm3fS8gPQw0` / instance `necromancer.wf-instance.356b93135c5c` (targetcleaningsupplies, `--cap 5 --fast`).
+
+| Step                             | Where                                           | Timing / notes                                                                                                                            |
+| -------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Retry from entombed (autopsy)    | CLI `fireAction` (App closed)                   | → `autopsy` + queued `necro.autopsy`                                                                                                      |
+| Netlify `drain-background` kicks | Production                                      | HTTP 202 immediately, **never claimed** effects, never wrote `necro.drainLog`                                                             |
+| Autopsy drain                    | **Local** `runDrain` (contaminated the AC path) | **~47.4s** wall; model **`claude-haiku-4-5-20251001`**; **9119** input / **4208** output tokens; repairRounds **1**; proposal v1, 3 types |
+| Accept anatomy                   | CLI                                             | → `interrogation` + queued `necro.interrogate`                                                                                            |
+| Interrogate                      | Still a **stub**                                | Local bundled handler drained the stub → advanced toward reanimate → **entombed** (`entombedFromStage=reanimating`)                       |
+
+Root cause for Netlify no-op: separate `*-background` function accepted requests but the workspace-import handler never ran (no `necro.drainLog`). Mitigation: pre-bundle (`build:drain-fn`, #25/#26) + Vessel `/api/ritual/drain` now runs via Next.js `after()` against the working Vessel bundle. Full unattended Netlify path still needs **NEC-11** (real `necro.interrogate`) then a fresh retry/summon.
+
 ### Loose ends (post-UI2)
 
 - Entombed **Retry** action returns to `entombedFromStage` (set by each `*-failed` action); séance header shows Retry via `session.fireAction`.
