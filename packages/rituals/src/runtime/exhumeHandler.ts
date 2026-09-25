@@ -2,7 +2,7 @@
  * necro.exhume — crawl the dead site and write exhumedPage docs + seance stats.
  */
 import {crawl, OffSiteRedirectError} from '@necro/exhume'
-import {withArrayKeys} from '@necro/hq-schema'
+import {withArrayKeys} from '@necro/hq-schema/arrayKey'
 import type {EffectHandler} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
 import {asDocumentId} from './refId'

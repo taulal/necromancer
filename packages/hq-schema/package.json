@@ -4,7 +4,9 @@
   "type": "module",
   "description": "HQ dataset content model (seance, exhumedPage, schemaProposal, question, task, redirectLedgerEntry).",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./arrayKey": "./src/arrayKey.ts",
+    "./slugFromUrl": "./src/slugFromUrl.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

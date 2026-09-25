@@ -2,7 +2,7 @@
  * necro.autopsy / necro.autopsy-rerun — condense → propose → validate → write schemaProposal.
  */
 import {runAutopsy, type SchemaProposal} from '@necro/autopsy'
-import {withArrayKeys} from '@necro/hq-schema'
+import {withArrayKeys} from '@necro/hq-schema/arrayKey'
 import type {EffectHandler} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
 import {asDocumentId} from './refId'

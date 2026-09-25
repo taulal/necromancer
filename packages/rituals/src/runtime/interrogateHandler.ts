@@ -2,7 +2,7 @@
  * necro.interrogate — deterministic findings + Claude ask_questions → question docs.
  */
 import {runInterrogate, type DraftQuestion, type ProposedTypeSummary} from '@necro/interrogate'
-import {withArrayKeys} from '@necro/hq-schema'
+import {withArrayKeys} from '@necro/hq-schema/arrayKey'
 import type {EffectHandler, FieldOp} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
 import {asDocumentId} from './refId'
