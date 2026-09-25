@@ -166644,12 +166644,35 @@ var autopsyHandler = async (params, ctx) => {
         types: latest.types,
       }
     : void 0
-  const result = await runAutopsy({
-    seanceId: seance._id.replace(/^drafts\./, ''),
-    pages,
-    version: nextVersion,
-    priorProposal,
-  })
+  let result
+  try {
+    result = await runAutopsy({
+      seanceId: seance._id.replace(/^drafts\./, ''),
+      pages,
+      version: nextVersion,
+      priorProposal,
+    })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    const stack = err instanceof Error ? err.stack : void 0
+    try {
+      await client.createOrReplace({
+        _id: 'necro.effectError',
+        _type: 'necro.effectError',
+        at: /* @__PURE__ */ new Date().toISOString(),
+        effect: 'necro.autopsy',
+        seanceId: seance._id.replace(/^drafts\./, ''),
+        message,
+        stack: stack?.slice(0, 4e3),
+        modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || null,
+        hasAnthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+        pageCount: pages.length,
+      })
+    } catch (logErr) {
+      ctx.log('[autopsy] failed to write necro.effectError', String(logErr))
+    }
+    throw err
+  }
   await progress(85)
   const seanceRef = seance._id.replace(/^drafts\./, '')
   const {usage, proposal} = result
