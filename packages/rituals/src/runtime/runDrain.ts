@@ -227,7 +227,12 @@ export async function kickDrainBackground(mode: DrainMode, holder: string): Prom
         'content-type': 'application/json',
         authorization: `Bearer ${secret}`,
       },
-      body: JSON.stringify({mode, holder: `${holder}-continue`}),
+      body: JSON.stringify({
+        mode,
+        holder: `${holder}-continue`,
+        // Propagate model pin across budget-continue kicks (BG isolate is fresh each time).
+        modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || undefined,
+      }),
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) {

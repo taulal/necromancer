@@ -162646,9 +162646,8 @@ var Hash2 = class {
       }
       if (index2 >= 64) {
         this._int32(_word)
-        _word[0] =
-          _word[16]
-          /* N.inputWords */
+        _word[0] = _word[16]
+        /* N.inputWords */
       }
       this._size += index2 - start
     }
@@ -162709,11 +162708,11 @@ var Hash2 = class {
     const high32 = (bits64 - low32) / 4294967296
     if (high32)
       _word[14] =
-      /* N.highIndex */
+        /* N.highIndex */
         swap32(high32)
     if (low32)
       _word[15] =
-      /* N.lowIndex */
+        /* N.lowIndex */
         swap32(low32)
     this._int32(_word)
     return encoding === 'hex' ? this._hex() : this._bin()
@@ -167921,7 +167920,12 @@ async function kickDrainBackground(mode, holder) {
         'content-type': 'application/json',
         authorization: `Bearer ${secret}`,
       },
-      body: JSON.stringify({mode, holder: `${holder}-continue`}),
+      body: JSON.stringify({
+        mode,
+        holder: `${holder}-continue`,
+        // Propagate model pin across budget-continue kicks (BG isolate is fresh each time).
+        modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || void 0,
+      }),
       signal: AbortSignal.timeout(1e4),
     })
     if (!res.ok) {
@@ -167970,6 +167974,11 @@ var entry_default = async (req) => {
     const body = await req.json()
     if (body.mode === 'schedule' || body.mode === 'pending') mode = body.mode
     if (body.holder) holder = body.holder
+    const override = body.modelReasoning?.trim()
+    if (override) {
+      process.env.NECRO_MODEL_REASONING = override
+      delete process.env.NECRO_AUTOPSY_FAST
+    }
   } catch {}
   await writeDrainLog({
     phase: 'start',
@@ -167977,6 +167986,10 @@ var entry_default = async (req) => {
     holder,
     hasWriteToken: Boolean(process.env.SANITY_HQ_WRITE_TOKEN?.trim()),
     hasAnthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
+    // Non-secret model ids — acceptance / write-up evidence.
+    modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || null,
+    modelFast: process.env.NECRO_MODEL_FAST?.trim() || null,
+    autopsyFast: process.env.NECRO_AUTOPSY_FAST === '1',
   })
   const lock = await tryAcquireDrainLock(holder)
   if (!lock.ok) {

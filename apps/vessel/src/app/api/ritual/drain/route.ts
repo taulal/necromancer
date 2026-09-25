@@ -100,6 +100,16 @@ export async function POST(req: Request) {
   const mode = await readMode(req.clone(), kind)
   const holder = kind === 'kick' ? 'app-kick' : mode === 'schedule' ? 'schedule' : 'secret-kick'
 
+  let modelReasoning: string | undefined
+  if (kind === 'secret') {
+    try {
+      const body = (await req.clone().json()) as {modelReasoning?: string}
+      modelReasoning = body.modelReasoning?.trim() || undefined
+    } catch {
+      /* no body */
+    }
+  }
+
   if (await isDrainLockHeld()) {
     return Response.json({skipped: 'busy'}, {status: 202})
   }
@@ -113,7 +123,7 @@ export async function POST(req: Request) {
           'content-type': 'application/json',
           authorization: `Bearer ${env('DRAIN_SECRET')}`,
         },
-        body: JSON.stringify({mode, holder}),
+        body: JSON.stringify({mode, holder, modelReasoning}),
         signal: AbortSignal.timeout(10_000),
       })
       // Background functions always answer 202 at the edge (even on handler errors).
