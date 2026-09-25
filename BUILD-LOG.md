@@ -145,3 +145,24 @@ Fix: fully bundle into `drain-background.js` (CJS; `netlify/functions/package.js
 - **Why local never saw it:** local `.env` has `NECRO_MODEL_REASONING=claude-haiku-4-5-20251001`, so every local autopsy so far ran on Haiku. Sonnet only ever ran on Netlify.
 - **Fix:** shared `parseToolUse` / `coerceToolInput` in `@necro/autopsy` (`toolInput.ts`), used by both `propose_anatomy` and `ask_questions`. It parses a stringified field back to JSON before zod. When validation fails it throws `ToolCallError` carrying `stopReason`, model and token counts, which the autopsy handler now writes into `necro.effectError`, so the next failure distinguishes truncation from shape errors without another repro. No bundler/config change: `drain-background.mjs` rebuilt only, and it still loads standalone.
 - **Not done:** strict tool schemas (API-enforced) as the longer-term fix; Netlify cap-50 acceptance run pending deploy.
+
+### NEC-07c · cap-50 Sonnet acceptance on Netlify: PASS (Fri 25 Sep, Claude Code)
+
+After #38 deployed (`7179284`, published 12:38:10 UTC): hewahihaumaru, `pageCap: 50`, `claude-sonnet-4-5-20250929`, App closed. `scripts/nec07c-cap50.ts` only kicks `POST /api/ritual/drain` (both kicks → **202 `via:background`**); no local drain. Séance `e2m8kG6gvuYt6cGzutCPLI` / instance `necromancer.wf-instance.37d217e33069`.
+
+| Mark                              | t+     | Stage delta |
+| --------------------------------- | ------ | ----------- |
+| Kick → `exhuming`                 | 2.1s   |             |
+| Exhume done (50 pages)            | 182.8s | **~3m 01s** |
+| Autopsy proposal v1               | 288.2s | **~1m 45s** |
+| `accept-anatomy` (script) + kick  | 303.3s |             |
+| `interrogation` stage             | 325.3s |             |
+| Interrogation done (15 questions) | 400.5s | **~1m 15s** |
+
+Autopsy: **29,301 in / 7,844 out**, `repairRounds: 1`, 5 types (`siteSettings`, `page`, `safeSpace`, `champion`, `resource`). `necro.effectError` untouched (still the 12:18 pre-fix error); `necro.drainLog` errors 0. Total **~6m 41s** end to end, unattended.
+
+Follow-ups from reading the output (not blocking the worker):
+
+- Duplicate question: "/member-login/ has only 47 words…" appears twice (fingerprint dedupe miss).
+- Contradiction false positives: hewahihaumaru is a directory of safe spaces, so many emails/addresses are listings, not conflicts. Needs a guard before NEC-UI3 shows these to judges.
+- `deterministic.ts` hard-codes `source: 'claude'` on rule-based questions, so provenance is wrong in the audit trail.
