@@ -1,5 +1,5 @@
 [build]
-  # Fully bundle drain-background.js (no externals) — BG isolate has no npm resolve.
+  # Fully bundle drain-background.mjs (no externals) — BG isolate has no npm resolve.
   command = "bun run build:vessel && bun run build:drain-fn"
   publish = "apps/vessel/.next"
 
@@ -8,7 +8,7 @@
   node_bundler = "esbuild"
 
 [functions."drain-background"]
-  # Pre-built single CJS file from build:drain-fn; do not re-bundle or externalise.
+  # Pre-built single ESM file from build:drain-fn; do not re-bundle.
   node_bundler = "none"
 
 # Background functions: *-background get a 15-minute limit.
