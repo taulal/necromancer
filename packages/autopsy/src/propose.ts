@@ -7,6 +7,7 @@ import type {Corpse} from './corpse'
 import {AUTOPSY_RERUN_RULE, AUTOPSY_SYSTEM_PROMPT} from './prompt'
 import type {HumanDecision, ProposedType, SchemaProposal} from './proposal'
 import {PROPOSE_ANATOMY_INPUT_JSON_SCHEMA, proposeAnatomyInputSchema} from './schema'
+import {parseToolUse} from './toolInput'
 
 export const PROPOSE_ANATOMY_TOOL_NAME = 'propose_anatomy'
 
@@ -65,20 +66,13 @@ function buildUserMessage(args: {
   return parts.join('\n')
 }
 
-function parseToolInput(input: unknown): ProposedType[] {
-  const parsed = proposeAnatomyInputSchema.parse(input)
-  return parsed.types
-}
-
 function extractToolUse(message: Anthropic.Message): {toolUseId: string; types: ProposedType[]} {
-  const block = message.content.find(
-    (b): b is Anthropic.ToolUseBlock =>
-      b.type === 'tool_use' && b.name === PROPOSE_ANATOMY_TOOL_NAME,
+  const {toolUseId, input} = parseToolUse(
+    message,
+    PROPOSE_ANATOMY_TOOL_NAME,
+    proposeAnatomyInputSchema,
   )
-  if (!block) {
-    throw new Error('Claude did not call propose_anatomy')
-  }
-  return {toolUseId: block.id, types: parseToolInput(block.input)}
+  return {toolUseId, types: input.types}
 }
 
 const proposeTool: Anthropic.Tool = {

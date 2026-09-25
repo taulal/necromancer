@@ -157047,6 +157047,61 @@ var PROPOSE_ANATOMY_INPUT_JSON_SCHEMA = {
   },
 }
 
+// packages/autopsy/src/toolInput.ts
+var ToolCallError = class extends Error {
+  meta
+  constructor(message, meta3, options) {
+    super(message, options)
+    this.name = 'ToolCallError'
+    this.meta = meta3
+  }
+}
+function coerceToolInput(input2) {
+  let value = input2
+  if (typeof value === 'string') {
+    try {
+      value = JSON.parse(value)
+    } catch {
+      return input2
+    }
+  }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return value
+  const next2 = {...value}
+  for (const [key, v] of Object.entries(next2)) {
+    if (typeof v === 'string' && (v.startsWith('[') || v.startsWith('{'))) {
+      try {
+        next2[key] = JSON.parse(v)
+      } catch {}
+    }
+  }
+  return next2
+}
+function parseToolUse(message, toolName2, schema) {
+  const meta3 = {
+    tool: toolName2,
+    model: message.model,
+    stopReason: message.stop_reason,
+    inputTokens: message.usage.input_tokens,
+    outputTokens: message.usage.output_tokens,
+  }
+  const block = message.content.find((b) => b.type === 'tool_use' && b.name === toolName2)
+  if (!block) {
+    throw new ToolCallError(
+      `Claude did not call ${toolName2} (stop_reason=${meta3.stopReason})`,
+      meta3,
+    )
+  }
+  const parsed = schema.safeParse(coerceToolInput(block.input))
+  if (!parsed.success) {
+    throw new ToolCallError(
+      `${toolName2} input invalid (stop_reason=${meta3.stopReason}, output_tokens=${meta3.outputTokens}): ${parsed.error.message}`,
+      meta3,
+      {cause: parsed.error},
+    )
+  }
+  return {toolUseId: block.id, input: parsed.data}
+}
+
 // packages/autopsy/src/propose.ts
 var PROPOSE_ANATOMY_TOOL_NAME = 'propose_anatomy'
 function resolveProposeModel(opts) {
@@ -157082,18 +157137,13 @@ function buildUserMessage(args) {
   }
   return parts.join('\n')
 }
-function parseToolInput(input2) {
-  const parsed = proposeAnatomyInputSchema.parse(input2)
-  return parsed.types
-}
 function extractToolUse(message) {
-  const block = message.content.find(
-    (b) => b.type === 'tool_use' && b.name === PROPOSE_ANATOMY_TOOL_NAME,
+  const {toolUseId, input: input2} = parseToolUse(
+    message,
+    PROPOSE_ANATOMY_TOOL_NAME,
+    proposeAnatomyInputSchema,
   )
-  if (!block) {
-    throw new Error('Claude did not call propose_anatomy')
-  }
-  return {toolUseId: block.id, types: parseToolInput(block.input)}
+  return {toolUseId, types: input2.types}
 }
 var proposeTool = {
   name: PROPOSE_ANATOMY_TOOL_NAME,
@@ -166667,6 +166717,15 @@ var autopsyHandler = async (params, ctx) => {
         modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || null,
         hasAnthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
         pageCount: pages.length,
+        ...(err instanceof ToolCallError
+          ? {
+              tool: err.meta.tool,
+              model: err.meta.model,
+              stopReason: err.meta.stopReason,
+              inputTokens: err.meta.inputTokens,
+              outputTokens: err.meta.outputTokens,
+            }
+          : {}),
       })
     } catch (logErr) {
       ctx.log('[autopsy] failed to write necro.effectError', {
@@ -167240,9 +167299,9 @@ function buildUserMessage2(args) {
     JSON.stringify(args.lowConfidenceTypes),
   ].join('\n')
 }
-function parseToolInput2(input2) {
-  const parsed = askQuestionsInputSchema.parse(input2)
-  return parsed.questions.map((q) => {
+function extractToolUse2(message) {
+  const {input: input2} = parseToolUse(message, ASK_QUESTIONS_TOOL_NAME, askQuestionsInputSchema)
+  return input2.questions.map((q) => {
     const required2 = q.kind === 'authenticity' ? true : q.required
     return {
       fingerprint: q.fingerprint?.trim() || fingerprintOf(q.kind, q.prompt),
@@ -167260,15 +167319,6 @@ function parseToolInput2(input2) {
       rank: rankForKind(q.kind),
     }
   })
-}
-function extractToolUse2(message) {
-  const block = message.content.find(
-    (b) => b.type === 'tool_use' && b.name === ASK_QUESTIONS_TOOL_NAME,
-  )
-  if (!block) {
-    throw new Error('Claude did not call ask_questions')
-  }
-  return parseToolInput2(block.input)
 }
 var askTool = {
   name: ASK_QUESTIONS_TOOL_NAME,

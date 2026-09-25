@@ -32,4 +32,5 @@ export {
   proposedTypeSchema,
   PROPOSE_ANATOMY_INPUT_JSON_SCHEMA,
 } from './schema'
+export {coerceToolInput, parseToolUse, ToolCallError, type ToolCallMeta} from './toolInput'
 export {validateProposal, RESERVED_TYPE_NAMES, type ValidateResult} from './validate'

@@ -1,7 +1,7 @@
 /**
  * necro.autopsy / necro.autopsy-rerun — condense → propose → validate → write schemaProposal.
  */
-import {runAutopsy, type SchemaProposal} from '@necro/autopsy'
+import {runAutopsy, ToolCallError, type SchemaProposal} from '@necro/autopsy'
 import {withArrayKeys} from '@necro/hq-schema/arrayKey'
 import type {EffectHandler} from '@sanity/workflow-engine'
 import type {SanityClient} from '@sanity/client'
@@ -143,6 +143,15 @@ export const autopsyHandler: EffectHandler = async (params, ctx) => {
         modelReasoning: process.env.NECRO_MODEL_REASONING?.trim() || null,
         hasAnthropic: Boolean(process.env.ANTHROPIC_API_KEY?.trim()),
         pageCount: pages.length,
+        ...(err instanceof ToolCallError
+          ? {
+              tool: err.meta.tool,
+              model: err.meta.model,
+              stopReason: err.meta.stopReason,
+              inputTokens: err.meta.inputTokens,
+              outputTokens: err.meta.outputTokens,
+            }
+          : {}),
       })
     } catch (logErr) {
       ctx.log('[autopsy] failed to write necro.effectError', {
