@@ -2,9 +2,10 @@
   "name": "@necro/interrogate",
   "private": true,
   "type": "module",
-  "description": "Interrogation engine: deterministic findings + Claude ask_questions → question docs.",
+  "description": "Interrogation engine: deterministic findings + Claude ask_questions \u2192 question docs.",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./tasks": "./src/tasks.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

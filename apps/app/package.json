@@ -2,7 +2,7 @@
   "name": "@necro/app",
   "private": true,
   "type": "module",
-  "description": "Necromancer — App SDK app for the Sanity org Dashboard.",
+  "description": "Necromancer \u2014 App SDK app for the Sanity org Dashboard.",
   "scripts": {
     "dev": "sanity dev",
     "build": "sanity build",
@@ -13,6 +13,7 @@
     "@necro/autopsy": "workspace:*",
     "@necro/bones": "workspace:*",
     "@necro/hq-schema": "workspace:*",
+    "@necro/interrogate": "workspace:*",
     "@necro/rituals": "workspace:*",
     "@sanity/icons": "^5.2.0",
     "@sanity/sdk": "^3.5.0",

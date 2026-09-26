@@ -192,3 +192,13 @@ Follow-ups from reading the output (not blocking the worker):
 - Duplicate question: "/member-login/ has only 47 words…" appears twice (fingerprint dedupe miss).
 - Contradiction false positives: hewahihaumaru is a directory of safe spaces, so many emails/addresses are listings, not conflicts. Needs a guard before NEC-UI3 shows these to judges.
 - `deterministic.ts` hard-codes `source: 'claude'` on rule-based questions, so provenance is wrong in the audit trail.
+
+### NEC-UI3 · Interrogation screen (Sat 26 Sep, Claude Code)
+
+Built against `docs/prototype/Interrogate.dc.html`: question list (answered ticks, required rings in ember, "n of N answered · n required left"), centre card (kind chip, "found by Knowledge Base" when `source == 'knowledgeBase'`, Fraunces prompt, evidence quotes linking to the old page, answer chips as a radiogroup, note, "This answer creates: …", Skip / Answer and next) and the "Ritual so far" rail. Prototype copy used verbatim.
+
+- **Writes:** a chip click writes `answer`, `answeredBy` (current user id) and `answeredAt` straight away via `useEditDocument` (lands as a draft); the note writes a new `answerNote` field on change. The App never touches `openRequiredQuestions`: the deployed question-gate Function recounts using the drafts perspective, so no dev "recount" button.
+- **Task preview is real logic, not mock copy.** `question.spawnsTasks` is only a boolean (NEC-11 never produced per-option templates), and the options are free text from Claude. The new `tasksForAnswer` in `@necro/interrogate/tasks` is pure and browser-safe, maps kind + answer to auto/human tasks by keyword, and turns anything it can't match into a human "Follow up" task. NEC-13 plan-ritual should call the same function so the preview matches the plan. Tests use the verbatim options from the hewahihaumaru run.
+- **Read-only** once the workflow has left `interrogation`; list order is required-first and doesn't move as you answer.
+- **Schema:** `question.answerNote` added. Needs an HQ schema deploy (Taylor). `apps/studio/schema.json` re-extracted; it was also missing `schemaProposal` model/token fields and `seance.replaceTarget` from earlier PRs.
+- **Not verified visually by me:** the App only renders inside the Dashboard. Screenshot vs prototype pending from Taylor.

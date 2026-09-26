@@ -61,6 +61,14 @@ export const question = defineType({
       description: 'The reviewer’s chosen or typed answer.',
     }),
     defineField({
+      name: 'answerNote',
+      title: 'Answer note',
+      type: 'text',
+      rows: 2,
+      description:
+        'Optional context from the reviewer; the ritual planner reads it with the answer.',
+    }),
+    defineField({
       name: 'answeredBy',
       title: 'Answered by',
       type: 'string',

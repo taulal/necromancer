@@ -102,6 +102,7 @@ export type Question = {
   }>
   options?: Array<string>
   answer?: string
+  answerNote?: string
   answeredBy?: string
   answeredAt?: string
   required?: boolean
