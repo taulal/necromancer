@@ -65,6 +65,88 @@ describe('findContradictions', () => {
   })
 })
 
+describe('findContradictions (directory sites)', () => {
+  const contact = (
+    id: string,
+    path: string,
+    entities: Partial<InterrogatePageInput['detectedEntities']>,
+    text: string,
+  ) =>
+    base({
+      _id: id,
+      path,
+      sections: [{kind: 'contact', text}],
+      detectedEntities: {phones: [], emails: [], addresses: [], prices: [], ...entities},
+    })
+
+  test('one-off listing values are not site facts', () => {
+    // hewahihaumaru: kiaora@ in chrome everywhere; each /space/ listing has its own email.
+    const pages = [
+      contact('p1', '/', {emails: ['kiaora@hewahihaumaru.org.nz']}, 'kiaora@hewahihaumaru.org.nz'),
+      contact(
+        'p2',
+        '/about',
+        {emails: ['kiaora@hewahihaumaru.org.nz']},
+        'kiaora@hewahihaumaru.org.nz',
+      ),
+      contact('p3', '/space/meteor/', {emails: ['clare@themeteor.co.nz']}, 'clare@themeteor.co.nz'),
+      contact('p4', '/space/dropin/', {emails: ['shop@dropin.nz']}, 'shop@dropin.nz'),
+    ]
+    expect(findContradictions(pages)).toEqual([])
+  })
+
+  test('same phone in different formats is not a contradiction', () => {
+    const pages = [
+      contact('p1', '/contact', {phones: ['(03) 260 1566']}, 'Call (03) 260 1566'),
+      contact('p2', '/space/x/', {phones: ['032601566']}, 'Call 032601566'),
+      contact('p3', '/space/y/', {phones: ['032601566']}, 'Call 032601566'),
+    ]
+    expect(findContradictions(pages)).toEqual([])
+  })
+
+  test('header value vs contact page value is still flagged', () => {
+    const pages = [
+      contact('p1', '/', {phones: ['09 555 0142']}, 'Call 09 555 0142'),
+      contact('p2', '/services', {phones: ['09 555 0142']}, 'Call 09 555 0142'),
+      contact('p3', '/contact', {phones: ['09 555 0198']}, 'Phone: 09 555 0198'),
+    ]
+    const [q] = findContradictions(pages)
+    expect(q?.options).toEqual(['09 555 0142', '09 555 0198', 'None of these — I will clarify'])
+  })
+})
+
+describe('findContradictions (shops)', () => {
+  test('different prices across pages are not a contradiction (cazskitchen)', () => {
+    const shop = (id: string, path: string, price: string) =>
+      base({
+        _id: id,
+        path,
+        sections: [{kind: 'prose', text: `Only ${price}`}],
+        detectedEntities: {phones: [], emails: [], addresses: [], prices: [price]},
+      })
+    expect(findContradictions([shop('p1', '/', '£15.00'), shop('p2', '/', '£20.00')])).toEqual([])
+  })
+})
+
+describe('findThinPages (URL variants)', () => {
+  test('one question per path, variants folded into evidence', () => {
+    const thin = [{kind: 'prose', text: 'Sign In Email Password Remember Me'}]
+    const pages = [
+      base({_id: 'a', path: '/member-login/', url: 'https://x.test/member-login/', sections: thin}),
+      base({
+        _id: 'b',
+        path: '/member-login/',
+        url: 'https://x.test/member-login/?logged_out=true',
+        sections: thin,
+      }),
+    ]
+    const qs = findThinPages(pages)
+    expect(qs).toHaveLength(1)
+    expect(qs[0]!.prompt).toContain('(2 URL variants)')
+    expect(qs[0]!.evidence).toHaveLength(2)
+  })
+})
+
 describe('findMissingMetaAlt', () => {
   test('flags missing meta description and alt', () => {
     const pages = [
@@ -144,7 +226,7 @@ describe('rankAndCap', () => {
       fingerprint: `f${i}`,
       kind: 'keep-or-kill' as const,
       prompt: `Q ${i}`,
-      evidence: [{pageId: 'p', url: 'https://x.test/', excerpt: 'x'}],
+      evidence: [{pageId: `p${i}`, url: `https://x.test/p${i}`, excerpt: 'x'}],
       options: ['a', 'b'],
       required: i < 3,
       source: 'claude' as const,
@@ -154,6 +236,35 @@ describe('rankAndCap', () => {
     const capped = rankAndCap(many, 15)
     expect(capped).toHaveLength(15)
     expect(capped.filter((q) => q.required)).toHaveLength(3)
+  })
+})
+
+describe('rankAndCap overlap', () => {
+  const kok = (fingerprint: string, paths: string[], rank = 40) => ({
+    fingerprint,
+    kind: 'keep-or-kill' as const,
+    prompt: fingerprint,
+    evidence: paths.map((p) => ({pageId: p, url: `https://x.test${p}`, excerpt: 'x'})),
+    options: ['a'],
+    required: false,
+    source: 'claude' as const,
+    spawnsTasks: true,
+    rank,
+  })
+
+  test('drops a thin-page question already covered by a wider keep-or-kill', () => {
+    // hewahihaumaru: Claude asked about /member-login/ variants; thin-page asked again.
+    const claude = kok('login-variants', ['/member-login/', '/member-login/?logged_out=true'], 45)
+    const thin = kok('thin-login', ['/member-login/'])
+    const other = kok('thin-reset', ['/password-reset/'])
+    const out = rankAndCap([thin, claude, other]).map((q) => q.fingerprint)
+    expect(out).toEqual(['login-variants', 'thin-reset'])
+  })
+
+  test('never drops required questions for overlap', () => {
+    const wide = kok('wide', ['/a', '/b'])
+    const req = {...kok('req', ['/a']), required: true}
+    expect(rankAndCap([wide, req]).map((q) => q.fingerprint)).toContain('req')
   })
 })
 

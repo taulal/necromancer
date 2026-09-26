@@ -106,7 +106,8 @@ describe('runInterrogate', () => {
             },
           ],
           options: ['Keep', 'Drop', 'Merge into page'],
-          required: false,
+          // Claude over-flags; only contradiction/authenticity may gate the stage.
+          required: true,
           spawnsTasks: true,
           fingerprint: 'map-widget',
         },
@@ -158,7 +159,8 @@ describe('runInterrogate', () => {
     expect(result.usage.model).toBe('sonnet-test')
     expect(result.usage.inputTokens).toBe(100)
     expect(result.questions.some((q) => q.kind === 'contradiction')).toBe(true)
-    expect(result.questions.some((q) => q.fingerprint === 'map-widget')).toBe(true)
+    expect(result.questions.find((q) => q.fingerprint === 'map-widget')?.required).toBe(false)
+    expect(result.questions.find((q) => q.prompt.includes('testimonial'))?.required).toBe(true)
     expect(result.questions.some((q) => q.prompt.includes('testimonial'))).toBe(true)
     expect(result.questions.every((q) => q.evidence.length > 0)).toBe(true)
     expect(result.questions.some((q) => q.prompt.includes('NOT ON THE PAGE'))).toBe(false)
