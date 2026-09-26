@@ -233,6 +233,34 @@ export const seance = defineType({
       hidden: ({document}) => document?.status !== 'entombed',
     }),
     defineField({
+      name: 'releaseId',
+      title: 'Release',
+      type: 'string',
+      description: 'Content Release in the target dataset that holds the resurrected site.',
+    }),
+    defineField({
+      name: 'targetSchemaId',
+      title: 'Target schema id',
+      type: 'string',
+      description: 'Schema deployed to the target (Agent Actions need it).',
+    }),
+    defineField({
+      name: 'reanimatedAt',
+      title: 'Reanimated at',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'risenAt',
+      title: 'Risen at',
+      type: 'datetime',
+    }),
+    defineField({
+      name: 'vesselUrl',
+      title: 'Vessel URL',
+      type: 'url',
+      description: 'Where the risen site lives.',
+    }),
+    defineField({
       name: 'startedBy',
       title: 'Started by',
       type: 'string',

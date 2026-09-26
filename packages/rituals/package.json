@@ -15,6 +15,7 @@
     "@necro/exhume": "workspace:*",
     "@necro/hq-schema": "workspace:*",
     "@necro/interrogate": "workspace:*",
+    "@necro/reanimate": "workspace:*",
     "@sanity/client": "^8.7.0",
     "@sanity/workflow-engine": "0.35.0"
   },

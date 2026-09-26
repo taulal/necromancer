@@ -8,8 +8,21 @@ import type {QuestionKind} from './types'
 
 export type TaskMode = 'auto' | 'human'
 
+/** HQ `task.action` enum (BRIEF §6). */
+export type TaskAction =
+  | 'rewrite-placeholder'
+  | 'generate-alt'
+  | 'generate-meta'
+  | 'fix-contact'
+  | 'normalise-headings'
+  | 'map-block'
+  | 'verify-testimonial'
+  | 'supply-asset'
+  | 'custom'
+
 export type TaskPreview = {
   mode: TaskMode
+  action: TaskAction
   title: string
   /** Old-site URLs the task touches (from the question evidence). */
   pages: string[]
@@ -72,23 +85,27 @@ export function tasksForAnswer(
   if (!a || q.spawnsTasks === false) return []
 
   const pages = evidencePages(q)
-  const task = (mode: TaskMode, title: string, pageCount = pages.length): TaskPreview[] => [
-    {mode, title, pages, pageCount: Math.max(pageCount, pages.length)},
-  ]
+  const task = (
+    mode: TaskMode,
+    action: TaskAction,
+    title: string,
+    pageCount = pages.length,
+  ): TaskPreview[] => [{mode, action, title, pages, pageCount: Math.max(pageCount, pages.length)}]
 
-  if (CLARIFY.test(a)) return task('human', 'Clarify with the client')
+  if (CLARIFY.test(a)) return task('human', 'custom', 'Clarify with the client')
 
   switch (q.kind) {
     case 'contradiction':
-      return task('auto', `Use “${a}” everywhere`)
+      return task('auto', 'fix-contact', `Use “${a}” everywhere`)
     case 'authenticity':
-      if (REWRITE.test(a)) return task('auto', only('Rewrite placeholder copy', a))
+      if (REWRITE.test(a))
+        return task('auto', 'rewrite-placeholder', only('Rewrite placeholder copy', a))
       if (KEEP.test(a)) return []
-      break
+      return task('human', 'verify-testimonial', `Verify with the client: ${a}`)
     case 'keep-or-kill': {
       const decision = answerDecision(q, a)
-      if (decision === 'merge') return task('auto', 'Merge into one page, 301 the rest')
-      if (decision === 'drop') return task('auto', 'Drop page, 301 to its survivor')
+      if (decision === 'merge') return task('auto', 'custom', 'Merge into one page, 301 the rest')
+      if (decision === 'drop') return task('auto', 'custom', 'Drop page, 301 to its survivor')
       if (decision === 'keep') return []
       break
     }
@@ -96,18 +113,18 @@ export function tasksForAnswer(
       if (SKIP.test(a)) return []
       const count = promptPageCount(q.prompt)
       if (/\balt\b/i.test(`${a} ${q.prompt ?? ''}`)) {
-        return task('auto', only('Generate alt text', a), count)
+        return task('auto', 'generate-alt', only('Generate alt text', a), count)
       }
       if (/meta|seo|description/i.test(`${a} ${q.prompt ?? ''}`)) {
-        return task('auto', only('Write meta descriptions', a), count)
+        return task('auto', 'generate-meta', only('Write meta descriptions', a), count)
       }
       break
     }
     case 'mapping':
-      return task('auto', `Map to ${a}`)
+      return task('human', 'map-block', `Map to ${a}`)
   }
 
-  return task('human', `Follow up: ${a}`)
+  return task('human', 'custom', `Follow up: ${a}`)
 }
 
 /** "/contact" for one page, "4 pages" otherwise. */

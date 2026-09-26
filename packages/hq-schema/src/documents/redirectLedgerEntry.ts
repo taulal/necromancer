@@ -33,6 +33,12 @@ export const redirectLedgerEntry = defineType({
       description: 'New path on the Vessel (or absolute URL). Empty when unmapped/dropped.',
     }),
     defineField({
+      name: 'reason',
+      title: 'Reason',
+      type: 'string',
+      description: 'Why the path was dropped or merged (answer or HTTP status).',
+    }),
+    defineField({
       name: 'status',
       title: 'Status',
       type: 'string',

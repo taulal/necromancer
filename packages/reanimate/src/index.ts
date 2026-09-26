@@ -25,3 +25,11 @@ export {
   type TargetDoc,
 } from './plan'
 export {block, key, toPlainText, type PtBlock} from './portableText'
+export {
+  INSTRUCTIONS,
+  planRitualTasks,
+  type AgentActionKind,
+  type PlannedTask,
+  type RitualPage,
+  type RitualQuestion,
+} from './ritual'

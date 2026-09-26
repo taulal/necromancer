@@ -37,6 +37,7 @@ export type RedirectLedgerEntry = {
   seance?: SeanceReference
   from?: string
   to?: string
+  reason?: string
   status?: 'mapped' | 'unmapped' | 'dropped'
 }
 
@@ -45,6 +46,13 @@ export type QuestionReference = {
   _type: 'reference'
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: 'question'
+}
+
+export type ExhumedPageReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'exhumedPage'
 }
 
 export type Task = {
@@ -75,13 +83,12 @@ export type Task = {
   status?: 'todo' | 'casting' | 'done' | 'failed' | 'skipped'
   fromQuestion?: QuestionReference
   result?: string
-}
-
-export type ExhumedPageReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'exhumedPage'
+  title?: string
+  exhumedPage?: ExhumedPageReference
+  pageType?: string
+  pagePath?: string
+  castMs?: number
+  castAt?: string
 }
 
 export type Question = {
@@ -219,6 +226,12 @@ export type ExhumedPage = {
     prices?: Array<string>
   }
   contentHash?: string
+  target?: {
+    docId?: string
+    type?: string
+    path?: string
+    status?: 'mapped' | 'dropped'
+  }
   html?: string
 }
 
@@ -252,6 +265,11 @@ export type Seance = {
   exhumeProgress?: number
   status?: 'alive' | 'haunted' | 'risen' | 'entombed'
   entombedReason?: string
+  releaseId?: string
+  targetSchemaId?: string
+  reanimatedAt?: string
+  risenAt?: string
+  vesselUrl?: string
   startedBy?: string
 }
 
@@ -379,8 +397,8 @@ export type AllSanitySchemaTypes =
   | SeanceReference
   | RedirectLedgerEntry
   | QuestionReference
-  | Task
   | ExhumedPageReference
+  | Task
   | Question
   | ProposedField
   | ProposedType

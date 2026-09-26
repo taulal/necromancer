@@ -208,6 +208,23 @@ export const exhumedPage = defineType({
       validation: (rule) => rule.required(),
     }),
     defineField({
+      name: 'target',
+      title: 'Target',
+      type: 'object',
+      description: 'Where reanimate put this page: target doc + path, or dropped (301).',
+      fields: [
+        defineField({name: 'docId', title: 'Doc id', type: 'string'}),
+        defineField({name: 'type', title: 'Type', type: 'string'}),
+        defineField({name: 'path', title: 'Path', type: 'string'}),
+        defineField({
+          name: 'status',
+          title: 'Status',
+          type: 'string',
+          options: {list: ['mapped', 'dropped']},
+        }),
+      ],
+    }),
+    defineField({
       name: 'html',
       title: 'Cached HTML',
       type: 'text',

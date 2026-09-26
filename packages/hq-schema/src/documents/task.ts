@@ -134,6 +134,43 @@ export const task = defineType({
       rows: 3,
       description: 'Outcome log after cast or human completion.',
     }),
+    defineField({
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      description: 'Short label shown in the Ritual list, e.g. “Write meta descriptions”.',
+    }),
+    defineField({
+      name: 'exhumedPage',
+      title: 'Exhumed page',
+      type: 'reference',
+      to: [{type: 'exhumedPage'}],
+      description: 'Source page; its page-ritual child casts this task.',
+    }),
+    defineField({
+      name: 'pageType',
+      title: 'Target type',
+      type: 'string',
+      description: 'Schema type of the target doc (page or a collection type).',
+    }),
+    defineField({
+      name: 'pagePath',
+      title: 'Target path',
+      type: 'string',
+      description: 'Path of the target doc on the Vessel.',
+    }),
+    defineField({
+      name: 'castMs',
+      title: 'Cast time (ms)',
+      type: 'number',
+      description: 'Wall time of the last cast (Agent Action or patch).',
+    }),
+    defineField({
+      name: 'castAt',
+      title: 'Cast at',
+      type: 'datetime',
+      description: 'When the last cast finished.',
+    }),
   ],
   preview: {
     select: {title: 'why', action: 'action', mode: 'mode', status: 'status'},
