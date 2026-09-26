@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import {actorLabel, historyEntrySummary} from './AuditTrail'
-import {pathForWorkflowStage, visitedScreenPaths} from './stageRoutes'
+import {isExhumeInFlight, pathForWorkflowStage, visitedScreenPaths} from './stageRoutes'
 
 describe('stageRoutes', () => {
   it('maps engine stages onto séance screens', () => {
@@ -40,5 +40,19 @@ describe('audit trail labels', () => {
         actor: {kind: 'person', id: 'pTaylor'},
       }),
     ).toBe('pTaylor fired accept-anatomy · accept')
+  })
+})
+
+describe('isExhumeInFlight', () => {
+  it('exhuming stages read the live field', () => {
+    expect(isExhumeInFlight('exhuming', undefined)).toBe(true)
+    expect(isExhumeInFlight(undefined, undefined)).toBe(true)
+  })
+  it("later stages mean exhume finished (cazskitchen showed autopsy's 20%)", () => {
+    expect(isExhumeInFlight('autopsy', undefined)).toBe(false)
+    expect(isExhumeInFlight('entombed', 'autopsy')).toBe(false)
+  })
+  it('entombed during exhume keeps the real value', () => {
+    expect(isExhumeInFlight('entombed', 'exhuming')).toBe(true)
   })
 })

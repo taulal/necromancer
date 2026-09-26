@@ -39,3 +39,16 @@ export function visitedScreenPaths(
   }
   return visited
 }
+
+/**
+ * True while the workflow's shared `exhumeProgress` field still describes exhumation.
+ * Later handlers (autopsy, interrogate…) report progress into the same field, so once
+ * the stage has moved on, exhumation is complete (unless it was entombed mid-exhume).
+ */
+export function isExhumeInFlight(
+  stage: string | undefined,
+  entombedFromStage: string | undefined,
+): boolean {
+  if (!stage || stage === 'summoned' || stage === 'exhuming') return true
+  return stage === 'entombed' && entombedFromStage === 'exhuming'
+}
