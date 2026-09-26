@@ -1,6 +1,7 @@
 /**
  * Zod mirror of ProposedType[] for Claude tool `propose_anatomy` (no free-text parsing).
  */
+import {BONES_MATCH_NAMES} from '@necro/bones'
 import {z} from 'zod'
 
 const fieldTypeSchema = z.enum([
@@ -90,7 +91,7 @@ export const PROPOSE_ANATOMY_INPUT_JSON_SCHEMA = {
           name: {type: 'string'},
           title: {type: 'string'},
           kind: {type: 'string', enum: ['document', 'object', 'singleton']},
-          bonesMatch: {type: ['string', 'null']},
+          bonesMatch: {type: ['string', 'null'], enum: [...BONES_MATCH_NAMES, null]},
           fields: {
             type: 'array',
             minItems: 1,

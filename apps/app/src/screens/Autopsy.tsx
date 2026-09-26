@@ -7,7 +7,7 @@ import {
   type DocumentHandle,
 } from '@sanity/sdk-react'
 import {useDocumentWorkflows, useWorkflowSession} from '@sanity/workflow-sdk'
-import {BONES} from '@necro/bones'
+import {BONES_MATCH_NAMES} from '@necro/bones'
 import {
   Badge,
   Box,
@@ -610,7 +610,7 @@ function Inspector({
               }}
             >
               <option value="">Custom (no Bones match)</option>
-              {BONES.map((b) => (
+              {BONES_MATCH_NAMES.map((b) => (
                 <option key={b} value={b}>
                   {b}
                 </option>

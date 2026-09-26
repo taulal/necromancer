@@ -1,7 +1,7 @@
 /**
  * Step 3 — deterministic validate + Schema.compile check (docs/batch-3.md NEC-09).
  */
-import {BONES} from '@necro/bones'
+import {BONES, BONES_MATCH_NAMES} from '@necro/bones'
 import {Schema} from '@sanity/schema'
 import {groupProblems, validateSchema} from '@sanity/schema/_internal'
 import type {Corpse} from './corpse'
@@ -123,15 +123,9 @@ function collectRefAndBoneErrors(types: ProposedType[]): string[] {
   )
   // Objects may also be referenced via of[]; allow any proposed name as a type target.
   const allNames = new Set(types.map((t) => t.name))
-  const boneSet = new Set<string>(BONES)
+  const boneSet = new Set<string>(BONES_MATCH_NAMES)
 
   for (const type of types) {
-    if (type.bonesMatch != null && type.bonesMatch !== '') {
-      if (!boneSet.has(type.bonesMatch)) {
-        errors.push(`Unknown bonesMatch "${type.bonesMatch}" on type "${type.name}"`)
-      }
-    }
-
     for (const field of type.fields) {
       if (field.to?.length) {
         // `to` only applies to reference fields (or array-of-reference). Bones belong in `of`.
@@ -165,12 +159,7 @@ function collectRefAndBoneErrors(types: ProposedType[]): string[] {
             'block',
             'object',
           ])
-          if (
-            !builtin.has(member) &&
-            !boneSet.has(member) &&
-            !allNames.has(member) &&
-            member !== 'link'
-          ) {
+          if (!builtin.has(member) && !boneSet.has(member) && !allNames.has(member)) {
             errors.push(
               `Unknown array member "${member}" on "${type.name}.${field.name}" (not Bones or proposed)`,
             )
@@ -183,7 +172,7 @@ function collectRefAndBoneErrors(types: ProposedType[]): string[] {
       const body = type.fields.find((f) => f.name === 'body' && f.type === 'array')
       if (body?.of) {
         for (const member of body.of) {
-          if (!boneSet.has(member) && !allNames.has(member) && member !== 'link') {
+          if (!boneSet.has(member) && !allNames.has(member)) {
             errors.push(`page.body.of member "${member}" must be a Bones block or proposed object`)
           }
         }
@@ -230,6 +219,7 @@ function collectCompileErrors(types: ProposedType[]): string[] {
  */
 export function validateProposal(types: ProposedType[], corpse: Corpse): ValidateResult {
   let next = filterEvidence(types, corpse)
+  next = normalizeBonesMatch(next)
   next = ensurePageAndSiteSettings(next)
   next = normalizeArrayMembership(next)
 
@@ -242,9 +232,28 @@ export function validateProposal(types: ProposedType[], corpse: Corpse): Validat
   return {types: next, errors}
 }
 
+/**
+ * `bonesMatch` is a label, not structure: an unknown name must not entomb the séance
+ * (cazskitchen, 26 Sep: "link" was rejected though the catalogue lists it). Unknown
+ * names become a custom type and the rationale says so.
+ */
+function normalizeBonesMatch(types: ProposedType[]): ProposedType[] {
+  const valid = new Set<string>(BONES_MATCH_NAMES)
+  return types.map((type) => {
+    if (type.bonesMatch == null || type.bonesMatch === '' || valid.has(type.bonesMatch)) {
+      return type
+    }
+    return {
+      ...type,
+      bonesMatch: null,
+      rationale: `${type.rationale} (Proposed Bones match "${type.bonesMatch}" is not in the catalogue; kept as a custom type.)`,
+    }
+  })
+}
+
 /** Model sometimes puts Bones names in `to[]` on array fields — move them to `of[]`. */
 function normalizeArrayMembership(types: ProposedType[]): ProposedType[] {
-  const boneSet = new Set<string>([...BONES, 'link'])
+  const boneSet = new Set<string>(BONES_MATCH_NAMES)
   return types.map((type) => ({
     ...type,
     fields: type.fields.map((field) => {
