@@ -49,6 +49,11 @@ function typeToSchema(t: ProposedType): ManifestSchemaType {
   }
 }
 
+/** Proposal types → schema defs, without Bones stubs (reanimate adds the real Bones). */
+export function compileProposedTypes(types: ProposedType[]): ManifestSchemaType[] {
+  return types.map(typeToSchema)
+}
+
 /**
  * Structural compile of a proposal into Sanity schema type defs (array).
  * Bones block stubs are included so page.body.of members resolve under Schema.compile.

@@ -8,7 +8,12 @@ export type {
   SiteFact,
 } from './corpse'
 export {condense, pathPrefixOf, signatureDistance} from './condense'
-export {compileToSchemaJson, compileToTypeScript, type ManifestSchemaType} from './compile'
+export {
+  compileProposedTypes,
+  compileToSchemaJson,
+  compileToTypeScript,
+  type ManifestSchemaType,
+} from './compile'
 export {
   propose,
   repairPropose,

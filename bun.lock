@@ -155,6 +155,15 @@
         "zod": "^4.5.2",
       },
     },
+    "packages/reanimate": {
+      "name": "@necro/reanimate",
+      "dependencies": {
+        "@necro/autopsy": "workspace:*",
+        "@necro/bones": "workspace:*",
+        "@necro/interrogate": "workspace:*",
+        "cheerio": "^1.2.0",
+      },
+    },
     "packages/rituals": {
       "name": "@necro/rituals",
       "dependencies": {
@@ -721,6 +730,8 @@
     "@necro/hq-schema": ["@necro/hq-schema@workspace:packages/hq-schema"],
 
     "@necro/interrogate": ["@necro/interrogate@workspace:packages/interrogate"],
+
+    "@necro/reanimate": ["@necro/reanimate@workspace:packages/reanimate"],
 
     "@necro/rituals": ["@necro/rituals@workspace:packages/rituals"],
 

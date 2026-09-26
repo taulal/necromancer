@@ -47,6 +47,23 @@ function only(base: string, answer: string): string {
   return /^only\b/i.test(answer) && rest ? `${base} (${rest})` : base
 }
 
+/**
+ * What a keep-or-kill answer decides for the pages in its evidence. Reanimate uses
+ * this for redirects (drop → 301 to home, merge → 301 to the survivor), so the
+ * preview, the redirect ledger and the ritual all agree.
+ */
+export function answerDecision(
+  q: Pick<QuestionForTasks, 'kind'>,
+  answer: string | null | undefined,
+): 'drop' | 'merge' | 'keep' | null {
+  const a = answer?.trim()
+  if (!a || q.kind !== 'keep-or-kill' || CLARIFY.test(a)) return null
+  if (MERGE.test(a)) return 'merge'
+  if (DROP.test(a)) return 'drop'
+  if (KEEP.test(a)) return 'keep'
+  return null
+}
+
 export function tasksForAnswer(
   q: QuestionForTasks,
   answer: string | null | undefined,
@@ -68,11 +85,13 @@ export function tasksForAnswer(
       if (REWRITE.test(a)) return task('auto', only('Rewrite placeholder copy', a))
       if (KEEP.test(a)) return []
       break
-    case 'keep-or-kill':
-      if (MERGE.test(a)) return task('auto', 'Merge into one page, 301 the rest')
-      if (DROP.test(a)) return task('auto', 'Drop page, 301 to its survivor')
-      if (KEEP.test(a)) return []
+    case 'keep-or-kill': {
+      const decision = answerDecision(q, a)
+      if (decision === 'merge') return task('auto', 'Merge into one page, 301 the rest')
+      if (decision === 'drop') return task('auto', 'Drop page, 301 to its survivor')
+      if (decision === 'keep') return []
       break
+    }
     case 'missing-info': {
       if (SKIP.test(a)) return []
       const count = promptPageCount(q.prompt)

@@ -202,3 +202,12 @@ Built against `docs/prototype/Interrogate.dc.html`: question list (answered tick
 - **Read-only** once the workflow has left `interrogation`; list order is required-first and doesn't move as you answer.
 - **Schema:** `question.answerNote` added. Needs an HQ schema deploy (Taylor). `apps/studio/schema.json` re-extracted; it was also missing `schemaProposal` model/token fields and `seance.replaceTarget` from earlier PRs.
 - **Not verified visually by me:** the App only renders inside the Dashboard. Screenshot vs prototype pending from Taylor.
+
+### NEC-12 · reanimate mapping library (Sat 26 Sep, Claude Code)
+
+New `@necro/reanimate`: pure, deterministic mapping from the accepted anatomy + exhumed pages + answers to target docs. No LLM.
+
+- **Page HTML → Bones.** Chrome (header/nav/footer, Divi `#main-header`, breadcrumbs) is stripped; main content is walked in order; a section starts at each h1/h2 and becomes `hero` / `mediaText` / `gallery` / `faq` / `richText` with real Portable Text (lists, h2–h4, links). Same-site links become paths so the Vessel's 301s re-map them. Logos that repeat on most pages are treated as chrome, not content.
+- **Pages vs collections.** A detail page (path depth ≥ 2) evidenced by a collection type in the accepted proposal becomes that type's doc, fields filled by name + type (title/name, price → number, description, images, slug); everything else is a `page`. Keep-or-kill answers decide drops (301 → home) and merges (301 → survivor) via the same `answerDecision` the Interrogation preview uses.
+- **Dry run on cazskitchen (read-only):** 8 pages + `siteSettings` (name "Caz's Kitchen" from the shared title suffix, email + address, logo), 9 images to upload, manifest of 20 types compiles. It caught two things: `/about/` vs `/about` would have made 7 pointless 301s (paths now normalised), and the brand picked `#fff` / `inherit` / `Courier New` (now prefers saturated colours and real font stacks). A test caught a duplicate redirect id when a dropped page had a query-string variant.
+- Bones `page` gains `seoTitle` (≤ 60) / `seoDescription` (≤ 155) for the ritual's generate-meta.

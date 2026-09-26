@@ -1,0 +1,18 @@
+{
+  "name": "@necro/reanimate",
+  "private": true,
+  "type": "module",
+  "description": "Reanimate mapping: exhumed pages + accepted anatomy → Bones target docs, redirects and schema manifest.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@necro/autopsy": "workspace:*",
+    "@necro/bones": "workspace:*",
+    "@necro/interrogate": "workspace:*",
+    "cheerio": "^1.2.0"
+  }
+}

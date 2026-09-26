@@ -34,6 +34,22 @@ export const page = defineType({
       description: 'Ordered page sections. Members are Bones block objects.',
       of: BONES.map((name) => defineArrayMember({type: name})),
     }),
+    defineField({
+      name: 'seoTitle',
+      title: 'SEO title',
+      type: 'string',
+      description: 'Search result title (≤ 60 characters). Written by the ritual when missing.',
+      validation: (rule) => rule.max(60),
+    }),
+    defineField({
+      name: 'seoDescription',
+      title: 'SEO description',
+      type: 'text',
+      rows: 3,
+      description:
+        'Search result description (≤ 155 characters). Written by the ritual when missing.',
+      validation: (rule) => rule.max(155),
+    }),
   ],
   preview: {
     select: {title: 'title', subtitle: 'slug.current'},
