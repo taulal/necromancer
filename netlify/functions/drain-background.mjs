@@ -166926,51 +166926,48 @@ var THIN_WORD_LIMIT = 60
 function fingerprint(parts) {
   return createHash2('sha256').update(parts.join('\0')).digest('hex').slice(0, 16)
 }
-function pageById(pages) {
-  return new Map(pages.map((p) => [p._id, p]))
-}
 var ENTITY_LABEL = {
   phones: 'phone number',
   emails: 'email',
   addresses: 'address',
   prices: 'price',
 }
+var KEY_PAGE = /^\/(?:(?:contact|about)(?:-us)?\/?)?$/i
+function normaliseEntity(kind, value) {
+  if (kind === 'phones') return value.replace(/\D/g, '')
+  return value.toLowerCase().replace(/\s+/g, ' ')
+}
 function findContradictions(pages) {
   const kinds = ['phones', 'emails', 'addresses', 'prices']
   const out = []
-  const byId = pageById(pages)
   for (const kind of kinds) {
-    const valuePages = /* @__PURE__ */ new Map()
+    const byKey = /* @__PURE__ */ new Map()
     for (const page2 of pages) {
       if ((page2.httpStatus ?? 200) >= 400) continue
       for (const raw of page2.detectedEntities?.[kind] ?? []) {
         const value = raw.trim()
-        if (!value) continue
-        const list = valuePages.get(value) ?? []
-        list.push(page2._id)
-        valuePages.set(value, list)
+        const key = normaliseEntity(kind, value)
+        if (!key) continue
+        const hits = byKey.get(key) ?? []
+        if (!hits.some((h) => h.page._id === page2._id)) hits.push({page: page2, raw: value})
+        byKey.set(key, hits)
       }
     }
-    if (valuePages.size < 2) continue
-    const values = [...valuePages.entries()].sort(
-      (a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]),
+    const siteLevel = [...byKey.values()].filter(
+      (hits) => hits.length >= 2 || hits.some((h) => KEY_PAGE.test(pagePath2(h.page))),
     )
-    const options = values.map(([v]) => v)
-    const evidence = values.flatMap(([value, pageIds]) => {
-      const samples = pageIds.slice(0, 2)
-      return samples.flatMap((id) => {
-        const page2 = byId.get(id)
-        if (!page2) return []
-        const excerpt = evidenceExcerpt(page2, value)
-        return [
-          {
-            pageId: page2._id.replace(/^drafts\./, ''),
-            url: pageUrl(page2),
-            excerpt,
-          },
-        ]
-      })
-    })
+    if (siteLevel.length < 2) continue
+    const values = siteLevel
+      .map((hits) => ({hits, label: mostCommon(hits.map((h) => h.raw))}))
+      .sort((a, b) => b.hits.length - a.hits.length || a.label.localeCompare(b.label))
+    const options = values.map((v) => v.label)
+    const evidence = values.flatMap(({hits}) =>
+      hits.slice(0, 2).map(({page: page2, raw}) => ({
+        pageId: page2._id.replace(/^drafts\./, ''),
+        url: pageUrl(page2),
+        excerpt: evidenceExcerpt(page2, raw),
+      })),
+    )
     const label = ENTITY_LABEL[kind]
     const listed = options.map((v) => `"${v}"`).join(', ')
     out.push({
@@ -166986,6 +166983,11 @@ function findContradictions(pages) {
     })
   }
   return out
+}
+function mostCommon(values) {
+  const tally = /* @__PURE__ */ new Map()
+  for (const v of values) tally.set(v, (tally.get(v) ?? 0) + 1)
+  return [...tally.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0]
 }
 function findMissingMetaAlt(pages) {
   const out = []
@@ -167073,30 +167075,33 @@ function findHttpErrorPages(pages) {
     })
 }
 function findThinPages(pages) {
-  return pages
-    .filter((p) => (p.httpStatus ?? 200) < 400)
-    .filter((p) => wordCount(p) > 0 && wordCount(p) < THIN_WORD_LIMIT)
-    .map((p) => {
-      const words2 = wordCount(p)
-      const path4 = pagePath2(p)
-      return {
-        fingerprint: fingerprint(['thin', p._id, String(words2)]),
-        kind: 'keep-or-kill',
-        prompt: `${path4} has only ${words2} words. Keep it, merge into another page, or kill it?`,
-        evidence: [
-          {
-            pageId: p._id.replace(/^drafts\./, ''),
-            url: pageUrl(p),
-            excerpt: evidenceExcerpt(p),
-          },
-        ],
-        options: ['Keep as-is', 'Merge into another page', 'Kill this page'],
-        required: false,
-        source: 'claude',
-        spawnsTasks: true,
-        rank: 40,
-      }
-    })
+  const byPath = /* @__PURE__ */ new Map()
+  for (const p of pages) {
+    if ((p.httpStatus ?? 200) >= 400) continue
+    const words2 = wordCount(p)
+    if (words2 === 0 || words2 >= THIN_WORD_LIMIT) continue
+    const path4 = pagePath2(p)
+    byPath.set(path4, [...(byPath.get(path4) ?? []), p])
+  }
+  return [...byPath.entries()].map(([path4, variants]) => {
+    const words2 = Math.max(...variants.map(wordCount))
+    const also = variants.length > 1 ? ` (${variants.length} URL variants)` : ''
+    return {
+      fingerprint: fingerprint(['thin', path4, ...variants.map((p) => p._id).sort()]),
+      kind: 'keep-or-kill',
+      prompt: `${path4} has only ${words2} words${also}. Keep it, merge into another page, or kill it?`,
+      evidence: variants.slice(0, 3).map((p) => ({
+        pageId: p._id.replace(/^drafts\./, ''),
+        url: pageUrl(p),
+        excerpt: evidenceExcerpt(p),
+      })),
+      options: ['Keep as-is', 'Merge into another page', 'Kill this page'],
+      required: false,
+      source: 'claude',
+      spawnsTasks: true,
+      rank: 40,
+    }
+  })
 }
 function findBoilerplate(pages) {
   const hits = []
@@ -167379,14 +167384,46 @@ var KIND_FLOOR = {
 function rankScore(q) {
   return q.rank || KIND_FLOOR[q.kind] || 0
 }
+function evidencePaths(q) {
+  const paths = /* @__PURE__ */ new Set()
+  for (const e of q.evidence) {
+    try {
+      paths.add(new URL(e.url).pathname)
+    } catch {
+      if (e.pageId) paths.add(e.pageId)
+    }
+  }
+  return paths
+}
+function dropOverlappingKeepOrKill(questions) {
+  const kok = questions
+    .filter((q) => q.kind === 'keep-or-kill')
+    .map((q) => ({q, paths: evidencePaths(q)}))
+    .filter(({paths}) => paths.size > 0)
+    .sort(
+      (a, b) =>
+        b.paths.size - a.paths.size ||
+        rankScore(b.q) - rankScore(a.q) ||
+        a.q.fingerprint.localeCompare(b.q.fingerprint),
+    )
+  const kept = []
+  const dropped = /* @__PURE__ */ new Set()
+  for (const {q, paths} of kok) {
+    const covered = kept.some((k) => [...paths].every((p) => k.has(p)))
+    if (covered && !q.required) dropped.add(q)
+    else kept.push(paths)
+  }
+  return questions.filter((q) => !dropped.has(q))
+}
 function rankAndCap(questions, max = MAX_QUESTIONS) {
   const seen = /* @__PURE__ */ new Set()
-  const deduped = []
+  const unique2 = []
   for (const q of questions) {
     if (seen.has(q.fingerprint)) continue
     seen.add(q.fingerprint)
-    deduped.push(q)
+    unique2.push(q)
   }
+  const deduped = dropOverlappingKeepOrKill(unique2)
   deduped.sort((a, b) => {
     const req = Number(b.required) - Number(a.required)
     if (req !== 0) return req

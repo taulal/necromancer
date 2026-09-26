@@ -12,10 +12,6 @@ function fingerprint(parts: string[]): string {
   return createHash('sha256').update(parts.join('\0')).digest('hex').slice(0, 16)
 }
 
-function pageById(pages: InterrogatePageInput[]): Map<string, InterrogatePageInput> {
-  return new Map(pages.map((p) => [p._id, p]))
-}
-
 type EntityKind = 'phones' | 'emails' | 'addresses' | 'prices'
 
 const ENTITY_LABEL: Record<EntityKind, string> = {
@@ -25,48 +21,55 @@ const ENTITY_LABEL: Record<EntityKind, string> = {
   prices: 'price',
 }
 
+/** Home, contact and about pages state the site's own facts. */
+const KEY_PAGE = /^\/(?:(?:contact|about)(?:-us)?\/?)?$/i
+
+/** Same fact in different formatting ("(03) 260 1566" / "032601566") must not conflict. */
+function normaliseEntity(kind: EntityKind, value: string): string {
+  if (kind === 'phones') return value.replace(/\D/g, '')
+  return value.toLowerCase().replace(/\s+/g, ' ')
+}
+
 /**
- * Same entity kind, different values across pages → contradiction questions.
- * One question per entity kind that has ≥2 distinct values.
+ * Same entity kind, conflicting site-level values → contradiction questions.
+ * A value is site-level when it appears on ≥2 pages or on a key page; a value
+ * found on one deep page (e.g. a directory listing's own contact) is that
+ * page's content, not a claim about the site. One question per entity kind.
  */
 export function findContradictions(pages: InterrogatePageInput[]): DraftQuestion[] {
   const kinds: EntityKind[] = ['phones', 'emails', 'addresses', 'prices']
   const out: DraftQuestion[] = []
-  const byId = pageById(pages)
 
   for (const kind of kinds) {
-    const valuePages = new Map<string, string[]>()
+    const byKey = new Map<string, Array<{page: InterrogatePageInput; raw: string}>>()
     for (const page of pages) {
       if ((page.httpStatus ?? 200) >= 400) continue
       for (const raw of page.detectedEntities?.[kind] ?? []) {
         const value = raw.trim()
-        if (!value) continue
-        const list = valuePages.get(value) ?? []
-        list.push(page._id)
-        valuePages.set(value, list)
+        const key = normaliseEntity(kind, value)
+        if (!key) continue
+        const hits = byKey.get(key) ?? []
+        if (!hits.some((h) => h.page._id === page._id)) hits.push({page, raw: value})
+        byKey.set(key, hits)
       }
     }
-    if (valuePages.size < 2) continue
 
-    const values = [...valuePages.entries()].sort(
-      (a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]),
+    const siteLevel = [...byKey.values()].filter(
+      (hits) => hits.length >= 2 || hits.some((h) => KEY_PAGE.test(pagePath(h.page))),
     )
-    const options = values.map(([v]) => v)
-    const evidence = values.flatMap(([value, pageIds]) => {
-      const samples = pageIds.slice(0, 2)
-      return samples.flatMap((id) => {
-        const page = byId.get(id)
-        if (!page) return []
-        const excerpt = evidenceExcerpt(page, value)
-        return [
-          {
-            pageId: page._id.replace(/^drafts\./, ''),
-            url: pageUrl(page),
-            excerpt,
-          },
-        ]
-      })
-    })
+    if (siteLevel.length < 2) continue
+
+    const values = siteLevel
+      .map((hits) => ({hits, label: mostCommon(hits.map((h) => h.raw))}))
+      .sort((a, b) => b.hits.length - a.hits.length || a.label.localeCompare(b.label))
+    const options = values.map((v) => v.label)
+    const evidence = values.flatMap(({hits}) =>
+      hits.slice(0, 2).map(({page, raw}) => ({
+        pageId: page._id.replace(/^drafts\./, ''),
+        url: pageUrl(page),
+        excerpt: evidenceExcerpt(page, raw),
+      })),
+    )
 
     const label = ENTITY_LABEL[kind]
     const listed = options.map((v) => `"${v}"`).join(', ')
@@ -84,6 +87,12 @@ export function findContradictions(pages: InterrogatePageInput[]): DraftQuestion
   }
 
   return out
+}
+
+function mostCommon(values: string[]): string {
+  const tally = new Map<string, number>()
+  for (const v of values) tally.set(v, (tally.get(v) ?? 0) + 1)
+  return [...tally.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]![0]
 }
 
 /** Missing meta description or image alt → missing-info (optional). */
@@ -171,32 +180,39 @@ export function findHttpErrorPages(pages: InterrogatePageInput[]): DraftQuestion
     })
 }
 
-/** Thin pages (< 60 words) → keep-or-kill (optional). */
+/**
+ * Thin pages (< 60 words) → keep-or-kill (optional). One question per path:
+ * query-string variants (/member-login/?logged_out=true) fold into evidence.
+ */
 export function findThinPages(pages: InterrogatePageInput[]): DraftQuestion[] {
-  return pages
-    .filter((p) => (p.httpStatus ?? 200) < 400)
-    .filter((p) => wordCount(p) > 0 && wordCount(p) < THIN_WORD_LIMIT)
-    .map((p) => {
-      const words = wordCount(p)
-      const path = pagePath(p)
-      return {
-        fingerprint: fingerprint(['thin', p._id, String(words)]),
-        kind: 'keep-or-kill' as const,
-        prompt: `${path} has only ${words} words. Keep it, merge into another page, or kill it?`,
-        evidence: [
-          {
-            pageId: p._id.replace(/^drafts\./, ''),
-            url: pageUrl(p),
-            excerpt: evidenceExcerpt(p),
-          },
-        ],
-        options: ['Keep as-is', 'Merge into another page', 'Kill this page'],
-        required: false,
-        source: 'claude' as const,
-        spawnsTasks: true,
-        rank: 40,
-      }
-    })
+  const byPath = new Map<string, InterrogatePageInput[]>()
+  for (const p of pages) {
+    if ((p.httpStatus ?? 200) >= 400) continue
+    const words = wordCount(p)
+    if (words === 0 || words >= THIN_WORD_LIMIT) continue
+    const path = pagePath(p)
+    byPath.set(path, [...(byPath.get(path) ?? []), p])
+  }
+
+  return [...byPath.entries()].map(([path, variants]) => {
+    const words = Math.max(...variants.map(wordCount))
+    const also = variants.length > 1 ? ` (${variants.length} URL variants)` : ''
+    return {
+      fingerprint: fingerprint(['thin', path, ...variants.map((p) => p._id).sort()]),
+      kind: 'keep-or-kill' as const,
+      prompt: `${path} has only ${words} words${also}. Keep it, merge into another page, or kill it?`,
+      evidence: variants.slice(0, 3).map((p) => ({
+        pageId: p._id.replace(/^drafts\./, ''),
+        url: pageUrl(p),
+        excerpt: evidenceExcerpt(p),
+      })),
+      options: ['Keep as-is', 'Merge into another page', 'Kill this page'],
+      required: false,
+      source: 'claude' as const,
+      spawnsTasks: true,
+      rank: 40,
+    }
+  })
 }
 
 /** Durable/theme boilerplate phrases → authenticity (required). */
