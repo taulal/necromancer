@@ -21,3 +21,8 @@ export const sanityConfigs: SanityConfig[] = [
   {projectId: PROJECT_ID, dataset: HQ_DATASET},
   {projectId: PROJECT_ID, dataset: SHOWCASE_DATASET},
 ]
+
+/** Public Vessel origin (non-secret) for Rise previews and "open preview" links. */
+export const VESSEL_URL = (
+  import.meta.env.SANITY_APP_VESSEL_URL ?? 'https://the-necromancer.netlify.app'
+).replace(/\/$/, '')

@@ -7,7 +7,8 @@ import {SeanceLayout} from './screens/SeanceLayout'
 import {Exhumation} from './screens/Exhumation'
 import {Autopsy} from './screens/Autopsy'
 import {Interrogation} from './screens/Interrogation'
-import {PlaceholderStage} from './screens/PlaceholderStage'
+import {Ritual} from './screens/Ritual'
+import {Rise} from './screens/Rise'
 
 export {isAppRoutePath} from './lib/appRoutes'
 
@@ -56,8 +57,8 @@ export function AppRouter() {
               <Route path="exhumation" element={<Exhumation />} />
               <Route path="autopsy" element={<Autopsy />} />
               <Route path="interrogation" element={<Interrogation />} />
-              <Route path="ritual" element={<PlaceholderStage stage="ritual" />} />
-              <Route path="rise" element={<PlaceholderStage stage="rise" />} />
+              <Route path="ritual" element={<Ritual />} />
+              <Route path="rise" element={<Rise />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

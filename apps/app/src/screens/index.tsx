@@ -15,7 +15,7 @@ export const SCREENS = [
 ] as const
 export type Screen = (typeof SCREENS)[number]
 
-/** @deprecated Use Graveyard / PlaceholderStage screens. Kept for any stray imports. */
+/** @deprecated Every stage has a real screen now. Kept for any stray imports. */
 export function Placeholder({screen}: {screen: Screen}) {
   return (
     <Card padding={5} tone="transparent">
@@ -33,4 +33,5 @@ export {Exhumation} from './Exhumation'
 export {Autopsy} from './Autopsy'
 export {Interrogation} from './Interrogation'
 export {SummonDrawer} from './SummonDrawer'
-export {PlaceholderStage} from './PlaceholderStage'
+export {Ritual} from './Ritual'
+export {Rise} from './Rise'
