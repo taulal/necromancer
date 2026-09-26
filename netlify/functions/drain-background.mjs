@@ -166938,7 +166938,7 @@ function normaliseEntity(kind, value) {
   return value.toLowerCase().replace(/\s+/g, ' ')
 }
 function findContradictions(pages) {
-  const kinds = ['phones', 'emails', 'addresses', 'prices']
+  const kinds = ['phones', 'emails', 'addresses']
   const out = []
   for (const kind of kinds) {
     const byKey = /* @__PURE__ */ new Map()
@@ -167181,11 +167181,11 @@ var INTERROGATE_SYSTEM_PROMPT = `You are interrogating a human who is resurrecti
 Rules:
 1. Only ask authenticity, keep-or-kill, and mapping questions. Do not re-ask contradictions or missing meta/alt already covered by deterministic findings.
 2. Authenticity: stock testimonials, fake-sounding quotes, theme filler not already listed. These questions are required.
-3. Keep-or-kill: orphan pages, near-duplicates, stale blog posts, thin content that needs a judgement call beyond the deterministic thin/404 list.
+3. Keep-or-kill: orphan pages, near-duplicates, stale blog posts, thin content that needs a judgement call beyond the deterministic thin/404 list. These are optional.
 4. Mapping: for each low-confidence autopsy type supplied, ask whether to keep, merge, or drop it (and into what). These are optional.
 5. Every question needs options[] (answer chips) and at least one evidence item whose excerpt is copied **exactly** from the page text provided \u2014 never paraphrase.
 6. Prefer 3\u20138 new questions. Do not exceed 10. Skip a topic if evidence is weak.
-7. Prompts should be one or two sentences a non-developer can answer.`
+7. Prompts should be one or two sentences a non-developer can answer. Refer to pages by path (e.g. /shop/), never by document id.`
 
 // packages/interrogate/src/schema.ts
 var evidenceSchema2 = external_exports.object({
@@ -167275,6 +167275,13 @@ function fingerprintOf(kind, prompt, extra) {
     .digest('hex')
     .slice(0, 16)
 }
+var REQUIRED_KINDS = /* @__PURE__ */ new Set(['contradiction', 'authenticity'])
+function stripDocIds(prompt) {
+  return prompt
+    .replace(/\s*\((?:\s*[A-Za-z0-9._-]{20,}\s*,?)+\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
 function rankForKind(kind) {
   switch (kind) {
     case 'authenticity':
@@ -167312,11 +167319,11 @@ function buildUserMessage2(args) {
 function extractToolUse2(message) {
   const {input: input2} = parseToolUse(message, ASK_QUESTIONS_TOOL_NAME, askQuestionsInputSchema)
   return input2.questions.map((q) => {
-    const required2 = q.kind === 'authenticity' ? true : q.required
+    const required2 = REQUIRED_KINDS.has(q.kind)
     return {
-      fingerprint: q.fingerprint?.trim() || fingerprintOf(q.kind, q.prompt),
+      fingerprint: q.fingerprint?.trim() || fingerprintOf(q.kind, stripDocIds(q.prompt)),
       kind: q.kind,
-      prompt: q.prompt,
+      prompt: stripDocIds(q.prompt),
       evidence: q.evidence.map((e) => ({
         pageId: e.pageId.replace(/^drafts\./, ''),
         url: e.url,
