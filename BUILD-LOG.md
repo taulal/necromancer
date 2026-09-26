@@ -222,3 +222,13 @@ Every effect in the deployed `resurrection` + `page-ritual` definitions now has 
 - **rise:** publishes the release (idempotent if already published), sets `seance.status = risen`, `risenAt`, `vesselUrl`.
 - **Not yet run against real data:** running reanimate locally was blocked by the permission check (it deploys a schema to showcase). Waiting on Taylor's go.
 - HQ schema: task title/exhumedPage/pageType/pagePath/castMs/castAt, séance releaseId/targetSchemaId/reanimatedAt/risenAt/vesselUrl, exhumedPage.target, ledger reason (needs a schema deploy for Studio; writes work before it).
+
+### NEC-14 · Vessel renderers, fallback, routes, 301s (Sat 26 Sep, Claude Code)
+
+The Vessel was a stub; now it renders a resurrected dataset.
+
+- **Bones renderers** (`@necro/bones/render`, React, no `sanity` import, no new deps): all 12 blocks plus a small Portable Text renderer (styles, lists, links). Styling is plain CSS whose brand decisions come only from CSS variables set from `siteSettings.brand`, so the corpse keeps its face.
+- **Schema-driven fallback** for inferred types (product, service…): reads the manifest reanimate stores on the showcase owner doc and renders by field type (string/text, image, image[], portable text, price-ish number, url). Collection index + detail routes come from the same anatomy.
+- **Routes:** `/[site]` (showcase only, dataset quota) → home, pages by slug, `/<collection>` and `/<collection>/<slug>`. `?perspective=<releaseId>` renders the release before Rise, with a "Previewing release" banner; the param is carried through every link.
+- **proxy.ts 301s** from `redirect` docs (60s cache per dataset + perspective), with trailing slashes normalised first (308). Same-site links in resurrected copy were stored as paths, so they flow through these 301s.
+- Verified: renderer tests on real pipeline output (HTML → blocks → assets → markup), `next build` green, and a local `next start` smoke test (empty states, 308 on trailing slash, 404 on unknown site). Not yet seen with real content: showcase is empty until reanimate runs.

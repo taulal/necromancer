@@ -1,0 +1,306 @@
+/*
+ * Bones base styles: deliberately plain. Every visual decision that belongs to the
+ * resurrected site comes from the CSS variables set by SiteShell from siteSettings.brand.
+ */
+:root {
+  --brand-primary: #1f2937;
+  --brand-secondary: #4b5563;
+  --font-heading: Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ink: #1a1a1a;
+  --muted: #5b5b5b;
+  --paper: #ffffff;
+  --line: #e5e5e5;
+  --measure: 68ch;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+  margin: 0 0 0.5em;
+}
+
+a {
+  color: var(--brand-primary);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Shell */
+.site-preview {
+  margin: 0;
+  padding: 8px 16px;
+  background: #fff7e0;
+  border-bottom: 1px solid #f0d890;
+  font-size: 14px;
+  text-align: center;
+}
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px clamp(16px, 4vw, 48px);
+  border-bottom: 1px solid var(--line);
+}
+.site-brand {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.site-brand img {
+  max-height: 56px;
+  width: auto;
+}
+.site-header ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.site-header nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.site-header nav a:hover {
+  color: var(--brand-primary);
+}
+.site-main {
+  padding: 0 clamp(16px, 4vw, 48px) 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 32px clamp(16px, 4vw, 48px);
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}
+.site-footer p {
+  margin: 4px 0;
+}
+.site-credit {
+  align-self: flex-end;
+}
+.site-empty {
+  padding: 96px 0;
+  text-align: center;
+}
+
+/* Blocks */
+.bones-hero,
+.bones-media {
+  display: grid;
+  gap: clamp(24px, 4vw, 56px);
+  align-items: center;
+  padding: clamp(40px, 6vw, 80px) 0;
+}
+@media (min-width: 800px) {
+  .bones-hero {
+    grid-template-columns: 1.1fr 1fr;
+  }
+  .bones-media {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bones-media--left .bones-figure {
+    order: -1;
+  }
+}
+.bones-hero h1 {
+  font-size: clamp(32px, 5vw, 56px);
+  color: var(--brand-primary);
+}
+.bones-lede {
+  font-size: 1.15em;
+  color: var(--muted);
+  max-width: var(--measure);
+}
+.bones-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.bones-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 6px;
+  background: var(--brand-primary);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+.bones-button--ghost {
+  background: transparent;
+  color: var(--brand-primary);
+  border: 1px solid var(--brand-primary);
+}
+.bones-rich,
+.bones-faq,
+.bones-contact,
+.bones-cta,
+.bones-quotes {
+  padding: 32px 0;
+  max-width: var(--measure);
+}
+.bones-prose > * + * {
+  margin-top: 0.9em;
+}
+.bones-prose p,
+.bones-prose ul,
+.bones-prose ol {
+  margin-bottom: 0;
+}
+.bones-prose blockquote,
+.bones-quote {
+  margin: 0;
+  padding-left: 16px;
+  border-left: 3px solid var(--brand-secondary);
+}
+.bones-figure {
+  margin: 0;
+}
+.bones-figure img {
+  border-radius: 6px;
+}
+.bones-figure figcaption {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.bones-cards,
+.bones-gallery,
+.bones-logos,
+.bones-doc {
+  padding: 40px 0;
+}
+.bones-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+}
+.bones-grid--tight {
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+}
+.bones-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bones-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+.bones-card__link:hover h3 {
+  color: var(--brand-primary);
+}
+.bones-card h3 {
+  margin: 8px 0 0;
+}
+.bones-price {
+  font-weight: 700;
+  color: var(--brand-primary);
+  margin: 0;
+}
+.bones-faq details {
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+}
+.bones-faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 32px;
+}
+.bones-contact dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 24px;
+}
+.bones-contact dt {
+  font-weight: 600;
+}
+.bones-contact dd {
+  margin: 0;
+  white-space: pre-line;
+}
+.bones-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  padding: 32px 0;
+}
+.bones-stats strong {
+  display: block;
+  font-size: 2em;
+  color: var(--brand-primary);
+}
+.bones-logos__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+}
+.bones-embed iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+.bones-doc {
+  display: grid;
+  gap: 20px;
+  max-width: 900px;
+}
+.bones-eyebrow {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.vessel-home {
+  max-width: 640px;
+  margin: 96px auto;
+  padding: 0 16px;
+}
