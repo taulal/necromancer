@@ -115,6 +115,19 @@ describe('findContradictions (directory sites)', () => {
   })
 })
 
+describe('findContradictions (shops)', () => {
+  test('different prices across pages are not a contradiction (cazskitchen)', () => {
+    const shop = (id: string, path: string, price: string) =>
+      base({
+        _id: id,
+        path,
+        sections: [{kind: 'prose', text: `Only ${price}`}],
+        detectedEntities: {phones: [], emails: [], addresses: [], prices: [price]},
+      })
+    expect(findContradictions([shop('p1', '/', '£15.00'), shop('p2', '/', '£20.00')])).toEqual([])
+  })
+})
+
 describe('findThinPages (URL variants)', () => {
   test('one question per path, variants folded into evidence', () => {
     const thin = [{kind: 'prose', text: 'Sign In Email Password Remember Me'}]

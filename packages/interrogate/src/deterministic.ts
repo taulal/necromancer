@@ -37,7 +37,8 @@ function normaliseEntity(kind: EntityKind, value: string): string {
  * page's content, not a claim about the site. One question per entity kind.
  */
 export function findContradictions(pages: InterrogatePageInput[]): DraftQuestion[] {
-  const kinds: EntityKind[] = ['phones', 'emails', 'addresses', 'prices']
+  // Prices are excluded: a shop lists many legitimate prices (cazskitchen: 21 "conflicting" prices).
+  const kinds: EntityKind[] = ['phones', 'emails', 'addresses']
   const out: DraftQuestion[] = []
 
   for (const kind of kinds) {

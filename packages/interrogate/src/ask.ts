@@ -45,6 +45,17 @@ function fingerprintOf(kind: string, prompt: string, extra?: string): string {
     .slice(0, 16)
 }
 
+/** Spec (NEC-11): only contradictions and authenticity gate the stage; Claude's flag is ignored. */
+const REQUIRED_KINDS = new Set<DraftQuestion['kind']>(['contradiction', 'authenticity'])
+
+/** Drop leaked document-id lists, e.g. "/shop/ pages (RgPzjpQgR5OLQk5B8u3qt1, …)". */
+export function stripDocIds(prompt: string): string {
+  return prompt
+    .replace(/\s*\((?:\s*[A-Za-z0-9._-]{20,}\s*,?)+\)/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
 function rankForKind(kind: DraftQuestion['kind']): number {
   switch (kind) {
     case 'authenticity':
@@ -89,11 +100,11 @@ function buildUserMessage(args: {
 function extractToolUse(message: Anthropic.Message): DraftQuestion[] {
   const {input} = parseToolUse(message, ASK_QUESTIONS_TOOL_NAME, askQuestionsInputSchema)
   return input.questions.map((q) => {
-    const required = q.kind === 'authenticity' ? true : q.required
+    const required = REQUIRED_KINDS.has(q.kind)
     return {
-      fingerprint: q.fingerprint?.trim() || fingerprintOf(q.kind, q.prompt),
+      fingerprint: q.fingerprint?.trim() || fingerprintOf(q.kind, stripDocIds(q.prompt)),
       kind: q.kind,
-      prompt: q.prompt,
+      prompt: stripDocIds(q.prompt),
       evidence: q.evidence.map((e) => ({
         pageId: e.pageId.replace(/^drafts\./, ''),
         url: e.url,
