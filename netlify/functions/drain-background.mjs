@@ -113660,10 +113660,12 @@ function detectPlatform(html3, headers) {
 // packages/exhume/src/crawl/robots.ts
 var import_robots_parser = __toESM(require_robots_parser(), 1)
 
+// packages/hq-schema/src/pageCap.ts
+var DEFAULT_PAGE_CAP = 10
+
 // packages/exhume/src/crawl/http.ts
 var USER_AGENT = 'NecromancerBot (+https://github.com/taulal/necromancer)'
 var FETCH_TIMEOUT_MS = 1e4
-var DEFAULT_PAGE_CAP = 50
 var DEFAULT_CONCURRENCY = 5
 var MAX_BODY_BYTES = 5 * 1024 * 1024
 function contentType(headers) {
@@ -162697,9 +162699,8 @@ var Hash2 = class {
       }
       if (index2 >= 64) {
         this._int32(_word)
-        _word[0] =
-          _word[16]
-          /* N.inputWords */
+        _word[0] = _word[16]
+        /* N.inputWords */
       }
       this._size += index2 - start
     }
@@ -162760,11 +162761,11 @@ var Hash2 = class {
     const high32 = (bits64 - low32) / 4294967296
     if (high32)
       _word[14] =
-      /* N.highIndex */
+        /* N.highIndex */
         swap32(high32)
     if (low32)
       _word[15] =
-      /* N.lowIndex */
+        /* N.lowIndex */
         swap32(low32)
     this._int32(_word)
     return encoding === 'hex' ? this._hex() : this._bin()
@@ -166782,7 +166783,7 @@ var exhumeHandler = async (params, ctx) => {
   if (!seance?.url) {
     throw new Error(`S\xE9ance ${seanceId} has no url`)
   }
-  const pageCap = seance.pageCap ?? 50
+  const pageCap = seance.pageCap ?? DEFAULT_PAGE_CAP
   const progress = createProgressThrottle((field, value) => ctx.setProgress(field, value))
   await progress(1)
   let result

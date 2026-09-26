@@ -1,4 +1,5 @@
 import {Suspense, type ReactNode} from 'react'
+import {DEFAULT_PAGE_CAP} from '@necro/hq-schema/pageCap'
 import {useParams} from 'react-router'
 import {useDocumentProjection, useDocuments, useQuery, type DocumentHandle} from '@sanity/sdk-react'
 import {useDocumentWorkflows, useWorkflowSession} from '@sanity/workflow-sdk'
@@ -162,7 +163,7 @@ function SitemapPanel({
         </span>
         <span>
           <span className="necro-mono" style={{color: 'var(--necro-bone)'}}>
-            {seance?.pageCap ?? 50}
+            {seance?.pageCap ?? DEFAULT_PAGE_CAP}
           </span>{' '}
           page cap
         </span>
@@ -297,7 +298,7 @@ function fallbackPercent(seance: SeanceExhume | null | undefined, pageCount: num
     const v = seance.exhumeProgress
     return clampPct(v <= 1 ? v * 100 : v)
   }
-  const cap = seance?.pageCap ?? 50
+  const cap = seance?.pageCap ?? DEFAULT_PAGE_CAP
   if (pageCount > 0 && cap > 0) return clampPct((pageCount / cap) * 100)
   return 0
 }
@@ -613,7 +614,7 @@ function subtitleFor(seance: SeanceExhume | null | undefined, pageCount: number)
   if (pageCount === 0) {
     return 'Robots check first. Digging begins when the drain claims the effect.'
   }
-  const cap = seance.pageCap ?? 50
+  const cap = seance.pageCap ?? DEFAULT_PAGE_CAP
   return `Sitemap growing — ${pageCount} of up to ${cap} pages. Digging five at a time.`
 }
 

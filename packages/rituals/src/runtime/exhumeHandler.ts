@@ -1,6 +1,7 @@
 /**
  * necro.exhume — crawl the dead site and write exhumedPage docs + seance stats.
  */
+import {DEFAULT_PAGE_CAP} from '@necro/hq-schema/pageCap'
 import {crawl, OffSiteRedirectError} from '@necro/exhume'
 import {withArrayKeys} from '@necro/hq-schema/arrayKey'
 import type {EffectHandler} from '@sanity/workflow-engine'
@@ -32,7 +33,7 @@ export const exhumeHandler: EffectHandler = async (params, ctx) => {
     throw new Error(`Séance ${seanceId} has no url`)
   }
 
-  const pageCap = seance.pageCap ?? 50
+  const pageCap = seance.pageCap ?? DEFAULT_PAGE_CAP
   const progress = createProgressThrottle((field, value) => ctx.setProgress(field, value))
   await progress(1)
 

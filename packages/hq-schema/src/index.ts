@@ -34,4 +34,5 @@ export {
   redirectLedgerEntry,
 }
 export {slugFromUrl} from './slugFromUrl'
+export {DEFAULT_PAGE_CAP} from './pageCap'
 export {arrayKey, withArrayKeys} from './arrayKey'

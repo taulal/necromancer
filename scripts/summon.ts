@@ -2,14 +2,15 @@
 /**
  * NEC-08L — create a séance, start resurrection, begin exhumation, drain until autopsy.
  *
- *   bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project] [--fast]
+ *   bun run summon <url> [--cap N] [--no-drain] [--replace] [--mode dataset|project] [--fast]
  *
+ * Default page cap: DEFAULT_PAGE_CAP (10); pass --cap for bigger runs.
  * Default target: dataset `showcase` (private until the demo site is chosen).
  * One resurrected site at a time — pass --replace to wipe showcase on reanimate.
  * Autopsy uses NECRO_MODEL_REASONING (Sonnet) unless --fast (Haiku / NECRO_MODEL_FAST).
  * Project mode is stretch (kept in code; not the default).
  */
-import {slugFromUrl} from '@necro/hq-schema'
+import {DEFAULT_PAGE_CAP, slugFromUrl} from '@necro/hq-schema'
 import {
   getEngine,
   getWorkflowClient,
@@ -24,7 +25,7 @@ const SHOWCASE = 'showcase'
 
 function usage(): never {
   console.error(
-    'Usage: bun run summon <url> [--cap 50] [--no-drain] [--replace] [--mode dataset|project] [--fast]',
+    'Usage: bun run summon <url> [--cap N] [--no-drain] [--replace] [--mode dataset|project] [--fast]',
   )
   process.exit(1)
 }
@@ -32,7 +33,7 @@ function usage(): never {
 function parseArgs(argv: string[]) {
   const args = argv.slice(2)
   let url: string | undefined
-  let cap = 50
+  let cap = DEFAULT_PAGE_CAP
   let drain = true
   let replace = false
   let fast = false
