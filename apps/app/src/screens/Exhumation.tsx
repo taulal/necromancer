@@ -6,6 +6,7 @@ import {useDocumentWorkflows, useWorkflowSession} from '@sanity/workflow-sdk'
 import {Box, Card, Flex, Grid, Heading, Spinner, Stack, Text} from '@sanity/ui'
 import {useNecroEngine} from '../lib/useNecroEngine'
 import {seanceGdrUri} from '../lib/seanceGdr'
+import {isExhumeInFlight} from './seance/stageRoutes'
 
 type SeanceExhume = {
   url?: string
@@ -212,7 +213,7 @@ function SitemapPanel({
   )
 }
 
-/** Prefer workflow `exhumeProgress`, then seance field, then pages/cap. */
+/** 100% once past exhumation; else workflow `exhumeProgress`, then seance field, then pages/cap. */
 function ExhumeProgress({
   seanceId,
   seance,
@@ -255,7 +256,17 @@ function ExhumeProgressSession({
 }) {
   const engine = useNecroEngine()
   const session = useWorkflowSession({engine, instanceId})
-  const fromWorkflow = readProgressField(session.evaluation?.instance.fields, 'exhumeProgress')
+  const instance = session.evaluation?.instance
+  const entombedFrom = instance?.fields?.find((f) => f.name === 'entombedFromStage')?.value
+  if (
+    !isExhumeInFlight(
+      instance?.currentStage,
+      typeof entombedFrom === 'string' ? entombedFrom : undefined,
+    )
+  ) {
+    return <>{children(100)}</>
+  }
+  const fromWorkflow = readProgressField(instance?.fields, 'exhumeProgress')
   let pct = fallbackPercent(seance, pageCount)
   if (fromWorkflow != null) {
     pct = clampPct(fromWorkflow > 1 ? fromWorkflow : fromWorkflow * 100)

@@ -167,3 +167,7 @@ From the cap-50 acceptance output (15 questions): 3 of the "required" contradict
 ### Default page cap 50 → 10 (Sat 26 Sep, Claude Code)
 
 Taylor's call: runs default to **10 pages** (faster, cheaper iterations while building NEC-12 onwards). One source now: `DEFAULT_PAGE_CAP` in `@necro/hq-schema/pageCap` (dependency-free, safe for the App/Vessel/Functions). It replaces the hard-coded 50s in the crawler, exhume handler (`seance.pageCap ?? …`), `bun run summon`, the Summon drawer, the Exhumation screen and the Studio `seance.pageCap` initial value. Explicit caps still win (`--cap 50`, drawer input, `scripts/nec07c-cap50.ts`). The Studio initial value needs the next HQ schema deploy; existing séances keep their stored cap.
+
+### Exhumation bar stuck at 20% after exhume (Sat 26 Sep, Claude Code)
+
+Taylor saw the entombed cazskitchen séance "stuck at 20% exhumation", though all 10 pages were exhumed. Cause: `exhumeProgress` is the only progress field the workflow declares, and every handler's `createProgressThrottle` writes to it by default. The autopsy handler set it to 20 and then threw, and the Exhumation screen showed that as exhume progress. Fix (App only, no deploy): `isExhumeInFlight(stage, entombedFromStage)`, so the bar reads the field only while summoned/exhuming (or entombed from exhuming) and shows 100% once the workflow has moved on. Longer term, per-stage progress fields in the definition (needs a workflow deploy).
