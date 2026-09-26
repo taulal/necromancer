@@ -1,4 +1,5 @@
 import {useCallback, useState, type CSSProperties, type FormEvent} from 'react'
+import {DEFAULT_PAGE_CAP} from '@necro/hq-schema/pageCap'
 import {useNavigate} from 'react-router'
 import {useClient} from '@sanity/sdk-react'
 import {slugFromUrl} from '@necro/hq-schema'
@@ -27,7 +28,7 @@ export function SummonDrawer({open, onClose}: Props) {
   const engine = useNecroEngine()
 
   const [url, setUrl] = useState('')
-  const [pageCap, setPageCap] = useState(50)
+  const [pageCap, setPageCap] = useState(DEFAULT_PAGE_CAP)
   const [visibilityPublic, setVisibilityPublic] = useState(false)
   const [replaceConfirmed, setReplaceConfirmed] = useState(false)
   const [occupancy, setOccupancy] = useState<ShowcaseOccupancy>({
@@ -215,7 +216,7 @@ export function SummonDrawer({open, onClose}: Props) {
                 min={1}
                 max={200}
                 value={pageCap}
-                onChange={(e) => setPageCap(Number(e.currentTarget.value) || 50)}
+                onChange={(e) => setPageCap(Number(e.currentTarget.value) || DEFAULT_PAGE_CAP)}
                 className="necro-mono"
                 style={{...inputStyle, height: 44}}
               />

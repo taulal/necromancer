@@ -145,3 +145,7 @@ Fix: fully bundle into `drain-background.js` (CJS; `netlify/functions/package.js
 - **Why local never saw it:** local `.env` has `NECRO_MODEL_REASONING=claude-haiku-4-5-20251001`, so every local autopsy so far ran on Haiku. Sonnet only ever ran on Netlify.
 - **Fix:** shared `parseToolUse` / `coerceToolInput` in `@necro/autopsy` (`toolInput.ts`), used by both `propose_anatomy` and `ask_questions`. It parses a stringified field back to JSON before zod. When validation fails it throws `ToolCallError` carrying `stopReason`, model and token counts, which the autopsy handler now writes into `necro.effectError`, so the next failure distinguishes truncation from shape errors without another repro. No bundler/config change: `drain-background.mjs` rebuilt only, and it still loads standalone.
 - **Not done:** strict tool schemas (API-enforced) as the longer-term fix; Netlify cap-50 acceptance run pending deploy.
+
+### Default page cap 50 → 10 (Sat 26 Sep, Claude Code)
+
+Taylor's call: runs default to **10 pages** (faster, cheaper iterations while building NEC-12 onwards). One source now: `DEFAULT_PAGE_CAP` in `@necro/hq-schema/pageCap` (dependency-free, safe for the App/Vessel/Functions). It replaces the hard-coded 50s in the crawler, exhume handler (`seance.pageCap ?? …`), `bun run summon`, the Summon drawer, the Exhumation screen and the Studio `seance.pageCap` initial value. Explicit caps still win (`--cap 50`, drawer input, `scripts/nec07c-cap50.ts`). The Studio initial value needs the next HQ schema deploy; existing séances keep their stored cap.

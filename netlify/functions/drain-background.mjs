@@ -113660,10 +113660,12 @@ function detectPlatform(html3, headers) {
 // packages/exhume/src/crawl/robots.ts
 var import_robots_parser = __toESM(require_robots_parser(), 1)
 
+// packages/hq-schema/src/pageCap.ts
+var DEFAULT_PAGE_CAP = 10
+
 // packages/exhume/src/crawl/http.ts
 var USER_AGENT = 'NecromancerBot (+https://github.com/taulal/necromancer)'
 var FETCH_TIMEOUT_MS = 1e4
-var DEFAULT_PAGE_CAP = 50
 var DEFAULT_CONCURRENCY = 5
 var MAX_BODY_BYTES = 5 * 1024 * 1024
 function contentType(headers) {
@@ -166777,7 +166779,7 @@ var exhumeHandler = async (params, ctx) => {
   if (!seance?.url) {
     throw new Error(`S\xE9ance ${seanceId} has no url`)
   }
-  const pageCap = seance.pageCap ?? 50
+  const pageCap = seance.pageCap ?? DEFAULT_PAGE_CAP
   const progress = createProgressThrottle((field, value) => ctx.setProgress(field, value))
   await progress(1)
   let result

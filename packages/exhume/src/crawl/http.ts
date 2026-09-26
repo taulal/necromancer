@@ -1,6 +1,6 @@
 export const USER_AGENT = 'NecromancerBot (+https://github.com/taulal/necromancer)'
 export const FETCH_TIMEOUT_MS = 10_000
-export const DEFAULT_PAGE_CAP = 50
+export {DEFAULT_PAGE_CAP} from '@necro/hq-schema/pageCap'
 export const DEFAULT_CONCURRENCY = 5
 /** Abort reading bodies larger than this (review F10). */
 export const MAX_BODY_BYTES = 5 * 1024 * 1024

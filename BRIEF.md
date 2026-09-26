@@ -178,7 +178,7 @@ Model: current Claude Sonnet for reasoning steps, Haiku for cheap classification
 
 ### 7.1 Exhume (`necro.exhume`)
 
-- Fetch `robots.txt`, `sitemap.xml` (+ index), fall back to link crawl from `/`; same-origin; respect `pageCap` (default 50); 5 concurrent.
+- Fetch `robots.txt`, `sitemap.xml` (+ index), fall back to link crawl from `/`; same-origin; respect `pageCap` (default 10; pass a higher cap for bigger runs); 5 concurrent.
 - Platform fingerprints (from the runbook): `wp-content/`, `wp-json/`, generator meta → WordPress; `cdn.durable.co` → Durable; `static.wixstatic.com` → Wix; `squarespace.com` → Squarespace; `webflow.com` → Webflow.
 - Parse with cheerio; strip nav/footer by repetition detection across pages (a block that appears on >70% of pages = chrome → `siteSettings` candidate).
 - Regex + Haiku pass for entities (NZ/AU/UK phone formats, emails, addresses, prices).
@@ -267,7 +267,7 @@ Design direction: **dark, occult, precise.** Near-black base, bone-white type, o
 | Agent Actions can't target release versions      | Med                    | Cast on drafts, then add to release                                                                                                   |
 | No programmatic schema deploy API (only CLI/MCP) | Med                    | Worker calls the same HTTP endpoint the CLI uses (spike in NEC-10), or runs `sanity schema deploy` against a generated temp workspace |
 | KB beta not accessible / not API-drivable        | Med-High               | Claude contradiction pass (MVP); document honestly                                                                                    |
-| Crawl too slow / blocked                         | Med                    | Sitemap-first, cap 50, cache HTML in `exhumedPage` so reruns don't refetch                                                            |
+| Crawl too slow / blocked                         | Med                    | Sitemap-first, cap 10 by default, cache HTML in `exhumedPage` so reruns don't refetch                                                 |
 | Judges can't log into our org to use the App     | High                   | Public `showcase` dataset + public Vessel URL + GIFs/video + Cursor transcripts in the post                                           |
 | Real client content in public                    | Low (if we follow §10) | `showcase` uses a consenting site only                                                                                                |
 | Scope creep vs 10 days                           | High                   | §3 cut line; Claude calls it daily in the build log                                                                                   |

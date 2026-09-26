@@ -1,6 +1,7 @@
 import {EarthGlobeIcon} from '@sanity/icons/EarthGlobe'
 import {defineArrayMember, defineField, defineType, type SanityDocument} from '@sanity/types'
 import {slugFromUrl} from '../slugFromUrl'
+import {DEFAULT_PAGE_CAP} from '../pageCap'
 
 /**
  * One resurrection attempt (BRIEF.md §6). Subject of the `resurrection` workflow.
@@ -127,8 +128,8 @@ export const seance = defineType({
       name: 'pageCap',
       title: 'Page cap',
       type: 'number',
-      description: 'Maximum pages to crawl (default 50). Same-origin only.',
-      initialValue: 50,
+      description: `Maximum pages to crawl (default ${DEFAULT_PAGE_CAP}). Same-origin only.`,
+      initialValue: DEFAULT_PAGE_CAP,
       validation: (rule) => rule.required().integer().min(1).max(200),
     }),
     defineField({
