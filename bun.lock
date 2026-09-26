@@ -25,6 +25,7 @@
         "@necro/autopsy": "workspace:*",
         "@necro/bones": "workspace:*",
         "@necro/hq-schema": "workspace:*",
+        "@necro/interrogate": "workspace:*",
         "@necro/rituals": "workspace:*",
         "@sanity/icons": "^5.2.0",
         "@sanity/sdk": "^3.5.0",

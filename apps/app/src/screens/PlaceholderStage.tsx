@@ -3,7 +3,6 @@ import {Card, Heading, Stack, Text} from '@sanity/ui'
 const COPY: Record<string, string> = {
   exhumation: 'Sitemap tree and crawl progress land with NEC-08.',
   autopsy: 'The anatomy board lands with NEC-09.',
-  interrogation: 'One question at a time lands with NEC-11.',
   ritual: 'Cast and step-through land with NEC-13.',
   rise: 'Before/after and the Rise button land with NEC-16.',
 }

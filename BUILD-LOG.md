@@ -145,3 +145,13 @@ Fix: fully bundle into `drain-background.js` (CJS; `netlify/functions/package.js
 - **Why local never saw it:** local `.env` has `NECRO_MODEL_REASONING=claude-haiku-4-5-20251001`, so every local autopsy so far ran on Haiku. Sonnet only ever ran on Netlify.
 - **Fix:** shared `parseToolUse` / `coerceToolInput` in `@necro/autopsy` (`toolInput.ts`), used by both `propose_anatomy` and `ask_questions`. It parses a stringified field back to JSON before zod. When validation fails it throws `ToolCallError` carrying `stopReason`, model and token counts, which the autopsy handler now writes into `necro.effectError`, so the next failure distinguishes truncation from shape errors without another repro. No bundler/config change: `drain-background.mjs` rebuilt only, and it still loads standalone.
 - **Not done:** strict tool schemas (API-enforced) as the longer-term fix; Netlify cap-50 acceptance run pending deploy.
+
+### NEC-UI3 · Interrogation screen (Sat 26 Sep, Claude Code)
+
+Built against `docs/prototype/Interrogate.dc.html`: question list (answered ticks, required rings in ember, "n of N answered · n required left"), centre card (kind chip, "found by Knowledge Base" when `source == 'knowledgeBase'`, Fraunces prompt, evidence quotes linking to the old page, answer chips as a radiogroup, note, "This answer creates: …", Skip / Answer and next) and the "Ritual so far" rail. Prototype copy used verbatim.
+
+- **Writes:** a chip click writes `answer`, `answeredBy` (current user id) and `answeredAt` straight away via `useEditDocument` (lands as a draft); the note writes a new `answerNote` field on change. The App never touches `openRequiredQuestions`: the deployed question-gate Function recounts using the drafts perspective, so no dev "recount" button.
+- **Task preview is real logic, not mock copy.** `question.spawnsTasks` is only a boolean (NEC-11 never produced per-option templates), and the options are free text from Claude. The new `tasksForAnswer` in `@necro/interrogate/tasks` is pure and browser-safe, maps kind + answer to auto/human tasks by keyword, and turns anything it can't match into a human "Follow up" task. NEC-13 plan-ritual should call the same function so the preview matches the plan. Tests use the verbatim options from the hewahihaumaru run.
+- **Read-only** once the workflow has left `interrogation`; list order is required-first and doesn't move as you answer.
+- **Schema:** `question.answerNote` added. Needs an HQ schema deploy (Taylor). `apps/studio/schema.json` re-extracted; it was also missing `schemaProposal` model/token fields and `seance.replaceTarget` from earlier PRs.
+- **Not verified visually by me:** the App only renders inside the Dashboard. Screenshot vs prototype pending from Taylor.
