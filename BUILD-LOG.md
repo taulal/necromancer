@@ -145,3 +145,11 @@ Fix: fully bundle into `drain-background.js` (CJS; `netlify/functions/package.js
 - **Why local never saw it:** local `.env` has `NECRO_MODEL_REASONING=claude-haiku-4-5-20251001`, so every local autopsy so far ran on Haiku. Sonnet only ever ran on Netlify.
 - **Fix:** shared `parseToolUse` / `coerceToolInput` in `@necro/autopsy` (`toolInput.ts`), used by both `propose_anatomy` and `ask_questions`. It parses a stringified field back to JSON before zod. When validation fails it throws `ToolCallError` carrying `stopReason`, model and token counts, which the autopsy handler now writes into `necro.effectError`, so the next failure distinguishes truncation from shape errors without another repro. No bundler/config change: `drain-background.mjs` rebuilt only, and it still loads standalone.
 - **Not done:** strict tool schemas (API-enforced) as the longer-term fix; Netlify cap-50 acceptance run pending deploy.
+
+### Autopsy: "link" bonesMatch entombed cazskitchen (Sat 26 Sep, Claude Code)
+
+Wiped run data from `hq` (8 séances + pages/proposals/questions/instances; definitions and schema kept) and ran cazskitchen.co.uk, cap 10, on Netlify: exhume 10 pages in **~91s**, then **entombed** at autopsy. `necro.effectError`: `Autopsy proposal invalid after repair: Unknown bonesMatch "link" on type "linkObject"`.
+
+Root cause: the catalogue sent to Claude lists `link` (the shared link object) first, but the validator only accepted the 12 block names in `BONES`. Sonnet matched a real catalogue entry and we rejected it twice (repair didn't change it). `bonesMatch` is a label and doesn't affect compile, so it should never be fatal.
+
+Fix: `BONES_MATCH_NAMES` (derived from `BONES_CATALOGUE`) is the single list of valid names; the tool schema now declares it as an enum; the validator turns any other name into a custom type and says so in the rationale, instead of erroring; the Autopsy board dropdown uses the same list. Replayed locally on the same 10 pages with Sonnet: **passes first time** (89.7s, 6,729 in / 7,014 out, 0 repairs, 12 types incl. `link` → Bones `link`). `drain-background.mjs` rebuilt; no config change.

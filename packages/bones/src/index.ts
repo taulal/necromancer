@@ -4,7 +4,12 @@
  * NEC-14a: object schemas + catalogue. Renderers land in a later ticket.
  */
 export {BONES, type BoneName} from './bones'
-export {BONES_CATALOGUE, type BoneCatalogueEntry, type BoneCatalogueField} from './catalogue'
+export {
+  BONES_CATALOGUE,
+  BONES_MATCH_NAMES,
+  type BoneCatalogueEntry,
+  type BoneCatalogueField,
+} from './catalogue'
 export {
   bonesBlockTypes,
   bonesDocumentTypes,

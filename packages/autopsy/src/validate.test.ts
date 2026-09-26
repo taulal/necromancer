@@ -9,6 +9,33 @@ import {RESERVED_TYPE_NAMES, validateProposal} from './validate'
 describe('validateProposal', () => {
   const corpse = condense(fixtureExhumedPages)
 
+  const withBones = (bonesMatch: string) =>
+    fixtureHappyProposalTypes().concat({
+      name: 'linkObject',
+      title: 'Link',
+      kind: 'object',
+      bonesMatch,
+      fields: [{name: 'label', type: 'string', evidenceCount: 1}],
+      rationale: 'Buttons and nav links.',
+      evidence: [],
+      confidence: 0.6,
+      decision: 'keep',
+    } as ProposedType)
+
+  test('accepts catalogue helper "link" as bonesMatch (cazskitchen 26 Sep)', () => {
+    const {types, errors} = validateProposal(withBones('link'), corpse)
+    expect(errors).toEqual([])
+    expect(types.find((t) => t.name === 'linkObject')?.bonesMatch).toBe('link')
+  })
+
+  test('unknown bonesMatch becomes a custom type, not an error', () => {
+    const {types, errors} = validateProposal(withBones('carousel'), corpse)
+    expect(errors).toEqual([])
+    const t = types.find((x) => x.name === 'linkObject')
+    expect(t?.bonesMatch).toBeNull()
+    expect(t?.rationale).toContain('"carousel" is not in the catalogue')
+  })
+
   test('happy fixture compiles and passes', () => {
     const {types, errors} = validateProposal(fixtureHappyProposalTypes(), corpse)
     expect(errors).toEqual([])
@@ -99,31 +126,5 @@ describe('validateProposal', () => {
     ]
     const {errors} = validateProposal(types, corpse)
     expect(errors.some((e) => e.includes('Dangling ref') && e.includes('ghostType'))).toBe(true)
-  })
-
-  test('flags unknown bonesMatch', () => {
-    const types: ProposedType[] = [
-      {
-        name: 'weirdBand',
-        title: 'Weird band',
-        kind: 'object',
-        bonesMatch: 'notABone',
-        fields: [{name: 'heading', type: 'string', evidenceCount: 1}],
-        rationale: 'Unknown bone.',
-        evidence: [
-          {
-            pageId: 'page-home',
-            url: 'https://acme.example/',
-            excerpt: 'Welcome to Acme Plumbing',
-          },
-        ],
-        confidence: 0.5,
-        decision: 'keep',
-      },
-    ]
-    const {errors} = validateProposal(types, corpse)
-    expect(errors.some((e) => e.includes('Unknown bonesMatch') && e.includes('notABone'))).toBe(
-      true,
-    )
   })
 })

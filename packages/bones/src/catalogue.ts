@@ -139,3 +139,6 @@ export const BONES_CATALOGUE: BoneCatalogueEntry[] = [
     },
   },
 ]
+
+/** Every name Claude sees in the catalogue — the valid values for `bonesMatch`. */
+export const BONES_MATCH_NAMES: readonly string[] = BONES_CATALOGUE.map((b) => b.name)

@@ -135659,6 +135659,7 @@ var BONES_CATALOGUE = [
     },
   },
 ]
+var BONES_MATCH_NAMES = BONES_CATALOGUE.map((b) => b.name)
 
 // node_modules/@sanity/types/lib/index.js
 function isRecord7(value) {
@@ -156977,7 +156978,7 @@ var PROPOSE_ANATOMY_INPUT_JSON_SCHEMA = {
           name: {type: 'string'},
           title: {type: 'string'},
           kind: {type: 'string', enum: ['document', 'object', 'singleton']},
-          bonesMatch: {type: ['string', 'null']},
+          bonesMatch: {type: ['string', 'null'], enum: [...BONES_MATCH_NAMES, null]},
           fields: {
             type: 'array',
             minItems: 1,
@@ -166427,13 +166428,8 @@ function collectRefAndBoneErrors(types) {
     types.filter((t) => t.kind === 'document' || t.kind === 'singleton').map((t) => t.name),
   )
   const allNames = new Set(types.map((t) => t.name))
-  const boneSet = new Set(BONES)
+  const boneSet = new Set(BONES_MATCH_NAMES)
   for (const type of types) {
-    if (type.bonesMatch != null && type.bonesMatch !== '') {
-      if (!boneSet.has(type.bonesMatch)) {
-        errors2.push(`Unknown bonesMatch "${type.bonesMatch}" on type "${type.name}"`)
-      }
-    }
     for (const field of type.fields) {
       if (field.to?.length) {
         const isRefField =
@@ -166465,12 +166461,7 @@ function collectRefAndBoneErrors(types) {
             'block',
             'object',
           ])
-          if (
-            !builtin.has(member) &&
-            !boneSet.has(member) &&
-            !allNames.has(member) &&
-            member !== 'link'
-          ) {
+          if (!builtin.has(member) && !boneSet.has(member) && !allNames.has(member)) {
             errors2.push(
               `Unknown array member "${member}" on "${type.name}.${field.name}" (not Bones or proposed)`,
             )
@@ -166482,7 +166473,7 @@ function collectRefAndBoneErrors(types) {
       const body = type.fields.find((f) => f.name === 'body' && f.type === 'array')
       if (body?.of) {
         for (const member of body.of) {
-          if (!boneSet.has(member) && !allNames.has(member) && member !== 'link') {
+          if (!boneSet.has(member) && !allNames.has(member)) {
             errors2.push(`page.body.of member "${member}" must be a Bones block or proposed object`)
           }
         }
@@ -166522,6 +166513,7 @@ function collectCompileErrors(types) {
 }
 function validateProposal(types, corpse) {
   let next2 = filterEvidence(types, corpse)
+  next2 = normalizeBonesMatch(next2)
   next2 = ensurePageAndSiteSettings(next2)
   next2 = normalizeArrayMembership(next2)
   const errors2 = [
@@ -166531,8 +166523,21 @@ function validateProposal(types, corpse) {
   ]
   return {types: next2, errors: errors2}
 }
+function normalizeBonesMatch(types) {
+  const valid = new Set(BONES_MATCH_NAMES)
+  return types.map((type) => {
+    if (type.bonesMatch == null || type.bonesMatch === '' || valid.has(type.bonesMatch)) {
+      return type
+    }
+    return {
+      ...type,
+      bonesMatch: null,
+      rationale: `${type.rationale} (Proposed Bones match "${type.bonesMatch}" is not in the catalogue; kept as a custom type.)`,
+    }
+  })
+}
 function normalizeArrayMembership(types) {
-  const boneSet = /* @__PURE__ */ new Set([...BONES, 'link'])
+  const boneSet = new Set(BONES_MATCH_NAMES)
   return types.map((type) => ({
     ...type,
     fields: type.fields.map((field) => {
