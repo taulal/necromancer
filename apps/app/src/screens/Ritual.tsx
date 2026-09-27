@@ -16,6 +16,7 @@ import {
   type PageGroup,
   type TaskRow,
 } from './ritual/ritual'
+import {effectRun, stepsFor, type EffectRun, type PendingEffectLike} from './seance/stageStatus'
 
 const panelStyle: CSSProperties = {
   background: 'var(--necro-surface)',
@@ -35,8 +36,6 @@ const TASK_PROJECTION = `{
 }`
 
 const PRE_RITUAL = new Set(['summoned', 'exhuming', 'autopsy', 'interrogation'])
-
-type Effect = {name?: string; status?: string}
 
 /** Ritual — NEC-UI4 / docs/prototype/Ritual.dc.html + batch-4. */
 export function Ritual() {
@@ -89,7 +88,6 @@ function RitualSession({seanceId, instanceId}: {seanceId: string; instanceId: st
   const session = useWorkflowSession({engine, instanceId})
   const instance = session.evaluation?.instance
   const stage = instance?.currentStage
-  const effects = (instance?.effects ?? []) as Effect[]
   const childIds = useMemo(
     () =>
       ((instance as {subworkflows?: Array<{ref?: {id?: string}}>} | undefined)?.subworkflows ?? [])
@@ -101,35 +99,34 @@ function RitualSession({seanceId, instanceId}: {seanceId: string; instanceId: st
   if (!stage || PRE_RITUAL.has(stage)) {
     return (
       <Quiet title="The ritual">
-        <Text muted>The ritual begins once the site is reanimated into its release.</Text>
-        <Text size={1} style={{color: 'var(--necro-faint)'}}>
-          Nothing needs you. The dead are patient.
+        <Text muted>
+          The ritual begins once every required question is answered and the site is reanimated into
+          its release. The status above says what is happening now.
         </Text>
       </Quiet>
     )
   }
 
   if (stage === 'reanimating') {
-    const status = (name: string) => effects.find((e) => e.name === name)?.status ?? 'waiting'
     return (
       <Quiet title="Reanimating">
         <Text muted>
-          Deploying the anatomy, raising every page into the release, uploading its images, writing
-          the redirects.
+          Raising every page into a Content Release in showcase. Nothing is live until Rise.
         </Text>
-        <Box
-          className="necro-soil"
-          style={{height: 6, borderRadius: 3, maxWidth: 360}}
-          aria-hidden
+        <EffectSteps
+          name="necro.reanimate"
+          title="Reanimate"
+          pending={instance?.pendingEffects}
+          history={instance?.effectHistory}
+          percent={progressOf(instance?.fields)}
         />
-        <Stack space={2}>
-          <Text size={1} className="necro-mono" muted>
-            necro.reanimate · {status('necro.reanimate')}
-          </Text>
-          <Text size={1} className="necro-mono" muted>
-            necro.plan-ritual · {status('necro.plan-ritual')}
-          </Text>
-        </Stack>
+        <EffectSteps
+          name="necro.plan-ritual"
+          title="Plan the ritual"
+          pending={instance?.pendingEffects}
+          history={instance?.effectHistory}
+          percent={progressOf(instance?.fields)}
+        />
       </Quiet>
     )
   }
@@ -304,6 +301,98 @@ function RitualBoard({
         <HumanPanel task={focused} left={humanOpen.length} releaseId={data?.releaseId} />
       </Box>
     </Grid>
+  )
+}
+
+function progressOf(fields: ReadonlyArray<{name: string; value?: unknown}> | undefined) {
+  const v = fields?.find((f) => f.name === 'exhumeProgress')?.value
+  return typeof v === 'number' ? v : undefined
+}
+
+const RUN_LABEL: Record<EffectRun, string> = {
+  waiting: 'waiting',
+  queued: 'queued for the worker',
+  running: 'running',
+  done: 'done',
+  failed: 'failed',
+}
+
+/** One effect as a checklist: its steps tick off as the handler reports progress. */
+function EffectSteps({
+  name,
+  title,
+  pending,
+  history,
+  percent,
+}: {
+  name: string
+  title: string
+  pending?: readonly PendingEffectLike[]
+  history?: ReadonlyArray<{name?: string; status?: string}>
+  percent?: number
+}) {
+  const run = effectRun(name, pending, history)
+  const steps = stepsFor(name)
+  const p = run === 'running' ? (percent ?? 0) : run === 'done' ? 101 : -1
+  const current = run === 'running' ? steps.findLastIndex((st) => p >= st.at) : -1
+  return (
+    <Stack space={2}>
+      <Flex align="center" gap={2}>
+        <span style={{fontSize: 14, color: 'var(--necro-bone)'}}>{title}</span>
+        <span
+          className="necro-mono"
+          style={{
+            fontSize: 11,
+            color:
+              run === 'failed'
+                ? 'var(--necro-ember)'
+                : run === 'done'
+                  ? '#8FD95A'
+                  : run === 'running'
+                    ? 'var(--necro-alive)'
+                    : 'var(--necro-faint)',
+          }}
+        >
+          {RUN_LABEL[run]}
+        </span>
+      </Flex>
+      {steps.length > 1 ? (
+        <Stack as="ol" space={2} style={{margin: 0, paddingLeft: 0, listStyle: 'none'}}>
+          {steps.map((st, i) => {
+            const done = run === 'done' || (current >= 0 && i < current)
+            const now = i === current
+            return (
+              <Flex as="li" key={st.label} align="center" gap={2}>
+                <span
+                  aria-hidden
+                  className={now ? 'necro-pulse' : undefined}
+                  style={{
+                    width: 14,
+                    textAlign: 'center',
+                    fontSize: 12,
+                    color: done ? '#8FD95A' : now ? 'var(--necro-alive)' : 'var(--necro-faint)',
+                  }}
+                >
+                  {done ? '✓' : now ? '●' : '○'}
+                </span>
+                <span
+                  style={{
+                    fontSize: 13,
+                    color: now
+                      ? 'var(--necro-bone)'
+                      : done
+                        ? 'var(--necro-dust)'
+                        : 'var(--necro-faint)',
+                  }}
+                >
+                  {st.label}
+                </span>
+              </Flex>
+            )
+          })}
+        </Stack>
+      ) : null}
+    </Stack>
   )
 }
 

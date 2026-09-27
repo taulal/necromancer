@@ -62,6 +62,14 @@ const GlobalStyle = createGlobalStyle`
     animation: necro-flicker 2.6s ease-in-out infinite;
   }
 
+  @keyframes necro-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.8); }
+  }
+  .necro-pulse {
+    animation: necro-pulse 1.6s ease-in-out infinite;
+  }
+
   @keyframes necro-soil {
     0% { background-position: 0 0; }
     100% { background-position: 40px 0; }

@@ -8,6 +8,7 @@ import {useNecroEngine} from '../lib/useNecroEngine'
 import {seanceGdrUri} from '../lib/seanceGdr'
 import {AuditTrail} from './seance/AuditTrail'
 import {ResurrectionDiagram} from './seance/ResurrectionDiagram'
+import {StageStatusBar} from './seance/StageStatusBar'
 import {STAGE_SCREENS, visitedScreenPaths} from './seance/stageRoutes'
 
 function SeanceTitle({seanceId}: {seanceId: string}) {
@@ -61,10 +62,10 @@ function SeanceWorkflowChrome({seanceId}: {seanceId: string}) {
       </Stack>
     )
   }
-  return <SeanceWorkflowSession instanceId={instanceId} />
+  return <SeanceWorkflowSession seanceId={seanceId} instanceId={instanceId} />
 }
 
-function SeanceWorkflowSession({instanceId}: {instanceId: string}) {
+function SeanceWorkflowSession({seanceId, instanceId}: {seanceId: string; instanceId: string}) {
   const engine = useNecroEngine()
   const session = useWorkflowSession({engine, instanceId})
   const [auditOpen, setAuditOpen] = useState(true)
@@ -102,6 +103,12 @@ function SeanceWorkflowSession({instanceId}: {instanceId: string}) {
         </Stack>
       </Flex>
 
+      {instance ? (
+        <Suspense fallback={null}>
+          <StageStatusBar seanceId={seanceId} instance={instance} />
+        </Suspense>
+      ) : null}
+
       <StageTabs visited={visited} currentStage={currentStage} />
 
       <Flex gap={4} align="flex-start" wrap="wrap">
@@ -122,9 +129,9 @@ function StageTabs({visited, currentStage}: {visited: Set<string>; currentStage?
   return (
     <Flex as="nav" gap={1} wrap="wrap" style={{borderBottom: '1px solid var(--necro-line)'}}>
       {STAGE_SCREENS.map((s) => {
-        const stageLit =
-          visited.has(s.path) ||
-          (currentStage !== undefined && (s.stages as readonly string[]).includes(currentStage))
+        const isCurrent =
+          currentStage !== undefined && (s.stages as readonly string[]).includes(currentStage)
+        const stageLit = visited.has(s.path) || isCurrent
         return (
           <NavLink
             key={s.path}
@@ -149,6 +156,21 @@ function StageTabs({visited, currentStage}: {visited: Set<string>; currentStage?
             })}
           >
             {s.label}
+            {isCurrent ? (
+              <span
+                aria-label="current stage"
+                className="necro-pulse"
+                style={{
+                  display: 'inline-block',
+                  width: 6,
+                  height: 6,
+                  marginLeft: 8,
+                  borderRadius: 999,
+                  verticalAlign: 'middle',
+                  background: 'var(--necro-alive)',
+                }}
+              />
+            ) : null}
           </NavLink>
         )
       })}

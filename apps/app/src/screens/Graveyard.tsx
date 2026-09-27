@@ -1,8 +1,59 @@
 import {Suspense, useState} from 'react'
 import {Link} from 'react-router'
-import {useDocuments, useDocumentProjection, type DocumentHandle} from '@sanity/sdk-react'
+import {useDocuments, useDocumentProjection, useQuery, type DocumentHandle} from '@sanity/sdk-react'
 import {Badge, Box, Button, Card, Flex, Grid, Heading, Spinner, Stack, Text} from '@sanity/ui'
 import {SummonDrawer} from './SummonDrawer'
+import {idFromRef} from './ritual/ritual'
+import {deriveStageStatus, type PendingEffectLike, type StatusTone} from './seance/stageStatus'
+
+type LiveInstance = {
+  seanceId?: string
+  currentStage?: string
+  pendingEffects?: PendingEffectLike[]
+  fields?: Array<{name: string; value?: unknown}>
+}
+
+/** Root resurrection instances with just enough to say what each séance is doing. */
+const LIVE_QUERY = `*[_type == "sanity.workflow.instance" && tag == "necromancer" && count(ancestors) == 0]{
+  "seanceId": fields[name == "subject"][0].value.id,
+  currentStage,
+  pendingEffects[]{name, queuedAt, claim},
+  "fields": fields[name in ["anatomyAccepted", "openRequiredQuestions", "riseFailed", "entombedFromStage", "exhumeProgress"]]{name, value}
+}`
+
+const TONE_COLOR: Record<StatusTone, string> = {
+  working: 'var(--necro-alive)',
+  queued: 'var(--necro-dust)',
+  'needs-you': 'var(--necro-ember-soft)',
+  waiting: 'var(--necro-faint)',
+  done: '#8FD95A',
+  failed: 'var(--necro-ember)',
+}
+
+function LiveLine({live}: {live?: LiveInstance}) {
+  if (!live?.currentStage) return null
+  const status =
+    live.currentStage === 'ritual' && !live.pendingEffects?.length
+      ? {tone: 'waiting' as const, title: 'Ritual', headline: 'Casting and blessing pages'}
+      : deriveStageStatus({...live, stage: live.currentStage, now: Date.now()})
+  const color = TONE_COLOR[status.tone]
+  return (
+    <Flex align="center" gap={2}>
+      <span
+        aria-hidden
+        className={
+          status.tone === 'working' || status.tone === 'queued' ? 'necro-pulse' : undefined
+        }
+        style={{width: 7, height: 7, borderRadius: 999, background: color, flex: '0 0 auto'}}
+      />
+      <span style={{fontSize: 13, color: 'var(--necro-dust)'}}>
+        <span style={{color}}>{status.title}</span>
+        {status.tone === 'needs-you' ? ' · needs you: ' : ' · '}
+        {status.headline}
+      </span>
+    </Flex>
+  )
+}
 
 type SeanceCard = {
   url?: string
@@ -12,7 +63,7 @@ type SeanceCard = {
   stats?: {pages?: number}
 }
 
-function Tombstone(handle: DocumentHandle) {
+function Tombstone({live, ...handle}: DocumentHandle & {live?: LiveInstance}) {
   const {data} = useDocumentProjection<SeanceCard>({
     ...handle,
     projection: `{url, slug, platform, status, stats}`,
@@ -54,9 +105,13 @@ function Tombstone(handle: DocumentHandle) {
             {data?.platform || 'unknown'}
             {data?.stats?.pages != null ? ` · ${data.stats.pages} pages` : ''}
           </Text>
-          <Text size={1} style={{color: 'var(--necro-dust)'}}>
-            {data?.status || 'summoned'}
-          </Text>
+          {live?.currentStage ? (
+            <LiveLine live={live} />
+          ) : (
+            <Text size={1} style={{color: 'var(--necro-dust)'}}>
+              {data?.status || 'summoned'}
+            </Text>
+          )}
         </Stack>
       </Card>
     </Link>
@@ -87,6 +142,10 @@ function SeanceGrid() {
     batchSize: 24,
     orderings: [{field: '_updatedAt', direction: 'desc'}],
   })
+  const {data: instances} = useQuery<LiveInstance[]>({query: LIVE_QUERY})
+  const liveBySeance = new Map(
+    (instances ?? []).map((i) => [idFromRef(i.seanceId) ?? '', i] as const),
+  )
 
   if (!data.length) {
     return (
@@ -104,7 +163,7 @@ function SeanceGrid() {
       <Grid columns={[1, 2, 3]} gap={3}>
         {data.map((handle) => (
           <Suspense key={handle.documentId} fallback={<TombstoneFallback />}>
-            <Tombstone {...handle} />
+            <Tombstone {...handle} live={liveBySeance.get(handle.documentId)} />
           </Suspense>
         ))}
       </Grid>
