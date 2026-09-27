@@ -162672,8 +162672,9 @@ var Hash2 = class {
       }
       if (index2 >= 64) {
         this._int32(_word)
-        _word[0] = _word[16]
-        /* N.inputWords */
+        _word[0] =
+          _word[16]
+          /* N.inputWords */
       }
       this._size += index2 - start
     }
@@ -162734,11 +162735,11 @@ var Hash2 = class {
     const high32 = (bits64 - low32) / 4294967296
     if (high32)
       _word[14] =
-        /* N.highIndex */
+      /* N.highIndex */
         swap32(high32)
     if (low32)
       _word[15] =
-        /* N.lowIndex */
+      /* N.lowIndex */
         swap32(low32)
     this._int32(_word)
     return encoding === 'hex' ? this._hex() : this._bin()
@@ -168559,7 +168560,9 @@ async function listSchemaIds(projectId3, dataset3, token) {
     {headers: {Authorization: `Bearer ${token}`}},
   )
   if (!res.ok) {
-    throw new Error(`Failed to list schemas on ${dataset3}: ${res.status}`)
+    throw new Error(
+      `Failed to list schemas on ${dataset3}: ${res.status} ${(await res.text()).slice(0, 300)}`,
+    )
   }
   const body = await res.json()
   const list = Array.isArray(body) ? body : (body.schemas ?? [])
@@ -168571,7 +168574,9 @@ async function deleteSchema(projectId3, dataset3, schemaId, token) {
     {method: 'DELETE', headers: {Authorization: `Bearer ${token}`}},
   )
   if (!res.ok && res.status !== 404) {
-    throw new Error(`Failed to delete schema ${schemaId}: ${res.status}`)
+    throw new Error(
+      `Failed to delete schema ${schemaId}: ${res.status} ${(await res.text()).slice(0, 300)}`,
+    )
   }
 }
 async function wipeShowcase(target, projectId3, token) {
@@ -168604,7 +168609,7 @@ async function claimShowcaseOwner(target, seanceId, slug) {
 }
 async function prepareShowcaseTarget(opts) {
   const target = opts.hq.withConfig({dataset: SHOWCASE_DATASET})
-  const occupancy = await readShowcaseOccupancy(target, opts.projectId, opts.token)
+  const occupancy = await readShowcaseOccupancy(target, opts.projectId, opts.schemaToken)
   if (isOccupiedByOther(occupancy, opts.seanceId)) {
     if (!opts.replaceTarget) {
       throw new ShowcaseOccupiedError(
@@ -168613,7 +168618,7 @@ async function prepareShowcaseTarget(opts) {
           ` (${occupancy.contentCount} docs, ${occupancy.schemaIds.length} schemas). Pass --replace on summon (or set replaceTarget) to wipe showcase first.`,
       )
     }
-    await wipeShowcase(target, opts.projectId, opts.token)
+    await wipeShowcase(target, opts.projectId, opts.schemaToken)
     await claimShowcaseOwner(target, opts.seanceId, opts.slug)
     return {wiped: true}
   }
@@ -168713,6 +168718,10 @@ var reanimateHandler = async (params, ctx) => {
   const hq = ctx.client
   const token = process.env.SANITY_HQ_WRITE_TOKEN?.trim()
   if (!token) throw new Error('SANITY_HQ_WRITE_TOKEN is required for reanimate')
+  const schemaToken = process.env.SANITY_ORG_TOKEN?.trim()
+  if (!schemaToken) {
+    throw new Error('SANITY_ORG_TOKEN is required for reanimate (schema deploy to showcase)')
+  }
   const seance = await hq.fetch(
     `*[_id in $ids] | order(_updatedAt desc)[0]{
       _id, url, slug, brand, targetMode, targetDataset, targetProjectId, replaceTarget
@@ -168741,7 +168750,7 @@ var reanimateHandler = async (params, ctx) => {
     replaceTarget: Boolean(seance.replaceTarget),
     slug: seance.slug?.current,
     projectId: projectId2,
-    token,
+    schemaToken,
   })
   await progress(15)
   const [proposals, pages, questions] = await Promise.all([
@@ -168790,7 +168799,7 @@ var reanimateHandler = async (params, ctx) => {
   const schemaId = await deployTargetSchema({
     projectId: projectId2,
     dataset: dataset3,
-    token,
+    token: schemaToken,
     types: manifest,
     title,
   })

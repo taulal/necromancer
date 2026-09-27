@@ -60,7 +60,9 @@ async function listSchemaIds(projectId: string, dataset: string, token: string):
     {headers: {Authorization: `Bearer ${token}`}},
   )
   if (!res.ok) {
-    throw new Error(`Failed to list schemas on ${dataset}: ${res.status}`)
+    throw new Error(
+      `Failed to list schemas on ${dataset}: ${res.status} ${(await res.text()).slice(0, 300)}`,
+    )
   }
   const body = (await res.json()) as Array<{_id?: string}> | {schemas?: Array<{_id?: string}>}
   const list = Array.isArray(body) ? body : (body.schemas ?? [])
@@ -78,7 +80,9 @@ async function deleteSchema(
     {method: 'DELETE', headers: {Authorization: `Bearer ${token}`}},
   )
   if (!res.ok && res.status !== 404) {
-    throw new Error(`Failed to delete schema ${schemaId}: ${res.status}`)
+    throw new Error(
+      `Failed to delete schema ${schemaId}: ${res.status} ${(await res.text()).slice(0, 300)}`,
+    )
   }
 }
 
@@ -132,10 +136,11 @@ export async function prepareShowcaseTarget(opts: {
   replaceTarget?: boolean
   slug?: string
   projectId: string
-  token: string
+  /** Needs sanity.project/deploySchema (or deployStudio) for the schema list/delete. */
+  schemaToken: string
 }): Promise<{wiped: boolean}> {
   const target = opts.hq.withConfig({dataset: SHOWCASE_DATASET})
-  const occupancy = await readShowcaseOccupancy(target, opts.projectId, opts.token)
+  const occupancy = await readShowcaseOccupancy(target, opts.projectId, opts.schemaToken)
 
   if (isOccupiedByOther(occupancy, opts.seanceId)) {
     if (!opts.replaceTarget) {
@@ -146,7 +151,7 @@ export async function prepareShowcaseTarget(opts: {
           `Pass --replace on summon (or set replaceTarget) to wipe showcase first.`,
       )
     }
-    await wipeShowcase(target, opts.projectId, opts.token)
+    await wipeShowcase(target, opts.projectId, opts.schemaToken)
     await claimShowcaseOwner(target, opts.seanceId, opts.slug)
     return {wiped: true}
   }

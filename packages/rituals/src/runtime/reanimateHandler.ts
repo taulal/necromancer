@@ -105,6 +105,12 @@ export const reanimateHandler: EffectHandler = async (params, ctx) => {
   const hq = ctx.client as SanityClient
   const token = process.env.SANITY_HQ_WRITE_TOKEN?.trim()
   if (!token) throw new Error('SANITY_HQ_WRITE_TOKEN is required for reanimate')
+  // The HQ token is an Editor robot: content yes, schemas no (needs deploySchema /
+  // deployStudio). Schema list/deploy/delete go through the org robot.
+  const schemaToken = process.env.SANITY_ORG_TOKEN?.trim()
+  if (!schemaToken) {
+    throw new Error('SANITY_ORG_TOKEN is required for reanimate (schema deploy to showcase)')
+  }
 
   const seance = await hq.fetch<{
     _id: string
@@ -146,7 +152,7 @@ export const reanimateHandler: EffectHandler = async (params, ctx) => {
     replaceTarget: Boolean(seance.replaceTarget),
     slug: seance.slug?.current,
     projectId,
-    token,
+    schemaToken,
   })
   await progress(15)
 
@@ -192,7 +198,13 @@ export const reanimateHandler: EffectHandler = async (params, ctx) => {
   const target = hq.withConfig({dataset, apiVersion: TARGET_API_VERSION, perspective: 'raw'})
   const title = plan.siteTitle ?? seance.slug?.current ?? seanceRef
   const manifest = targetSchemaManifest(plan.extraTypes)
-  const schemaId = await deployTargetSchema({projectId, dataset, token, types: manifest, title})
+  const schemaId = await deployTargetSchema({
+    projectId,
+    dataset,
+    token: schemaToken,
+    types: manifest,
+    title,
+  })
   await progress(25)
 
   // Release: reuse while active; a published one means this séance already rose.
