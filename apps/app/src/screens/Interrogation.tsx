@@ -1,6 +1,6 @@
-import {Suspense, useEffect, useMemo, useState, type CSSProperties} from 'react'
+import {Suspense, useEffect, useMemo, useRef, useState, type CSSProperties} from 'react'
 import {Link, useParams} from 'react-router'
-import {useCurrentUser, useDocumentProjection, useEditDocument, useQuery} from '@sanity/sdk-react'
+import {editDocument, useApplyDocumentActions, useCurrentUser, useQuery} from '@sanity/sdk-react'
 import {useDocumentWorkflows, useWorkflowSession} from '@sanity/workflow-sdk'
 import {Box, Card, Flex, Grid, Heading, Spinner, Stack, Text, TextInput} from '@sanity/ui'
 import {pagesLabel, tasksForAnswer, type TaskPreview} from '@necro/interrogate/tasks'
@@ -67,12 +67,8 @@ function InterrogationSession({seanceId, instanceId}: {seanceId: string; instanc
   const engine = useNecroEngine()
   const session = useWorkflowSession({engine, instanceId})
   const instance = session.evaluation?.instance
-  const effects = instance?.effects as Array<{name?: string; status?: string}> | undefined
-  const questioning = !!effects?.some(
-    (e) =>
-      e.name === 'necro.interrogate' &&
-      (e.status === 'pending' || e.status === 'running' || e.status === 'claimed'),
-  )
+  // Queued or claimed: 0.35 keeps in-flight effects on pendingEffects[].
+  const questioning = !!instance?.pendingEffects?.some((e) => e.name === 'necro.interrogate')
   const stage = instance?.currentStage
   return (
     <InterrogationBody
@@ -150,22 +146,14 @@ function InterrogationBody({
 
       <Box style={{gridColumn: 'span 6'}}>
         {selected ? (
-          <Suspense
-            fallback={
-              <Card padding={5} radius={2} style={panelStyle}>
-                <Centered />
-              </Card>
-            }
-          >
-            <QuestionCard
-              key={selected._id}
-              id={selected._id}
-              position={position}
-              total={tally.total}
-              locked={locked}
-              onNext={goNext}
-            />
-          </Suspense>
+          <QuestionCard
+            key={selected._id}
+            q={selected}
+            position={position}
+            total={tally.total}
+            locked={locked}
+            onNext={goNext}
+          />
         ) : null}
       </Box>
 
@@ -258,40 +246,75 @@ function QuestionList({
   )
 }
 
+/** Note edits are saved after the typing settles, not per keystroke. */
+const NOTE_DEBOUNCE_MS = 600
+
+/**
+ * Renders from the list row (already live-queried), so switching questions never
+ * suspends. Answer and note are held locally so clicks land instantly; writes go out
+ * as one draft edit per answer.
+ */
 function QuestionCard({
-  id,
+  q: row,
   position,
   total,
   locked,
   onNext,
 }: {
-  id: string
+  q: QuestionRow
   position: number
   total: number
   locked: boolean
   onNext: () => void
 }) {
-  const handle = {documentId: id, documentType: 'question'}
-  const {data: q} = useDocumentProjection<QuestionRow>({
-    ...handle,
-    projection: QUESTION_PROJECTION,
-  })
+  const id = row._id
   const user = useCurrentUser()
-  const editAnswer = useEditDocument<string>({...handle, path: 'answer'})
-  const editAnsweredBy = useEditDocument<string>({...handle, path: 'answeredBy'})
-  const editAnsweredAt = useEditDocument<string>({...handle, path: 'answeredAt'})
-  const editNote = useEditDocument<string>({...handle, path: 'answerNote'})
+  const apply = useApplyDocumentActions()
+  const handle = useMemo(() => ({documentId: id, documentType: 'question'}), [id])
 
-  if (!q) return null
+  const [answer, setAnswer] = useState(row.answer)
+  const [note, setNote] = useState(row.answerNote ?? '')
+  const noteTimer = useRef<number | undefined>(undefined)
+  const pendingNote = useRef<string | null>(null)
 
+  // Follow the server once our own writes have landed (or someone else answered).
+  useEffect(() => setAnswer(row.answer), [row.answer])
+  useEffect(() => {
+    if (pendingNote.current == null) setNote(row.answerNote ?? '')
+  }, [row.answerNote])
+
+  const flushNote = () => {
+    window.clearTimeout(noteTimer.current)
+    const value = pendingNote.current
+    if (value == null) return
+    pendingNote.current = null
+    void apply(editDocument(handle, {set: {answerNote: value}}))
+  }
+  useEffect(() => flushNote, []) // save an unsent note when switching questions
+
+  const q = {...row, answer, answerNote: note}
   const answered = isAnswered(q)
   const spawned = tasksForAnswer(q, q.answer)
 
   const choose = (option: string) => {
-    if (locked || option === q.answer) return
-    void editAnswer(option)
-    if (user?.id) void editAnsweredBy(user.id)
-    void editAnsweredAt(new Date().toISOString())
+    if (locked || option === answer) return
+    setAnswer(option)
+    void apply(
+      editDocument(handle, {
+        set: {
+          answer: option,
+          answeredAt: new Date().toISOString(),
+          ...(user?.id ? {answeredBy: user.id} : {}),
+        },
+      }),
+    )
+  }
+
+  const changeNote = (value: string) => {
+    setNote(value)
+    pendingNote.current = value
+    window.clearTimeout(noteTimer.current)
+    noteTimer.current = window.setTimeout(flushNote, NOTE_DEBOUNCE_MS)
   }
 
   return (
@@ -447,9 +470,10 @@ function QuestionCard({
           <TextInput
             id={`note-${id}`}
             placeholder="Optional note"
-            value={q.answerNote ?? ''}
+            value={note}
             disabled={locked}
-            onChange={(e) => void editNote(e.currentTarget.value)}
+            onChange={(e) => changeNote(e.currentTarget.value)}
+            onBlur={flushNote}
           />
         </Stack>
 

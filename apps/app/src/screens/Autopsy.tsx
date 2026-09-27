@@ -762,12 +762,8 @@ function isAutopsyBusy(session: ReturnType<typeof useWorkflowSession>): boolean 
   const rerunBusy = fields?.find((f) => f.name === 'autopsyRerunBusy')
   if (rerunBusy?.value === true) return true
 
-  const effects = session.evaluation?.instance.effects as
-    Array<{name?: string; status?: string}> | undefined
-  if (!effects) return false
-  return effects.some(
-    (e) =>
-      (e.name === 'necro.autopsy' || e.name === 'necro.autopsy-rerun') &&
-      (e.status === 'pending' || e.status === 'running' || e.status === 'claimed'),
+  // Queued or claimed: 0.35 keeps in-flight effects on pendingEffects[].
+  return !!session.evaluation?.instance.pendingEffects?.some(
+    (e) => e.name === 'necro.autopsy' || e.name === 'necro.autopsy-rerun',
   )
 }
