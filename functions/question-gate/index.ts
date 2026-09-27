@@ -42,8 +42,11 @@ export async function syncOpenRequiredQuestions(seanceId: string): Promise<numbe
     `*[
       _type == "sanity.workflow.instance" &&
       tag == $tag &&
-      definition.name == "resurrection" &&
-      status == "active" &&
+      // Instance docs carry the definition name as a plain string and have no
+      // status field; a live root resurrection is one not yet risen or entombed.
+      definition == "resurrection" &&
+      count(ancestors) == 0 &&
+      !(currentStage in ["risen", "entombed"]) &&
       count(fields[name == "subject" && (
         value.id == $published ||
         value.id == $draft ||

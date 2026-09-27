@@ -70,11 +70,39 @@ function InterrogationSession({seanceId, instanceId}: {seanceId: string; instanc
   // Queued or claimed: 0.35 keeps in-flight effects on pendingEffects[].
   const questioning = !!instance?.pendingEffects?.some((e) => e.name === 'necro.interrogate')
   const stage = instance?.currentStage
+  const gateValue = instance?.fields?.find((f) => f.name === 'openRequiredQuestions')?.value
+  const [gateError, setGateError] = useState<string | null>(null)
+
+  // Belt to the question-gate Function's braces: the workflow only leaves interrogation
+  // when openRequiredQuestions hits 0, so keep it in step with the answers on screen.
+  const syncGate = useMemo(() => {
+    let inFlight: number | null = null
+    return (requiredLeft: number) => {
+      if (stage !== 'interrogation' || questioning) return
+      if (gateValue === requiredLeft || inFlight === requiredLeft) return
+      inFlight = requiredLeft
+      engine
+        .editField({
+          instanceId,
+          target: {scope: 'workflow', field: 'openRequiredQuestions'},
+          mode: 'set',
+          value: requiredLeft,
+        })
+        .then(() => setGateError(null))
+        .catch((err: unknown) => setGateError(err instanceof Error ? err.message : String(err)))
+        .finally(() => {
+          inFlight = null
+        })
+    }
+  }, [engine, instanceId, stage, questioning, gateValue])
+
   return (
     <InterrogationBody
       seanceId={seanceId}
       locked={!!stage && stage !== 'interrogation'}
       questioning={questioning}
+      onRequiredLeft={syncGate}
+      gateError={gateError}
     />
   )
 }
@@ -83,10 +111,14 @@ function InterrogationBody({
   seanceId,
   locked = false,
   questioning = false,
+  onRequiredLeft,
+  gateError,
 }: {
   seanceId: string
   locked?: boolean
   questioning?: boolean
+  onRequiredLeft?: (requiredLeft: number) => void
+  gateError?: string | null
 }) {
   const {data} = useQuery<QuestionRow[]>({
     query: `*[_type == "question" && seance._ref == $seanceId] | order(_createdAt asc) ${QUESTION_PROJECTION}`,
@@ -101,6 +133,11 @@ function InterrogationBody({
   useEffect(() => {
     if (!selectedId && firstOpen) setSelectedId(firstOpen._id)
   }, [selectedId, firstOpen])
+
+  const requiredLeft = questions.length ? counts(questions).requiredLeft : null
+  useEffect(() => {
+    if (requiredLeft != null) onRequiredLeft?.(requiredLeft)
+  }, [requiredLeft, onRequiredLeft])
 
   if (!questions.length) {
     return (
@@ -159,6 +196,11 @@ function InterrogationBody({
 
       <Box style={{gridColumn: 'span 3'}}>
         <RitualSoFar questions={questions} requiredLeft={tally.requiredLeft} />
+        {gateError ? (
+          <Text size={1} style={{color: 'var(--necro-ember)', marginTop: 12}}>
+            Couldn’t update the question gate: {gateError}
+          </Text>
+        ) : null}
       </Box>
     </Grid>
   )
